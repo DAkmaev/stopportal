@@ -1,9 +1,11 @@
 import asyncio
-from typing import List
+from typing import List, Dict, Any
 
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.stock import StockDAO
+from backend.services.StochService import StochService
+from backend.utils.stoch import stoch_calculator
 from backend.utils.telegram.telegramm_client import send_tg_message
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
@@ -16,8 +18,9 @@ async def get_stochs(
     period: str = 'W',
     stock_dao: StockDAO = Depends(),
     stoch_calculator: StochCalculator = Depends()
-):
-    def fill_message(decision: str, stocks: List[StochDecisionModel], period: str):
+) -> List[StochDecisionModel]:
+    def fill_message(decision: str, stocks: List[StochDecisionModel],
+                     period: str):
         if len(stocks) == 0:
             return ''
 
@@ -35,7 +38,9 @@ async def get_stochs(
 
     stocks = await stock_dao.get_all_stocks()
 
-    des_futures = [stoch_calculator.get_stoch_decision(st.tiker, st.type, period) for st in stocks]
+    des_futures = [
+        stoch_calculator.get_stoch_decision(st.tiker, st.type, period) for st
+        in stocks]
     decisions = await asyncio.gather(*des_futures)
 
     stocks_to_buy = list(
@@ -63,7 +68,7 @@ async def get_stoch(
 ):
     decision_model = await stoch_calculator.get_stoch_decision(tiker, type, period)
 
-    message = f""" Акции { tiker }
+    message = f""" Акции {tiker}
     Вывод: {decision_model.decision.name}
     """
 

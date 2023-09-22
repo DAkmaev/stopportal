@@ -3,6 +3,7 @@ from typing import Awaitable, Callable
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from backend.services.SchedulerService import SchedulerService
 from backend.settings import settings
 
 
@@ -43,6 +44,9 @@ def register_startup_event(
         app.middleware_stack = None
         _setup_db(app)
         app.middleware_stack = app.build_middleware_stack()
+
+        sch_srv = SchedulerService()
+        sch_srv.start()
         pass  # noqa: WPS420
 
     return _startup

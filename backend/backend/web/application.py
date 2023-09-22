@@ -1,3 +1,4 @@
+import logging
 from importlib import metadata
 from pathlib import Path
 
@@ -9,6 +10,9 @@ from backend.web.api.router import api_router
 from backend.web.lifetime import register_shutdown_event, register_startup_event
 
 APP_ROOT = Path(__file__).parent.parent
+
+# logging.basicConfig(level = logging.DEBUG, )
+logger = logging.getLogger('stopportal')
 
 
 def get_app() -> FastAPI:
