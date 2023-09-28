@@ -45,8 +45,8 @@ def register_startup_event(
         _setup_db(app)
         app.middleware_stack = app.build_middleware_stack()
 
-        sch_srv = SchedulerService()
-        sch_srv.start()
+        # sch_srv = SchedulerService()
+        # sch_srv.start()
         pass  # noqa: WPS420
 
     return _startup

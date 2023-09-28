@@ -4,8 +4,7 @@ from fastapi import APIRouter, Depends
 
 from backend.db.dao.stock import StockDAO
 from backend.db.models.stocks import StockModel
-from backend.web.api.stock.scheme import (StockModelDTO, StockModelInputDTO,
-                                          StockTypeEnum)
+from backend.web.api.stock.scheme import (StockModelDTO, StockModelInputDTO)
 
 router = APIRouter()
 
@@ -67,6 +66,7 @@ async def delete_stock_model(
 ) -> None:
     """
     Delete stock model from the database.
+    :param stock_dao:
     :param stock_id:
     """
 

@@ -1,11 +1,12 @@
 import asyncio
-from typing import List, Dict, Any
+import logging
+from _datetime import datetime
+from typing import List
 
 from fastapi import APIRouter, Depends
 
+from backend.db.dao.cron_job import CronJobRunDao
 from backend.db.dao.stock import StockDAO
-from backend.services.StochService import StochService
-from backend.utils.stoch import stoch_calculator
 from backend.utils.telegram.telegramm_client import send_tg_message
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
@@ -16,9 +17,21 @@ router = APIRouter()
 @router.get("/")
 async def get_stochs(
     period: str = 'W',
+    is_cron: bool = False,
     stock_dao: StockDAO = Depends(),
+    cron_dao: CronJobRunDao = Depends(),
     stoch_calculator: StochCalculator = Depends()
 ) -> List[StochDecisionModel]:
+
+    if is_cron:
+        CRON_JOB_NAME = 'CheckStoch'
+        last_run = await cron_dao.get_cron_job_run_by_params(period, CRON_JOB_NAME)
+
+        if last_run and last_run.last_run_date.date() == datetime.today().date():
+            return []
+
+        await cron_dao.update_cron_job_run(period, CRON_JOB_NAME)
+
     def fill_message(decision: str, stocks: List[StochDecisionModel],
                      period: str):
         if len(stocks) == 0:

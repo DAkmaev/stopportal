@@ -18,3 +18,4 @@ async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]
     finally:
         await session.commit()
         await session.close()
+

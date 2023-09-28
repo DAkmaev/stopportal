@@ -44,8 +44,8 @@ class StockDAO:
 
         await self.session.delete(stock)
 
-    async def get_all_stocks(self, limit: int = 100, offset: int = 0) -> List[
-        StockModel]:
+    async def get_all_stocks(self, limit: int = 100,
+                             offset: int = 0) -> List[StockModel]:
         """
         Get all stocks models with limit/offset pagination.
 
