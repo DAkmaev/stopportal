@@ -40,10 +40,11 @@ class StochCalculator:
         last_row = stoch.df.iloc[-1]
         previous_row = stoch.df.iloc[-2]
 
-        is_cross_lines = last_row.k > last_row.d and previous_row.k < previous_row.d
+        is_cross_lines_buy = last_row.k > last_row.d and previous_row.k < previous_row.d
+        is_cross_lines_sell = last_row.k < last_row.d and previous_row.k > previous_row.d
 
-        need_buy = is_cross_lines and last_row.k < 25
-        need_sell = is_cross_lines and last_row.d > 80
+        need_buy = is_cross_lines_buy and last_row.k < 25
+        need_sell = is_cross_lines_sell and last_row.d > 80
         decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.SELL if need_sell else StochDecisionEnum.RELAX
 
         return StochDecisionModel(
