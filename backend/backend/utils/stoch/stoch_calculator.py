@@ -19,7 +19,17 @@ class StochCalculator:
                 return date - pd.DateOffset(days=date.weekday())
 
             # Группируем данные по неделям, начиная с понедельника, и вычисляем необходимые агрегированные значения
-            df = df.groupby(week_start)[['OPEN', 'CLOSE', 'HIGH', 'LOW']].agg(
+            df = df.groupby(week_start)[
+                ['OPEN', 'CLOSE', 'HIGH', 'LOW']].agg(
+                {'OPEN': 'first', 'CLOSE': 'last', 'HIGH': 'max', 'LOW': 'min'})
+
+        elif period == "M":
+            def month_start(date):
+                return date.replace(day=1)
+
+            # Группируем данные по месяцам и вычисляем необходимые агрегированные значения
+            df = df.groupby(month_start)[
+                ['OPEN', 'CLOSE', 'HIGH', 'LOW']].agg(
                 {'OPEN': 'first', 'CLOSE': 'last', 'HIGH': 'max', 'LOW': 'min'})
 
         #print(df)
