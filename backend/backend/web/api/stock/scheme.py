@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from enum import Enum
 
@@ -20,4 +22,4 @@ class StockModelInputDTO(BaseModel):
     """DTO for creating new stock model."""
 
     tiker: str
-    type: StockTypeEnum
+    type: Optional[StockTypeEnum] = StockTypeEnum.MOEX

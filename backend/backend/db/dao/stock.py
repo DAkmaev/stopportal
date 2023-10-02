@@ -20,6 +20,14 @@ class StockDAO:
         :param tiker: tiker of a stock.
         :param type: type of stock:  MOEX or YAHOO.
         """
+        raw_stock = await self.session.execute(
+            select(StockModel).where(StockModel.tiker == tiker)
+        )
+        exist_stock: StockModel = raw_stock.scalars().one_or_none()
+
+        if exist_stock:
+            raise HTTPException(status_code=400, detail=f"Тикер {exist_stock.tiker} уже существует")
+
         self.session.add(StockModel(
             tiker=tiker,
             type=type
@@ -31,7 +39,19 @@ class StockDAO:
 
         :param items:
         """
+        new_tikers = map(lambda i: i.tiker, items)
+
+        raw_stocks = await self.session.execute(
+            select(StockModel).where(StockModel.tiker.in_(new_tikers))
+        )
+        exist_stocks = list(raw_stocks.scalars().fetchall())
+
+        if len(exist_stocks) > 0:
+            exist_stocks_tikers = map(lambda i: i.tiker, exist_stocks)
+            raise HTTPException(status_code=400, detail=f"В базе уже есть тикеры {','.join(exist_stocks_tikers)}")
+
         self.session.add_all(items)
+
 
     async def delete_stock_model(self, stock_id: int) -> None:
         """
