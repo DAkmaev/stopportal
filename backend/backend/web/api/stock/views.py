@@ -4,13 +4,14 @@ from fastapi import APIRouter, Depends
 
 from backend.db.dao.stock import StockDAO
 from backend.db.models.stocks import StockModel
-from backend.web.api.stock.scheme import (StockModelDTO, StockModelInputDTO)
+from backend.web.api.stock.scheme import (StockModelDTO, StockModelInputDTO,
+                                          StockStopDTO, StockStopInputDTO)
 
 router = APIRouter()
 
 
 @router.get("/", response_model=List[StockModelDTO])
-async def get_user_models(
+async def get_stock_models(
     limit: int = 10,
     offset: int = 0,
     stock_dao: StockDAO = Depends(),
@@ -59,6 +60,23 @@ async def create_stock_batch_models(
     )
 
 
+@router.post("/{stock_id}/stop")
+async def add_stock_stop_model(
+    new_stop: StockStopInputDTO,
+    stock_id: int,
+    stock_dao: StockDAO = Depends(),
+) -> None:
+    """
+    Creates stocks models in the database.
+
+    :param stock_id:
+    :param new_stop:
+    :param stock_dao: DAO for stock models.
+    """
+
+    await stock_dao.add_stop_model(stock_id, period=new_stop.period, value=new_stop.value)
+
+
 @router.delete("/{stock_id}", status_code=204)
 async def delete_stock_model(
     stock_id: int,
@@ -71,3 +89,18 @@ async def delete_stock_model(
     """
 
     await stock_dao.delete_stock_model(stock_id)
+
+
+@router.delete("/{stock_id}/stop/{stop_id}", status_code=204)
+async def delete_stock_stop_model(
+    stop_id: int,
+    stock_id: int,
+    stock_dao: StockDAO = Depends(),
+) -> None:
+    """
+    Delete stock model from the database.
+    :param stop_id:
+    :param stock_dao:
+    """
+
+    await stock_dao.delete_stock_stop_model(stop_id, stock_id)

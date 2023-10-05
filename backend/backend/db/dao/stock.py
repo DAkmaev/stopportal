@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
-from typing import List, Optional
+from typing import List, Optional, Type
 
-from backend.db.models.stocks import StockModel
+from backend.db.models.stocks import StockModel, StockStopModel
 
 
 class StockDAO:
@@ -26,12 +26,10 @@ class StockDAO:
         exist_stock: StockModel = raw_stock.scalars().one_or_none()
 
         if exist_stock:
-            raise HTTPException(status_code=400, detail=f"Тикер {exist_stock.tiker} уже существует")
+            raise HTTPException(status_code=400,
+                                detail=f"Тикер {exist_stock.tiker} уже существует")
 
-        self.session.add(StockModel(
-            tiker=tiker,
-            type=type
-        ))
+        self.session.add(StockModel(tiker=tiker, type=type))
 
     async def create_stocks_models(self, items: List[StockModel]) -> None:
         """
@@ -48,10 +46,26 @@ class StockDAO:
 
         if len(exist_stocks) > 0:
             exist_stocks_tikers = map(lambda i: i.tiker, exist_stocks)
-            raise HTTPException(status_code=400, detail=f"В базе уже есть тикеры {','.join(exist_stocks_tikers)}")
+            raise HTTPException(status_code=400,
+                                detail=f"В базе уже есть тикеры {','.join(exist_stocks_tikers)}")
 
         self.session.add_all(items)
 
+    async def add_stop_model(self, stock_id: int, period: str, value: float) -> Type[StockModel]:
+        """
+        Add stop to stock.
+
+        :param value:
+        :param period:
+        :param stock_id:
+        """
+        stock = await self.session.get(StockModel, stock_id)
+        if not stock:
+            raise HTTPException(status_code=404, detail="Акция не найдена")
+
+        stock.stops.append(StockStopModel(period=period, value=value))
+
+        return stock
 
     async def delete_stock_model(self, stock_id: int) -> None:
         """
@@ -63,6 +77,21 @@ class StockDAO:
             raise HTTPException(status_code=404, detail="Акция не найдена")
 
         await self.session.delete(stock)
+
+    async def delete_stock_stop_model(self, stop_id: int, stock_id: int) -> None:
+        """
+        Delete stock_stop in session.
+        :param stock_id:
+        :param stop_id:
+        """
+        stop = await self.session.get(StockStopModel, stop_id)
+        if not stop:
+            raise HTTPException(status_code=404, detail="Стоп не найден")
+
+        if stop.stock_id != stock_id:
+            raise HTTPException(status_code=400, detail="Стоп id не от данной акции")
+
+        await self.session.delete(stop)
 
     async def get_all_stocks(self, limit: int = 100,
                              offset: int = 0) -> List[StockModel]:
@@ -79,7 +108,7 @@ class StockDAO:
 
         return list(raw_stocks.scalars().fetchall())
 
-    async def get_stock(self, id: int) -> StockModel:
+    async def get_stock_model(self, id: int) -> StockModel:
         """
         Get stock models by id.
 
@@ -88,6 +117,19 @@ class StockDAO:
         """
         stock = await self.session.execute(
             select(StockModel).where(id == id)
+        )
+
+        return stock.scalars().one_or_none()
+
+    async def get_stock_stop_model(self, id: int) -> StockStopModel:
+        """
+        Get stock stop models by id.
+
+        :param id: stock stop id.
+        :return: stock.
+        """
+        stock = await self.session.execute(
+            select(StockStopModel).where(id == id)
         )
 
         return stock.scalars().one_or_none()
@@ -104,6 +146,6 @@ class StockDAO:
         """
         query = select(StockModel)
         if tiker:
-            query = query.where(StockModel.name == tiker)
+            query = query.where(StockModel.tiker == tiker)
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
