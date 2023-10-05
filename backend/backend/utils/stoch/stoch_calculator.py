@@ -39,11 +39,20 @@ class StochCalculator:
 
         return stoch
 
-    async def get_stoch_decision(self, tiker: str, type: str, period: str) -> StochDecisionModel:
+    async def get_stoch_decision(self, tiker: str, type: str, period: str, stop: float | None) -> StochDecisionModel:
         days_diff = 30 if period == 'D' else 30 * 7 if period == 'W' else 30 * 31
         start = (datetime.datetime.now() - datetime.timedelta(days_diff)).date()
 
         df = MoexReader.get_stock_history(start, tiker) if type == StockTypeEnum.MOEX else YahooReader.get_stock_history(start, tiker)
+
+        last_price = df.iloc[-1]['CLOSE']
+        if stop and last_price <= stop:
+            return StochDecisionModel(
+                decision=StochDecisionEnum.SELL,
+                last_price=last_price,
+                stop=stop,
+                tiker=tiker
+            )
 
         stoch = await StochCalculator().get_stoch(df, period)
 
@@ -60,6 +69,7 @@ class StochCalculator:
             d=last_row.d,
             k_previous=previous_row.k,
             d_previous=previous_row.d,
+            last_price=last_price,
             tiker=tiker
         )
 

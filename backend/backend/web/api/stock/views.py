@@ -4,8 +4,11 @@ from fastapi import APIRouter, Depends
 
 from backend.db.dao.stock import StockDAO
 from backend.db.models.stocks import StockModel
-from backend.web.api.stock.scheme import (StockModelDTO, StockModelInputDTO,
-                                          StockStopDTO, StockStopInputDTO)
+from backend.web.api.stock.scheme import (
+    StockModelDTO,
+    StockModelInputDTO,
+    StockStopInputDTO
+)
 
 router = APIRouter()
 

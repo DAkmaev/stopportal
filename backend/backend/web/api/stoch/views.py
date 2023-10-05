@@ -41,19 +41,28 @@ async def get_stochs(
 
         result = f'Акции {decision} ({period_str})!\n'
         for dec in stocks:
-            k = round(dec.k, 2)
-            k_prev = round(dec.k_previous, 2)
-            d = round(dec.d, 2)
-            d_prev = round(dec.d_previous, 2)
             name = f'[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})'
-            result += f'{name} - k: {k}, d: {d}, k prev: {k_prev}, d prev: {d_prev}\n'
+            price_str = f' - цена: {round(dec.last_price, 2)}'
+            stop_str = f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
+            stoch_data_str = ''
+            if dec.k and dec.d:
+                k = round(dec.k, 2)
+                d = round(dec.d, 2)
+                stoch_data_str = f', k: {k}, d: {d}'
+
+            result += f'{name}{price_str}{stop_str}{stoch_data_str}\n'
+
         return result
 
     stocks = await stock_dao.get_all_stocks()
 
     des_futures = [
-        stoch_calculator.get_stoch_decision(st.tiker, st.type, period) for st
-        in stocks]
+        stoch_calculator.get_stoch_decision(
+            st.tiker,
+            st.type,
+            period,
+            st.stops[0].value if st.stops else None
+        ) for st in stocks]
     decisions = await asyncio.gather(*des_futures)
 
     stocks_to_buy = list(
@@ -77,9 +86,14 @@ async def get_stoch(
     tiker: str,
     period: str = 'W',
     type: str = 'MOEX',
+    stock_dao: StockDAO = Depends(),
     stoch_calculator: StochCalculator = Depends()
 ):
-    decision_model = await stoch_calculator.get_stoch_decision(tiker, type, period)
+    stocks = await stock_dao.filter(tiker=tiker)
+    stops_same_period = list(filter(lambda s: s.period == period, stocks[0].stops))
+    stop_value = stops_same_period[0].value if stops_same_period else None
+
+    decision_model = await stoch_calculator.get_stoch_decision(tiker, type, period, stop_value)
 
     message = f""" Акции {tiker}
     Вывод: {decision_model.decision.name}

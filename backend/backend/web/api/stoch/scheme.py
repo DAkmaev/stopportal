@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from enum import Enum
 
@@ -16,7 +18,9 @@ class StochDecisionModel(BaseModel):
 
     tiker: str
     decision: StochDecisionEnum
-    k: float
-    d: float
-    k_previous: float
-    d_previous: float
+    last_price: float
+    k: Optional[float] = None
+    d: Optional[float] = None
+    stop: Optional[float] = None
+    # k_previous: Optional[float] = None
+    # d_previous: Optional[float] = None
