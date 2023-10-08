@@ -6,7 +6,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.cron_job import CronJobRunDao
-from backend.db.dao.stock import StockDAO
+from backend.db.dao.companies import CompanyDAO
 from backend.utils.telegram.telegramm_client import send_tg_message
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
@@ -18,7 +18,7 @@ router = APIRouter()
 async def get_stochs(
     period: str = 'W',
     is_cron: bool = False,
-    stock_dao: StockDAO = Depends(),
+    company_dao: CompanyDAO = Depends(),
     cron_dao: CronJobRunDao = Depends(),
     stoch_calculator: StochCalculator = Depends()
 ) -> List[StochDecisionModel]:
@@ -32,15 +32,15 @@ async def get_stochs(
 
         await cron_dao.update_cron_job_run(period, CRON_JOB_NAME)
 
-    def fill_message(decision: str, stocks: List[StochDecisionModel],
+    def fill_message(decision: str, companies: List[StochDecisionModel],
                      period: str):
-        if len(stocks) == 0:
+        if len(companies) == 0:
             return ''
 
         period_str = 'месяц' if period == 'M' else 'день' if period == 'D' else 'неделя'
 
         result = f'Акции {decision} ({period_str})!\n'
-        for dec in stocks:
+        for dec in companies:
             name = f'[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})'
             price_str = f' - цена: {round(dec.last_price, 2)}'
             stop_str = f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
@@ -54,7 +54,7 @@ async def get_stochs(
 
         return result
 
-    stocks = await stock_dao.get_all_stocks()
+    companies = await company_dao.get_all_companies()
 
     des_futures = [
         stoch_calculator.get_stoch_decision(
@@ -62,20 +62,20 @@ async def get_stochs(
             st.type,
             period,
             st.stops[0].value if st.stops else None
-        ) for st in stocks]
+        ) for st in companies]
     decisions = await asyncio.gather(*des_futures)
 
-    stocks_to_buy = list(
+    companies_to_buy = list(
         filter(lambda d: d.decision == StochDecisionEnum.BUY, decisions))
-    stocks_to_sell = list(
+    companies_to_sell = list(
         filter(lambda d: d.decision == StochDecisionEnum.SELL, decisions))
-    stocks_to_relax = list(
+    companies_to_relax = list(
         filter(lambda d: d.decision == StochDecisionEnum.RELAX, decisions))
 
     await asyncio.gather(
-        send_tg_message(fill_message("продавать", stocks_to_sell, period)),
-        send_tg_message(fill_message("покупать", stocks_to_buy, period)),
-        send_tg_message(fill_message("тест", stocks_to_relax, period))
+        send_tg_message(fill_message("продавать", companies_to_sell, period)),
+        send_tg_message(fill_message("покупать", companies_to_buy, period)),
+        send_tg_message(fill_message("тест", companies_to_relax, period))
     )
 
     return decisions
@@ -86,11 +86,11 @@ async def get_stoch(
     tiker: str,
     period: str = 'W',
     type: str = 'MOEX',
-    stock_dao: StockDAO = Depends(),
+    company_dao: CompanyDAO = Depends(),
     stoch_calculator: StochCalculator = Depends()
 ):
-    stocks = await stock_dao.filter(tiker=tiker)
-    stops_same_period = list(filter(lambda s: s.period == period, stocks[0].stops))
+    companies = await company_dao.filter(tiker=tiker)
+    stops_same_period = list(filter(lambda s: s.period == period, companies[0].stops))
     stop_value = stops_same_period[0].value if stops_same_period else None
 
     decision_model = await stoch_calculator.get_stoch_decision(tiker, type, period, stop_value)

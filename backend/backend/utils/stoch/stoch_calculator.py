@@ -7,7 +7,7 @@ from pandas import DataFrame
 from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
-from backend.web.api.stock.scheme import StockTypeEnum
+from backend.web.api.company.scheme import CompanyTypeEnum
 
 
 class StochCalculator:
@@ -43,7 +43,7 @@ class StochCalculator:
         days_diff = 30 if period == 'D' else 30 * 7 if period == 'W' else 30 * 31
         start = (datetime.datetime.now() - datetime.timedelta(days_diff)).date()
 
-        df = MoexReader.get_stock_history(start, tiker) if type == StockTypeEnum.MOEX else YahooReader.get_stock_history(start, tiker)
+        df = MoexReader.get_company_history(start, tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker)
 
         last_price = df.iloc[-1]['CLOSE']
         if stop and last_price <= stop:

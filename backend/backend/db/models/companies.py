@@ -10,19 +10,19 @@ if TYPE_CHECKING:
     from .item import Item  # noqa: F401
 
 
-class StockModel(Base):
-    __tablename__ = "stock"
+class CompanyModel(Base):
+    __tablename__ = "companies"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     tiker: Mapped[str] = mapped_column(String, index=True, unique=True)
     type: Mapped[str] = mapped_column(String, default='MOEX', nullable=True)
-    stops: Mapped[List["StockStopModel"]] = relationship(lazy="selectin")
+    stops: Mapped[List["CompanyStopModel"]] = relationship(lazy="selectin")
 
 
-class StockStopModel(Base):
-    __tablename__ = "stock_stop"
+class CompanyStopModel(Base):
+    __tablename__ = "companies_stop"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     period: Mapped[str] = mapped_column(String)
     value: Mapped[float] = mapped_column(Float, nullable=False)
-    stock_id: Mapped[int] = mapped_column(ForeignKey("stock.id"))
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
 

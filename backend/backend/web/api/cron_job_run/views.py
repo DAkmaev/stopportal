@@ -19,9 +19,9 @@ async def get_all_cron_job_run_models(
     Retrieve all cron_job_run objects from the database.
 
     :param cron_job_run_dao: DAO for CronJobRun models.
-    :param limit: limit of stock objects, defaults to 10.
-    :param offset: offset of stock objects, defaults to 0.
-    :return: list of stock objects from database.
+    :param limit: limit of company objects, defaults to 10.
+    :param offset: offset of company objects, defaults to 0.
+    :return: list of company objects from database.
     """
     return await cron_job_run_dao.get_all_cron_job_runs(limit=limit, offset=offset)
 
@@ -35,7 +35,7 @@ async def get_cron_job_run_models(
     Retrieve one cron_job_run object  from the database.
 
     :param cron_job_run_dao: DAO for CronJobRun models.
-    :return: list of stock objects from database.
+    :return: list of company objects from database.
     """
     return await cron_job_run_dao.get_cron_job_run(id)
 

@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 
 class MoexReader:
-    def get_stock_history(start: datetime, tiker: str) -> DataFrame:
+    def get_company_history(start: datetime, tiker: str) -> DataFrame:
         COLUMNS = (
             "OPEN",
             "HIGH",
