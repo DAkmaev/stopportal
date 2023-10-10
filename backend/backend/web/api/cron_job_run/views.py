@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Type
 
 from fastapi import APIRouter, Depends
 
@@ -30,7 +30,7 @@ async def get_all_cron_job_run_models(
 async def get_cron_job_run_models(
     id: int,
     cron_job_run_dao: CronJobRunDao = Depends(),
-) -> List[CronJobRunModel]:
+) -> Type[CronJobRunModel]:
     """
     Retrieve one cron_job_run object  from the database.
 

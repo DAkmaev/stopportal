@@ -121,6 +121,19 @@ class CompanyDAO:
 
         return company.scalars().one_or_none()
 
+    async def get_company_model_by_tiker(self, tiker: str) -> CompanyModel:
+        """
+        Get specific company model by tiker.
+
+        :param tiker: tiker of company instance.
+        :return: company model.
+        """
+        company = await self.session.execute(
+            select(CompanyModel).where(CompanyModel.tiker == tiker)
+        )
+
+        return company.scalars().one_or_none()
+
     async def get_company_stop_model(self, id: int) -> CompanyStopModel:
         """
         Get company stop models by id.

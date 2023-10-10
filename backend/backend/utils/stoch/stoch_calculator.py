@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import dataclass
 
 import btalib
 import pandas as pd
@@ -10,8 +11,14 @@ from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
 from backend.web.api.company.scheme import CompanyTypeEnum
 
 
+@dataclass
+class StochDecision:
+    decision: StochDecisionEnum
+    df: DataFrame
+
+
 class StochCalculator:
-    async def get_stoch(self,  df: DataFrame, period: str = "D"):
+    async def _get_stoch(self,  df: DataFrame, period: str = "D"):
 
         if period == "W":
             # Функция для определения начала недели с понедельника
@@ -39,11 +46,31 @@ class StochCalculator:
 
         return stoch
 
-    async def get_stoch_decision(self, tiker: str, type: str, period: str, stop: float | None) -> StochDecisionModel:
-        days_diff = 30 if period == 'D' else 30 * 7 if period == 'W' else 30 * 31
-        start = (datetime.datetime.now() - datetime.timedelta(days_diff)).date()
+    async def get_period_decision(
+        self,  df: DataFrame, period: str, skip_check_borders: bool = False
+    ) -> StochDecision:
 
-        df = MoexReader.get_company_history(start, tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker)
+        stoch = await StochCalculator()._get_stoch(df, period)
+        last_row = stoch.df.iloc[-1]
+        need_buy = last_row.d < last_row.k and (skip_check_borders or last_row.k < 25)
+        need_sell = last_row.d > last_row.k and (skip_check_borders or last_row.k > 80)
+
+        decision = (
+            StochDecisionEnum.BUY if need_buy
+            else StochDecisionEnum.SELL if need_sell
+            else StochDecisionEnum.RELAX
+        )
+
+        return StochDecision(decision=decision, df=stoch.df)
+
+    async def get_stoch_decision(self, tiker: str, type: str, period: str, stop: float | None) -> StochDecisionModel:
+        # days_diff_day = 30
+        # days_diff_week = days_diff_day * 7
+        # исторические данные за период, которого хватит для сточ помесячно (ну и день/неделя тоже)
+        days_diff_month = 30 * 31
+
+        start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
+        df = (MoexReader.get_company_history(start, tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
 
         last_price = df.iloc[-1]['CLOSE']
         if stop and last_price <= stop:
@@ -54,21 +81,35 @@ class StochCalculator:
                 tiker=tiker
             )
 
-        stoch = await StochCalculator().get_stoch(df, period)
+        # для продажи проверяем границы и разворот
+        per_decision = await self.get_period_decision(df, period)
+        # для покупки проверяем другие периоды, они должны сопавсть, без границ
+        if per_decision.decision != StochDecisionEnum.SELL and period != 'M':
+            decision_week = await self.get_period_decision(df, 'W', True)
+            decision_month = await self.get_period_decision(df, 'M', True)
+            need_buy = (decision_month.decision == decision_week.decision and
+                        decision_week.decision == StochDecisionEnum.BUY)
 
-        last_row = stoch.df.iloc[-1]
-        previous_row = stoch.df.iloc[-2]
+            if period == 'D':
+                decision_day = await self.get_period_decision(df, 'D', True)
+                need_buy = need_buy and decision_day.decision == StochDecisionEnum.BUY
 
-        need_buy = last_row.d < last_row.k < 25
-        need_sell = last_row.d > last_row.k > 80
-        decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.SELL if need_sell else StochDecisionEnum.RELAX
+            per_decision.decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.RELAX
 
+        # stoch = await StochCalculator()._get_stoch(df, period)
+        #
+        # last_row = stoch.df.iloc[-1]
+        # previous_row = stoch.df.iloc[-2]
+        #
+        # need_buy = last_row.d < last_row.k < 25
+        # need_sell = last_row.d > last_row.k > 80
+        # decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.SELL if need_sell else StochDecisionEnum.RELAX
+
+        last_row = per_decision.df.iloc[-1]
         return StochDecisionModel(
-            decision=decision,
+            decision=per_decision.decision,
             k=last_row.k,
             d=last_row.d,
-            k_previous=previous_row.k,
-            d_previous=previous_row.d,
             last_price=last_price,
             tiker=tiker
         )

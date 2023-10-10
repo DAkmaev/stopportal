@@ -18,6 +18,8 @@ router = APIRouter()
 async def get_stochs(
     period: str = 'W',
     is_cron: bool = False,
+    send_messages: bool = True,
+    send_test: bool = False,
     company_dao: CompanyDAO = Depends(),
     cron_dao: CronJobRunDao = Depends(),
     stoch_calculator: StochCalculator = Depends()
@@ -72,11 +74,15 @@ async def get_stochs(
     companies_to_relax = list(
         filter(lambda d: d.decision == StochDecisionEnum.RELAX, decisions))
 
-    await asyncio.gather(
-        send_tg_message(fill_message("продавать", companies_to_sell, period)),
-        send_tg_message(fill_message("покупать", companies_to_buy, period)),
-        send_tg_message(fill_message("тест", companies_to_relax, period))
-    )
+    if send_messages:
+        send_tasks = [
+            send_tg_message(fill_message("продавать", companies_to_sell, period)),
+            send_tg_message(fill_message("покупать", companies_to_buy, period))
+        ]
+        if send_test:
+            send_tasks.append(send_tg_message(fill_message("тест", companies_to_relax, period)))
+
+        await asyncio.gather(*send_tasks)
 
     return decisions
 

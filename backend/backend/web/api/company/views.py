@@ -45,6 +45,12 @@ async def create_company_model(
         tiker=new_company_object.tiker,
         type=new_company_object.type
     )
+    if new_company_object.stops:
+        company = await company_dao.get_company_model_by_tiker(new_company_object.tiker)
+        for stop in new_company_object.stops:
+            await company_dao.add_stop_model(company_id=company.id, period=stop.period,
+                                             value=stop.value)
+
 
 @router.post("/batch")
 async def create_company_batch_models(

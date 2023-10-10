@@ -33,6 +33,7 @@ class CompanyModelInputDTO(BaseModel):
 
     tiker: str
     type: Optional[CompanyTypeEnum] = CompanyTypeEnum.MOEX
+    stops: Optional[List[CompanyStopInputDTO]] = []
 
 
 
