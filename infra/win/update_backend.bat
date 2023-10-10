@@ -1,7 +1,7 @@
 cd ..\..\
 git pull
 cd ..\
-venv\Scripts\activate
+call venv\Scripts\activate
 cd stopportal\backend
 poetry install
 alembic upgrade "head"
