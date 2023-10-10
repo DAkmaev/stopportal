@@ -1,5 +1,6 @@
-cd ..\..\..\
+cd ..\..\
 git pull
+cd ..\
 venv\Scripts\activate
 cd stopportal\backend
 poetry install
