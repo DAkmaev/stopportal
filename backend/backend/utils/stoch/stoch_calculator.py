@@ -72,6 +72,12 @@ class StochCalculator:
         start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
         df = (MoexReader.get_company_history(start, tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
 
+        if df.size == 0:
+            return StochDecisionModel(
+                decision=StochDecisionEnum.UNKNOWN,
+                tiker=tiker
+            )
+
         last_price = df.iloc[-1]['CLOSE']
         if stop and last_price <= stop:
             return StochDecisionModel(
@@ -95,15 +101,6 @@ class StochCalculator:
                 need_buy = need_buy and decision_day.decision == StochDecisionEnum.BUY
 
             per_decision.decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.RELAX
-
-        # stoch = await StochCalculator()._get_stoch(df, period)
-        #
-        # last_row = stoch.df.iloc[-1]
-        # previous_row = stoch.df.iloc[-2]
-        #
-        # need_buy = last_row.d < last_row.k < 25
-        # need_sell = last_row.d > last_row.k > 80
-        # decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.SELL if need_sell else StochDecisionEnum.RELAX
 
         last_row = per_decision.df.iloc[-1]
         return StochDecisionModel(

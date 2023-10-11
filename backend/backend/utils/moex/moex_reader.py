@@ -24,10 +24,11 @@ class MoexReader:
 
             df = pd.DataFrame(data)
 
-            # Преобразовываем столбец TRADEDATE в тип datetime
-            df['TRADEDATE'] = pd.to_datetime(df['TRADEDATE'])
+            if df.size > 0:
+                # Преобразовываем столбец TRADEDATE в тип datetime
+                df['TRADEDATE'] = pd.to_datetime(df['TRADEDATE'])
 
-            # Устанавливаем столбец TRADEDATE в качестве индекса
-            df.set_index('TRADEDATE', inplace=True)
+                # Устанавливаем столбец TRADEDATE в качестве индекса
+                df.set_index('TRADEDATE', inplace=True)
 
             return df

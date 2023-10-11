@@ -1,10 +1,7 @@
-import datetime
-from pathlib import Path
+Аfrom pathlib import Path
 
 import pandas as pd
-import btalib
 import pytest
-from pandas import DataFrame
 
 from backend.utils.stoch.stoch_calculator import StochCalculator, StochDecision
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
@@ -35,7 +32,7 @@ class MockYahooReader:
         return mocked_dataframe
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_get_period_decision():
     calculator = StochCalculator()
     stoch_decision = await calculator.get_period_decision(mocked_dataframe, period="D")
@@ -44,7 +41,7 @@ async def test_get_period_decision():
     assert stoch_decision.decision in [StochDecisionEnum.BUY, StochDecisionEnum.SELL, StochDecisionEnum.RELAX]
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_get_stoch_decision(monkeypatch):
     # Mocking the external calls to MoexReader and YahooReader
     monkeypatch.setattr("backend.utils.moex.moex_reader.MoexReader", MockMoexReader)
@@ -59,3 +56,28 @@ async def test_get_stoch_decision(monkeypatch):
     assert isinstance(stoch_decision.d, float)
     assert isinstance(stoch_decision.last_price, float)
     assert stoch_decision.tiker == mocked_ticker
+
+
+# @pytest.mark.anyio
+# async def test_get_stoch_decision_bye(monkeypatch):
+#     # Mocking the external calls to MoexReader and YahooReader
+#     monkeypatch.setattr("backend.utils.moex.moex_reader.MoexReader", MockMoexReader)
+#     monkeypatch.setattr("backend.utils.yahoo.yahoo_reader.YahooReader", MockYahooReader)
+#
+#     calculator = StochCalculator()
+#     stoch_decision = await calculator.get_stoch_decision(mocked_ticker, mocked_type, 'D', None)
+#
+#     assert isinstance(stoch_decision, StochDecisionModel)
+#     assert stoch_decision.decision == StochDecisionEnum.BUY
+#
+# @pytest.mark.anyio
+# async def test_get_stoch_decision_bye(monkeypatch):
+#     # Mocking the external calls to MoexReader and YahooReader
+#     monkeypatch.setattr("backend.utils.moex.moex_reader.MoexReader", MockMoexReader)
+#     monkeypatch.setattr("backend.utils.yahoo.yahoo_reader.YahooReader", MockYahooReader)
+#
+#     calculator = StochCalculator()
+#     stoch_decision = await calculator.get_stoch_decision(mocked_ticker, mocked_type, 'D', None)
+#
+#     assert isinstance(stoch_decision, StochDecisionModel)
+#     assert stoch_decision.decision == StochDecisionEnum.BUY

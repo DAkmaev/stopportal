@@ -8,6 +8,7 @@ class StochDecisionEnum(str, Enum):
     BUY = 'BUY'
     SELL = 'SELL'
     RELAX = 'RELAX'
+    UNKNOWN = 'UNKNOWN'
 
 
 class StochDecisionModel(BaseModel):
@@ -18,7 +19,7 @@ class StochDecisionModel(BaseModel):
 
     tiker: str
     decision: StochDecisionEnum
-    last_price: float
+    last_price: Optional[float] = None
     k: Optional[float] = None
     d: Optional[float] = None
     stop: Optional[float] = None
