@@ -14,6 +14,7 @@ class CompanyModel(Base):
     __tablename__ = "companies"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String, index=True, unique=True, nullable=True)
     tiker: Mapped[str] = mapped_column(String, index=True, unique=True)
     type: Mapped[str] = mapped_column(String, default='MOEX', nullable=True)
     stops: Mapped[List["CompanyStopModel"]] = relationship(lazy="selectin", cascade="all,delete")

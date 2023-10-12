@@ -68,7 +68,7 @@ export async function getStrategies() {
 export const endpoints = Object.freeze({
   BRIEFCASE: 'briefcase',
   BRIEFCASE_COMPANIES: 'briefcase/companies',
-  COMPANIES: 'companies',
+  COMPANIES: 'api/company/',
   COMPANIES_CATEGORIES: 'companies/categories',
   COMPANIES_STRATEGIES: 'companies/strategies',
   DIVIDENDS: 'dividends',

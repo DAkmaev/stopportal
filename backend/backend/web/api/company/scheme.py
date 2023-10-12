@@ -24,6 +24,7 @@ class CompanyModelDTO(BaseModel):
     """
     id: int
     tiker: str
+    name: Optional[str] = None
     type: CompanyTypeEnum
     stops: Optional[List[CompanyStopDTO]]
 
@@ -32,8 +33,16 @@ class CompanyModelInputDTO(BaseModel):
     """DTO for creating new company model."""
 
     tiker: str
+    name: Optional[str] = None
     type: Optional[CompanyTypeEnum] = CompanyTypeEnum.MOEX
     stops: Optional[List[CompanyStopInputDTO]] = []
 
+
+class CompanyModelPatchDTO(CompanyModelInputDTO):
+    """DTO for updating company model."""
+
+    tiker: Optional[str] = None
+    type: Optional[CompanyTypeEnum] = None
+    stops: Optional[List[CompanyStopInputDTO]] = None
 
 

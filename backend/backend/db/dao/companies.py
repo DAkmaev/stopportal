@@ -13,10 +13,11 @@ class CompanyDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_company_model(self, tiker: str, type: str) -> None:
+    async def create_company_model(self, tiker: str, name: str, type: str) -> None:
         """
         Add single company to session.
 
+        :param name:
         :param tiker: tiker of a company.
         :param type: type of company:  MOEX or YAHOO.
         """
@@ -29,9 +30,10 @@ class CompanyDAO:
             raise HTTPException(status_code=400,
                                 detail=f"Тикер {exist_company.tiker} уже существует")
 
-        self.session.add(CompanyModel(tiker=tiker, type=type))
+        self.session.add(CompanyModel(tiker=tiker, name=name, type=type))
 
-    async def create_companies_models(self, items: List[CompanyModel]) -> None:
+    async def create_companies_models(
+        self, items: List[CompanyModel]) -> None:
         """
         Add multiple companies to session.
 
@@ -51,7 +53,24 @@ class CompanyDAO:
 
         self.session.add_all(items)
 
-    async def add_stop_model(self, company_id: int, period: str, value: float) -> Type[CompanyModel]:
+    async def update_company_model(self, company_id: int, updated_fields: dict,
+                                   partial: bool = False) -> CompanyModel:
+        """
+        Add single update company to session.
+
+        """
+        company = await self.get_company_model(company_id)
+
+        if not company:
+            raise HTTPException(status_code=404, detail="Компания не найдена")
+
+        for field, value in updated_fields.items():
+            if not partial or (hasattr(company, field) and value is not None):
+                setattr(company, field, value)
+
+        return company
+
+    async def add_stop_model(self, company_id: int, period: str, value: float) -> None:
         """
         Add stop to company.
 
@@ -64,8 +83,6 @@ class CompanyDAO:
             raise HTTPException(status_code=404, detail="Акция не найдена")
 
         company.stops.append(CompanyStopModel(period=period, value=value))
-
-        return company
 
     async def delete_company_model(self, company_id: int) -> None:
         """
@@ -116,7 +133,7 @@ class CompanyDAO:
         :return: company.
         """
         company = await self.session.execute(
-            select(CompanyModel).where(id == id)
+            select(CompanyModel).where(CompanyModel.id == id)
         )
 
         return company.scalars().one_or_none()

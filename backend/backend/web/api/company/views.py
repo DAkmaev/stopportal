@@ -7,7 +7,7 @@ from backend.db.models.companies import CompanyModel
 from backend.web.api.company.scheme import (
     CompanyModelDTO,
     CompanyModelInputDTO,
-    CompanyStopInputDTO
+    CompanyStopInputDTO, CompanyModelPatchDTO
 )
 
 router = APIRouter()
@@ -43,6 +43,7 @@ async def create_company_model(
     """
     await company_dao.create_company_model(
         tiker=new_company_object.tiker,
+        name=new_company_object.name if new_company_object.name else new_company_object.tiker,
         type=new_company_object.type
     )
     if new_company_object.stops:
@@ -65,7 +66,49 @@ async def create_company_batch_models(
     """
 
     await company_dao.create_companies_models(
-        list(map(lambda s: CompanyModel(tiker=s.tiker, type=s.type), new_company_list))
+        list(map(lambda s: CompanyModel(
+            tiker=s.tiker,
+            name=s.name if s.name else s.tiker,
+            type=s.type
+        ), new_company_list))
+    )
+
+
+@router.patch("/{company_id}")
+async def partial_update_company(
+    company_id: int,
+    updated_company: CompanyModelPatchDTO,
+    company_dao: CompanyDAO = Depends(),
+) -> None:
+    """
+    Partially updates company model in the database.
+
+    :param updated_company:
+    :param company_id: ID of the company to be updated.
+    :param updated_fields: Dictionary containing the fields to be updated and their new values.
+    :param company_dao: DAO for company models.
+    """
+
+    await company_dao.update_company_model(
+        company_id, updated_company.model_dump(), True
+    )
+
+
+@router.put("/{company_id}")
+async def update_company(
+    company_id: int,
+    updated_company: CompanyModelInputDTO,
+    company_dao: CompanyDAO = Depends(),
+) -> None:
+    """
+    Updates company model in the database.
+
+    :param company_id: ID of the company to be updated.
+    :param updated_company: Updated company model item.
+    :param company_dao: DAO for company models.
+    """
+    await company_dao.update_company_model(
+        company_id, updated_company.model_dump()
     )
 
 

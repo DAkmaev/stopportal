@@ -47,21 +47,21 @@
                       required
                     />
                   </v-col>
-                  <v-col cols="12" sm="6" md="3">
-                    <v-autocomplete
-                      v-model="temp.currency"
-                      no-data-text="Нет данных"
-                      label="Выберите валюту"
-                      :items="currencies"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="12" sm="6" md="3">
-                    <v-checkbox
-                      v-model="temp.has_mos_index"
-                      label="Индекс МОС биржи"
-                    />
-                  </v-col>
+<!--                  <v-col cols="12" sm="6" md="3">-->
+<!--                    <v-autocomplete-->
+<!--                      v-model="temp.currency"-->
+<!--                      no-data-text="Нет данных"-->
+<!--                      label="Выберите валюту"-->
+<!--                      :items="currencies"-->
+<!--                      clearable-->
+<!--                    />-->
+<!--                  </v-col>-->
+<!--                  <v-col cols="12" sm="6" md="3">-->
+<!--                    <v-checkbox-->
+<!--                      v-model="temp.has_mos_index"-->
+<!--                      label="Индекс МОС биржи"-->
+<!--                    />-->
+<!--                  </v-col>-->
                 </v-row>
 <!--                <v-row>-->
 <!--                  <v-col cols="12" sm="6" md="6">-->
@@ -150,13 +150,13 @@ export default {
           text: 'Тикер',
           align: 'start',
           value: 'tiker'
-        },
-        {
-          text: 'Индекс МОС биржи',
-          value: 'has_mos_index',
-          align: 'center'
-        },
-        { text: 'Валюта', value: 'currency' }
+        }
+        // ,{
+        //   text: 'Индекс МОС биржи',
+        //   value: 'has_mos_index',
+        //   align: 'center'
+        // },
+        // { text: 'Валюта', value: 'currency' }
       ],
       valid: true,
       temp: {
@@ -264,7 +264,7 @@ export default {
       this.dialog = true
     },
     editItem() {
-      putData(endpoints.COMPANIES, this.temp, false)
+      putData(endpoints.COMPANIES + this.temp.id, this.temp, false)
         .then(() => {
           this.fetchList()
           this.dialog = false
