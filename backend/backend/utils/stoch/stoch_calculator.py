@@ -63,14 +63,17 @@ class StochCalculator:
 
         return StochDecision(decision=decision, df=stoch.df)
 
-    async def get_stoch_decision(self, tiker: str, type: str, period: str, stop: float | None) -> StochDecisionModel:
+    async def get_stoch_decision(
+            self, tiker: str, type: str, period: str, stop: float | None
+        ) -> StochDecisionModel:
         # days_diff_day = 30
         # days_diff_week = days_diff_day * 7
         # исторические данные за период, которого хватит для сточ помесячно (ну и день/неделя тоже)
         days_diff_month = 30 * 31
 
         start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
-        df = (MoexReader.get_company_history(start, tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
+        mreader = MoexReader()
+        df = (await mreader.get_company_history_async(start=start, tiker=tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
 
         if df.size == 0:
             return StochDecisionModel(

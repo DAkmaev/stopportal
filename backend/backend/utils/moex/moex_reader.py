@@ -1,31 +1,50 @@
+import asyncio
 import datetime
+from typing import Optional, Tuple
 
 import apimoex
 import pandas as pd
 import requests
 from pandas import DataFrame
+from aiohttp import ClientSession
 
 
 class MoexReader:
-    def get_company_history(start: datetime, tiker: str, add_current: bool = True) -> DataFrame:
-        COLUMNS = (
-            "OPEN",
-            "HIGH",
-            "LOW",
-            "TRADEDATE",
-            "CLOSE",
-            "VOLUME",
-            "VALUE",
-        )
-        with requests.Session() as session:
-            data = apimoex.get_board_history(
-                session, tiker, start=str(start), columns=COLUMNS)
+    async def _fetch_board_history(
+        self, session: requests.Session(), tiker: str,
+        start: datetime, columns: Optional[Tuple[str, ...]]
+    ) -> dict:
 
+        return apimoex.get_board_history(
+            session, security=tiker, start=str(start), columns=columns)
+
+    async def _fetch_board_candles(
+        self, session: requests.Session(), tiker: str, start: datetime
+    ) -> list:
+
+        return apimoex.get_board_candles(
+            session, security=tiker, interval=10, start=str(start), columns=None)
+
+    async def get_company_history_async(
+            self, start: datetime, tiker: str, add_current: bool = True) -> DataFrame:
+
+        COLUMNS = ("OPEN", "HIGH", "LOW", "TRADEDATE", "CLOSE", "VOLUME", "VALUE")
+
+        with requests.Session() as session:
+            tasks = [
+                self._fetch_board_history(
+                    session, tiker=tiker,start=start, columns=COLUMNS),
+            ]
             if add_current:
                 candle_start = datetime.datetime.today().strftime('%Y-%m-%d')
-                candles = apimoex.get_board_candles(
-                    session,security=tiker, interval=10, start=candle_start, columns=None)
+                tasks.append(self._fetch_board_candles(
+                    session, tiker=tiker, start=candle_start))
 
+            results = await asyncio.gather(*tasks)
+
+            data = results[0]
+            candles = results[1]
+            if add_current and data and candles:
                 last_candle = candles[-1]
                 last_data = {
                     "OPEN": last_candle.get('open'),
@@ -42,15 +61,8 @@ class MoexReader:
                 else:
                     data.append(last_data)
 
-                print(data)
-
-            df = pd.DataFrame(data)
-
+            df = DataFrame(data)
             if df.size > 0:
-                # Преобразовываем столбец TRADEDATE в тип datetime
                 df['TRADEDATE'] = pd.to_datetime(df['TRADEDATE'])
-
-                # Устанавливаем столбец TRADEDATE в качестве индекса
                 df.set_index('TRADEDATE', inplace=True)
-
             return df

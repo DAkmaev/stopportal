@@ -12,6 +12,7 @@ from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
 
 router = APIRouter()
+semaphore = asyncio.Semaphore(10)
 
 
 @router.get("/")
@@ -33,6 +34,15 @@ async def get_stochs(
             return []
 
         await cron_dao.update_cron_job_run(period, CRON_JOB_NAME)
+
+    async def fetch_stoch_decision(st):
+        async with semaphore:
+            return await stoch_calculator.get_stoch_decision(
+                st.tiker,
+                st.type,
+                period,
+                st.stops[0].value if st.stops else None
+            )
 
     def fill_message(decision: str, companies: List[StochDecisionModel],
                      period: str):
@@ -58,13 +68,7 @@ async def get_stochs(
 
     companies = await company_dao.get_all_companies()
 
-    des_futures = [
-        stoch_calculator.get_stoch_decision(
-            st.tiker,
-            st.type,
-            period,
-            st.stops[0].value if st.stops else None
-        ) for st in companies]
+    des_futures = [fetch_stoch_decision(st) for st in companies]
     decisions = await asyncio.gather(*des_futures)
 
     companies_to_buy = list(
