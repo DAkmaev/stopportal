@@ -92,6 +92,7 @@ async def get_stoch(
     tiker: str,
     period: str = 'W',
     type: str = 'MOEX',
+    send_messages: bool = False,
     company_dao: CompanyDAO = Depends(),
     stoch_calculator: StochCalculator = Depends()
 ):
@@ -101,10 +102,10 @@ async def get_stoch(
 
     decision_model = await stoch_calculator.get_stoch_decision(tiker, type, period, stop_value)
 
-    message = f""" Акции {tiker}
-    Вывод: {decision_model.decision.name}
-    """
-
-    await send_tg_message(message)
+    if send_messages:
+        message = f""" Акции {tiker}
+            Вывод: {decision_model.decision.name}
+            """
+        await send_tg_message(message)
 
     return decision_model
