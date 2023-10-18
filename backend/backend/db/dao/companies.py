@@ -64,9 +64,19 @@ class CompanyDAO:
         if not company:
             raise HTTPException(status_code=404, detail="Компания не найдена")
 
+        stops_data = updated_fields.pop("stops", None)  # Extract stops data if present
         for field, value in updated_fields.items():
             if not partial or (hasattr(company, field) and value is not None):
                 setattr(company, field, value)
+
+        if stops_data:
+            # Update the stops for the company
+            updated_stops = []
+            for stop_data in stops_data:
+                stop = await self.update_company_stop(company_id, stop_data)
+                updated_stops.append(stop)
+
+            company.stops = updated_stops
 
         return company
 
@@ -83,6 +93,20 @@ class CompanyDAO:
             raise HTTPException(status_code=404, detail="Акция не найдена")
 
         company.stops.append(CompanyStopModel(period=period, value=value))
+
+    async def update_company_stop(self, company_id: int, stop_data: dict) -> CompanyStopModel:
+        stop_id = stop_data.get("id")
+        if stop_id:
+            stop = await self.get_company_stop_model(stop_id)
+            if stop:
+                for field, value in stop_data.items():
+                    setattr(stop, field, value)
+                return stop
+
+        # If stop_id is not provided or stop with given id is not found, create a new stop
+        stop = CompanyStopModel(**stop_data, company_id=company_id)
+        self.session.add(stop)
+        return stop
 
     async def delete_company_model(self, company_id: int) -> None:
         """
@@ -159,10 +183,11 @@ class CompanyDAO:
         :return: company.
         """
         company = await self.session.execute(
-            select(CompanyStopModel).where(id == id)
+            select(CompanyStopModel).where(CompanyStopModel.id == id)
         )
 
         return company.scalars().one_or_none()
+
 
     async def filter(
         self,

@@ -16,7 +16,8 @@ async def create_test_company(
 ) -> CompanyModel:
     dao = CompanyDAO(dbsession)
     tiker_name = uuid.uuid4().hex
-    await dao.create_company_model(tiker_name, "MOEX")
+    name = uuid.uuid4().hex
+    await dao.create_company_model(tiker_name, name, "MOEX")
 
     companies = await dao.filter(tiker=tiker_name)
 
