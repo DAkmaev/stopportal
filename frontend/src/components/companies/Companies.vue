@@ -27,7 +27,7 @@
           <v-icon v-if="item.has_mos_index" color="primary">mdi-check</v-icon>
         </template>
         <template v-slot:item.stops="{ item }">
-          <v-chip @click="alert('ssssss')">{{ item.stops.length }}</v-chip>
+          <v-chip @click="handleEditStops(item)">{{ item.stops.length }}</v-chip>
         </template>
       </v-data-table>
       <company-dialog
@@ -38,6 +38,12 @@
         :dialog-mode="dialogMode"
         @dialog-cancel="dialog = false"
         @added-company="handleSaveDialog"
+      />
+      <company-stops
+        :open="dialogStops"
+        :name="editData.name"
+        :stops="editData.stops"
+        @closed-stops="dialogStops = false"
       />
 
     </v-container>
@@ -54,10 +60,11 @@ import {
 // import { getDividends } from '@/api/open-broker'
 import PriceSynchronizer from '@/utils/PriceSynchronizer'
 import CompanyDialog from '@/components/companies/CompanyDialog.vue'
+import CompanyStops from '@/components/companies/CompanyStops.vue'
 
 export default {
   name: 'Companies',
-  components: { CompanyDialog },
+  components: { CompanyDialog, CompanyStops },
   props: {},
   data() {
     return {
@@ -66,6 +73,7 @@ export default {
       otrasli: [],
       strategies: [],
       dialog: false,
+      dialogStops: false,
       dialogMode: '',
       selected: [],
       headers: [
@@ -145,7 +153,15 @@ export default {
     handleSaveDialog() {
       this.dialog = false
       this.fetchList()
+    },
+    handleEditStops(item) {
+      this.editData = Object.assign({}, item)
+      this.dialogStops = true
+    },
+    handleSaveStopsDialog() {
+      this.dialogStops = false
     }
+
   }
 }
 </script>

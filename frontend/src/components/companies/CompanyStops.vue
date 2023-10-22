@@ -1,54 +1,96 @@
 <template>
-  <v-dialog v-model="stops" scrollable max-width="980px">
+  <v-dialog v-if="open" v-model="temp" width="auto">
     <v-card>
       <v-card-title>
-        Изменить стопы для {{ tiker }}
+        Изменить стопы для {{ name }}
       </v-card-title>
       <v-card-text>
         <v-container>
-          <v-form ref="addForm" v-model="valid" lazy-validation>
-            <v-row>
-              <v-col cols="12" sm="6" md="3">
-                <v-text-field
-                    v-model="temp.name"
-                    :rules="rules.nameRules"
-                    label="Название"
-                    required
-                />
-              </v-col>
-              <v-col cols="12" sm="6" md="3">
-                <v-text-field
-                    v-model="temp.tiker"
-                    :rules="rules.tikerRules"
-                    label="Тикер"
-                    required
-                />
-              </v-col>
-            </v-row>
-            <v-card-actions>
-              <v-spacer />
-              <v-btn text @click="handleCancel">Отмена</v-btn>
-              <v-btn text :disabled="!valid" color="primary" @click="saveItem">Сохранить</v-btn>
-            </v-card-actions>
-          </v-form>
+          <v-row v-for="period in Object.keys(temp)" :key="period">
+            <v-col cols="8">
+              <v-text-field
+                  clearable
+                  :label="periodNames[period]"
+                  v-model="temp[period].value"
+              >{{temp[period].value}}</v-text-field>
+            </v-col>
+          </v-row>
         </v-container>
       </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn text @click="handleCancel">Отмена</v-btn>
+        <v-btn text color="primary" @click="saveStops">Сохранить</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
 export default {
-  name: "CompanyStops",
+  name: 'CompanyStops',
   props: {
-    tiker: {
-      type: String
+    open: Boolean,
+    name: {
+      type: String,
+      default: undefined
     },
     stops: {
       type: Array,
-      default: []
+      default: () => ([])
     }
   },
+  data() {
+    return {
+      temp: {},
+      periodNames: {
+        'D': 'День',
+        'W': 'Неделя',
+        'M': 'Месяц'
+      }
+    }
+  },
+  computed: {},
+  watch: {
+    open: function() {
+      this.resetTemp()
+      if (this.stops) {
+        for (const stop of this.stops) {
+          const { period, id, value } = stop
+          this.temp[period] = { id, value }
+        }
+      }
+    },
+    temp: function() {
+      if (!this.temp) {
+        this.$emit('closed-stops')
+      }
+    }
+  },
+  methods: {
+    resetTemp() {
+      this.temp = {
+        'D': { 'id': null, 'value': null },
+        'W': { 'id': null, 'value': null },
+        'M': { 'id': null, 'value': null }
+      }
+    },
+    handleCancel() {
+      this.$emit('closed-stops')
+    },
+    saveStops() {
+      const diffValues = Object.keys(this.temp).filter(period => {
+        const existStop = this.stops.find(s => s.period === period)
+        const newStopValue = this.temp[period].value
+        return !!newStopValue && !existStop || existStop && existStop.value !== newStopValue
+      })
+      // const diffValues = this.stops.filter(s => {
+      //   const editValue = this.temp[s.period].value
+      //   return editValue !== null && s.value !== null && editValue !== s.value
+      // })
+      console.log(diffValues)
+    }
+  }
 }
 </script>
 

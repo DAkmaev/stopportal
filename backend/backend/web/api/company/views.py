@@ -75,7 +75,7 @@ async def create_company_batch_models(
 
 
 @router.patch("/{company_id}")
-async def partial_update_company(
+async def partial_update_company_model(
     company_id: int,
     updated_company: CompanyModelPatchDTO,
     company_dao: CompanyDAO = Depends(),
@@ -95,7 +95,7 @@ async def partial_update_company(
 
 
 @router.put("/{company_id}")
-async def update_company(
+async def update_company_model(
     company_id: int,
     updated_company: CompanyModelInputDTO,
     company_dao: CompanyDAO = Depends(),

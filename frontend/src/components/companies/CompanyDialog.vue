@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-if="open" v-model="temp" :eager="true" scrollable max-width="980px">
+  <v-dialog v-if="open" v-model="temp" :eager="true" scrollable max-width="980px" >
     <v-card>
       <v-card-title>
         {{ dialogModes[dialogMode] }}

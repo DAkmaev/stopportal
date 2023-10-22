@@ -41,6 +41,10 @@ async def test_update_company_model(
     TIKER = "TEST_TIKER"
     NAME = "Test Company"
     NEW_NAME = "Updated Company"
+    STOP_PERIOD1 = "W"
+    STOP_VALUE1 = 100.0
+    STOP_PERIOD2 = "M"
+    STOP_VALUE2 = 200.0
 
     company_dao = CompanyDAO(dbsession)
 
@@ -51,14 +55,30 @@ async def test_update_company_model(
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
     assert company.name == NAME
 
+    # Add two stop models for the company
+    await company_dao.add_stop_model(company.id, STOP_PERIOD1, STOP_VALUE1)
+    await company_dao.add_stop_model(company.id, STOP_PERIOD2, STOP_VALUE2)
+
+    # Retrieve the created company
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    assert len(company.stops) == 2
+
     # Update the company
-    updated_fields = {"name": NEW_NAME}
+    updated_fields = {
+        "name": NEW_NAME,
+        "stops": [
+            {"period": "M", "value": 300.0, "id": 1},
+            {"period": "D", "value": 400.0}
+        ]
+    }
     await company_dao.update_company_model(company.id, updated_fields, partial=True)
 
     # Verify the company was updated
     updated_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
     assert updated_company is not None
     assert updated_company.name == NEW_NAME
+    # assert len(updated_company.stops) == 1
+    # assert updated_company.stops[0].value == 300
 
     # Clean up - delete the test company
     await company_dao.delete_company_model(updated_company.id)
