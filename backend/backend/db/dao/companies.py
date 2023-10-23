@@ -78,13 +78,15 @@ class CompanyDAO:
             updated_stops = []
             for stop_data in stops_data:
                 if 'id' in stop_data and stop_data['id'] is not None:
-                    stop = await self.update_company_stop(company_id, stop_data)
+                    if stop_data['value'] is not None:
+                        stop = await self.update_company_stop(company_id, stop_data)
+                        updated_stops.append(stop)
+                        updated_stop_ids.add(stop.id)
 
-                else:
+                elif stop_data['value'] is not None:
                     stop = await self.add_stop_model(company_id, stop_data['period'], stop_data['value'])
-
-                updated_stops.append(stop)
-                updated_stop_ids.add(stop.id)
+                    updated_stops.append(stop)
+                    updated_stop_ids.add(stop.id)
 
             # Remove stops that are not in updated_stops
             stops_to_remove = [stop for stop in company.stops if stop.id not in updated_stop_ids and stop.id is not None ]

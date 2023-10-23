@@ -51,6 +51,10 @@ export async function putData(endpoint = '', body = {}, parseResponse = true, pa
   return requestWithBody('PUT', endpoint, body, parseResponse, params)
 }
 
+export async function patchData(endpoint = '', body = {}, parseResponse = true, params = {}) {
+  return requestWithBody('PATCH', endpoint, body, parseResponse, params)
+}
+
 export async function deleteData(endpoint = '', params = {}) {
   return requestWithBody('DELETE', endpoint, {}, false, params)
 }

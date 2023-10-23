@@ -12,7 +12,7 @@ class CompanyTypeEnum(str, Enum):
 class CompanyStopInputDTO(BaseModel):
     id: Optional[int] = None
     period: str
-    value: float
+    value: Optional[float] = None
 
 
 class CompanyStopDTO(CompanyStopInputDTO):

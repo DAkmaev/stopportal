@@ -42,7 +42,9 @@
       <company-stops
         :open="dialogStops"
         :name="editData.name"
+        :company-id="editData.id"
         :stops="editData.stops"
+        @changed-company-stops="handleSaveStopsDialog"
         @closed-stops="dialogStops = false"
       />
 
@@ -160,6 +162,7 @@ export default {
     },
     handleSaveStopsDialog() {
       this.dialogStops = false
+      this.fetchList()
     }
 
   }

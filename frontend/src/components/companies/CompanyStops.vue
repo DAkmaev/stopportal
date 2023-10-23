@@ -27,12 +27,18 @@
 </template>
 
 <script>
+import { endpoints, patchData } from '@/api/invmos-back'
+
 export default {
   name: 'CompanyStops',
   props: {
     open: Boolean,
     name: {
       type: String,
+      default: undefined
+    },
+    companyId: {
+      type: Number,
       default: undefined
     },
     stops: {
@@ -79,16 +85,29 @@ export default {
       this.$emit('closed-stops')
     },
     saveStops() {
-      const diffValues = Object.keys(this.temp).filter(period => {
-        const existStop = this.stops.find(s => s.period === period)
-        const newStopValue = this.temp[period].value
-        return !!newStopValue && !existStop || existStop && existStop.value !== newStopValue
-      })
+      const stops = Object.keys(this.temp).map(period => ({
+        id: this.temp[period].id,
+        value: this.temp[period].value,
+        period
+      }))
+
+      patchData(endpoints.COMPANIES + this.companyId, { 'stops': stops }, false)
+        .then(() => {
+          this.$emit('changed-company-stops')
+        })
+        .catch(err => {
+          console.error(err)
+        })
+      // const diffValues = Object.keys(this.temp).filter(period => {
+      //   const existStop = this.stops.find(s => s.period === period)
+      //   const newStopValue = this.temp[period].value
+      //   return !!newStopValue && !existStop || existStop && existStop.value !== newStopValue
+      // })
       // const diffValues = this.stops.filter(s => {
       //   const editValue = this.temp[s.period].value
       //   return editValue !== null && s.value !== null && editValue !== s.value
       // })
-      console.log(diffValues)
+      // console.log(diffValues)
     }
   }
 }

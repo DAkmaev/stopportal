@@ -5,7 +5,7 @@ from backend.db.dao.companies import CompanyDAO
 
 
 @pytest.mark.anyio
-async def test_update_company(
+async def test_add_company_model(
     fastapi_app: FastAPI,
     dbsession: AsyncSession,
 ) -> None:
@@ -83,6 +83,52 @@ async def test_update_company_model(
     # Clean up - delete the test company
     await company_dao.delete_company_model(updated_company.id)
 
+@pytest.mark.anyio
+async def test_update_company_model_null_values(
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+) -> None:
+    TIKER = "TEST_TIKER"
+    NAME = "Test Company"
+    NEW_NAME = "Updated Company"
+    STOP_PERIOD1 = "W"
+    STOP_VALUE1 = 100.0
+    STOP_PERIOD2 = "M"
+    # STOP_VALUE2 = 200.0
+
+    company_dao = CompanyDAO(dbsession)
+
+    # Create a new company
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+
+    # Retrieve the created company
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    assert company.name == NAME
+
+    # Add stop models for the company
+    await company_dao.add_stop_model(company.id, STOP_PERIOD1, STOP_VALUE1)
+
+    # Retrieve the created company
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    assert len(company.stops) == 1
+
+    # Update the company
+    stop = company.stops[0]
+    updated_fields = {
+        "stops": [
+            {"period": STOP_PERIOD1, "value": None, "id": stop.id},
+            {"period": STOP_PERIOD2, "value": None}
+        ]
+    }
+    await company_dao.update_company_model(company.id, updated_fields, partial=True)
+
+    # Verify the company was updated
+    updated_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    assert updated_company is not None
+    assert len(updated_company.stops) == 0
+
+    # Clean up - delete the test company
+    await company_dao.delete_company_model(updated_company.id)
 
 @pytest.mark.anyio
 async def test_update_company_model_not_found(
