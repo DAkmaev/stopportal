@@ -9,10 +9,10 @@
           <v-row v-for="period in Object.keys(temp)" :key="period">
             <v-col cols="8">
               <v-text-field
-                  clearable
-                  :label="periodNames[period]"
-                  v-model="temp[period].value"
-              >{{temp[period].value}}</v-text-field>
+                v-model="temp[period].value"
+                clearable
+                :label="periodNames[period]"
+              >{{ temp[period].value }}</v-text-field>
             </v-col>
           </v-row>
         </v-container>
