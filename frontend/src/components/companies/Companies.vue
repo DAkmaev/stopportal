@@ -7,6 +7,11 @@
             <v-btn small dark fab color="primary" class="ms-2" @click="handleAdd"><v-icon>mdi-plus</v-icon></v-btn>
           </v-item-group>
         </v-col>
+        <v-col align="end">
+          <v-item-group>
+            <v-btn small dark color="warning" class="ms-2" :loading="checkingStoch" @click="handleStoch">Проверить Stoch</v-btn>
+          </v-item-group>
+        </v-col>
       </v-row>
       <v-data-table
         dense
@@ -37,7 +42,8 @@
         :edit-data="editData"
         :dialog-mode="dialogMode"
         @dialog-cancel="dialog = false"
-        @added-company="handleSaveDialog"
+        @added-company="handleUpdatedDialog"
+        @deleted-company="handleUpdatedDialog"
       />
       <company-stops
         :open="dialogStops"
@@ -56,7 +62,7 @@
 <script>
 import {
   getData,
-  // getCategoriesSimple, getStrategies,
+  // getCategoriesSimple, getStrategies, getStrategies,
   endpoints
 } from '@/api/invmos-back'
 // import { getDividends } from '@/api/open-broker'
@@ -77,6 +83,7 @@ export default {
       dialog: false,
       dialogStops: false,
       dialogMode: '',
+      checkingStoch: false,
       selected: [],
       headers: [
         {
@@ -152,7 +159,7 @@ export default {
       this.editData = Object.assign({}, item)
       this.dialog = true
     },
-    handleSaveDialog() {
+    handleUpdatedDialog() {
       this.dialog = false
       this.fetchList()
     },
@@ -163,8 +170,18 @@ export default {
     handleSaveStopsDialog() {
       this.dialogStops = false
       this.fetchList()
+    },
+    handleStoch() {
+      this.checkingStoch = true
+      Promise.all([
+        getData(endpoints.STOCH, { period: 'D' }),
+        getData(endpoints.STOCH, { period: 'W' }),
+        getData(endpoints.STOCH, { period: 'M' })
+      ]).then((results) => {
+        this.checkingStoch = false
+        console.log(results)
+      })
     }
-
   }
 }
 </script>

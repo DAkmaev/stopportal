@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-if="open" v-model="temp" :eager="true" scrollable max-width="980px" >
+  <v-dialog v-if="open" v-model="temp" :eager="true" scrollable max-width="980px">
     <v-card>
       <v-card-title>
         {{ dialogModes[dialogMode] }}
@@ -196,9 +196,9 @@ export default {
     },
     handleDelete() {
       confirm('Вы точно хотите удалить?') &&
-      deleteData(endpoints.COMPANIES, { id: this.temp.id }).then(() => {
+      deleteData(endpoints.COMPANIES + this.temp.id).then(() => {
         this.active = []
-        this.$emit('added-company')
+        this.$emit('deleted-company')
         this.dialog = false
         console.log(`Deleted`)
       })
