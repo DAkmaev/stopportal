@@ -52,7 +52,7 @@
             :key="item.title"
             link
             :to="item.name ? { name: item.name } : null"
-              :href="item.name"
+            :href="item.name"
           >
             <v-list-item-action>
               <v-icon>{{ item.icon }}</v-icon>
