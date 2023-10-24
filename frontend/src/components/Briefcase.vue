@@ -9,10 +9,10 @@
         </v-col>
         <v-col cols="2">
           <v-switch
-              v-model="hideNoShareCompanies"
-              label="Скрыть если 0 акций"
-              @change="fetchList"
-          ></v-switch>
+            v-model="hideNoShareCompanies"
+            label="Скрыть если 0 акций"
+            @change="fetchList"
+          />
         </v-col>
         <v-col cols="2">
           <v-menu
