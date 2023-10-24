@@ -16,11 +16,11 @@
             </v-col>
           </v-row>
           <v-list-group
-              v-else-if="item.children"
-              :key="item.title"
-              v-model="item.model"
-              :prepend-icon="item.model ? item.icon : item['icon-alt']"
-              append-icon="mdi-menu-down"
+            v-else-if="item.children"
+            :key="item.title"
+            v-model="item.model"
+            :prepend-icon="item.model ? item.icon : item['icon-alt']"
+            append-icon="mdi-menu-down"
           >
             <template v-slot:activator>
               <v-list-item-content>
@@ -30,12 +30,12 @@
               </v-list-item-content>
             </template>
             <v-list-item
-                v-for="(child, i) in item.children"
-                :key="i"
-                link
-                :to="child.name ? { name: child.name } : null"
-                :href="child.name"
-                style="padding-left: 4.5em"
+              v-for="(child, i) in item.children"
+              :key="i"
+              link
+              :to="child.name ? { name: child.name } : null"
+              :href="child.name"
+              style="padding-left: 4.5em"
             >
               <v-list-item-action v-if="child.icon">
                 <v-icon>{{ child.icon }}</v-icon>
@@ -48,10 +48,10 @@
             </v-list-item>
           </v-list-group>
           <v-list-item
-              v-else
-              :key="item.title"
-              link
-              :to="item.name ? { name: item.name } : null"
+            v-else
+            :key="item.title"
+            link
+            :to="item.name ? { name: item.name } : null"
               :href="item.name"
           >
             <v-list-item-action>
@@ -94,8 +94,8 @@
       <v-btn icon large>
         <v-avatar size="32px" item>
           <v-img
-              src="https://cdn.vuetifyjs.com/images/logos/logo.svg"
-              alt="Vuetify"
+            src="https://cdn.vuetifyjs.com/images/logos/logo.svg"
+            alt="Vuetify"
           /></v-avatar>
       </v-btn>
     </v-app-bar>
