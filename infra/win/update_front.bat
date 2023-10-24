@@ -1,2 +1,2 @@
-cd ..\..\stopportal\frontend
+cd ..\..\..\stopportal\frontend
 npm install
