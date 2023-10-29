@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 from dataclasses import dataclass
 
 import btalib
@@ -9,6 +10,7 @@ from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
 from backend.web.api.company.scheme import CompanyTypeEnum
+from backend.db.models.companies import CompanyStopModel
 
 
 @dataclass
@@ -63,33 +65,8 @@ class StochCalculator:
 
         return StochDecision(decision=decision, df=stoch.df)
 
-    async def get_stoch_decision(
-            self, tiker: str, type: str, period: str, stop: float | None
-        ) -> StochDecisionModel:
-        # days_diff_day = 30
-        # days_diff_week = days_diff_day * 7
-        # исторические данные за период, которого хватит для сточ помесячно (ну и день/неделя тоже)
-        days_diff_month = 30 * 31
 
-        start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
-        mreader = MoexReader()
-        df = (await mreader.get_company_history_async(start=start, tiker=tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
-
-        if df.size == 0:
-            return StochDecisionModel(
-                decision=StochDecisionEnum.UNKNOWN,
-                tiker=tiker
-            )
-
-        last_price = df.iloc[-1]['CLOSE']
-        if stop and last_price <= stop:
-            return StochDecisionModel(
-                decision=StochDecisionEnum.SELL,
-                last_price=last_price,
-                stop=stop,
-                tiker=tiker
-            )
-
+    async def _calculate_decision(self, tiker: str, period: str, df: DataFrame, stop: CompanyStopModel | None, last_price: float):
         # для продажи проверяем границы и разворот
         per_decision = await self.get_period_decision(df, period)
         # для покупки проверяем другие периоды, они должны сопавсть, без границ
@@ -114,4 +91,39 @@ class StochCalculator:
             tiker=tiker
         )
 
+    async def get_stoch_decisions(
+            self, tiker: str, type: str, period: str, stops: List[CompanyStopModel] | None
+        ) -> dict[str, StochDecisionModel]:
+        days_diff_month = 30 * 31
+
+        start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
+        mreader = MoexReader()
+        df = (await mreader.get_company_history_async(start=start, tiker=tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
+
+        results = dict()
+
+        for cur_period in ['W', 'M', 'D']:
+            if period == cur_period or period == 'ALL':
+                if df.size == 0:
+                    results[cur_period] = StochDecisionModel(
+                        decision=StochDecisionEnum.UNKNOWN,
+                        tiker=tiker
+                    )
+                else:
+                    last_price = df.iloc[-1]['CLOSE']
+                    stops_or_none = None if not stops else list(filter(lambda s: s.period == cur_period, stops))
+                    stop = stops_or_none[0] if stops_or_none and stops_or_none[0] is not None else None
+                    if stops_or_none and last_price <= stop.value:
+                        results[cur_period] = StochDecisionModel(
+                            decision=StochDecisionEnum.SELL,
+                            last_price=last_price,
+                            stop=stop,
+                            tiker=tiker
+                        )
+                    else:
+                        results[cur_period] = await self._calculate_decision(
+                            tiker, period, df, stop, last_price
+                        )
+
+        return results
 

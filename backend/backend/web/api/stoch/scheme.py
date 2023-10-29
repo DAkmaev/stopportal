@@ -11,6 +11,13 @@ class StochDecisionEnum(str, Enum):
     UNKNOWN = 'UNKNOWN'
 
 
+class StochPeriodEnum(str, Enum):
+    DAY = 'D'
+    WEEK = 'W'
+    MONTH = 'M'
+    ALL = 'All'
+
+
 class StochDecisionModel(BaseModel):
     """
     Scheme for Stoch decision.

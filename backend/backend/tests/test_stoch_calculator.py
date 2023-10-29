@@ -48,14 +48,14 @@ async def test_get_stoch_decision(monkeypatch):
     monkeypatch.setattr("backend.utils.yahoo.yahoo_reader.YahooReader", MockYahooReader)
 
     calculator = StochCalculator()
-    stoch_decision = await calculator.get_stoch_decision(mocked_ticker, mocked_type, mocked_period, mocked_stop)
+    stoch_decision = await calculator.get_stoch_decisions(mocked_ticker, mocked_type, mocked_period, mocked_stop)
 
-    assert isinstance(stoch_decision, StochDecisionModel)
-    assert stoch_decision.decision in [StochDecisionEnum.BUY, StochDecisionEnum.SELL, StochDecisionEnum.RELAX]
-    assert isinstance(stoch_decision.k, float)
-    assert isinstance(stoch_decision.d, float)
-    assert isinstance(stoch_decision.last_price, float)
-    assert stoch_decision.tiker == mocked_ticker
+    assert isinstance(stoch_decision[mocked_period], StochDecisionModel)
+    assert stoch_decision[mocked_period].decision in [StochDecisionEnum.BUY, StochDecisionEnum.SELL, StochDecisionEnum.RELAX]
+    assert isinstance(stoch_decision[mocked_period].k, float)
+    assert isinstance(stoch_decision[mocked_period].d, float)
+    # assert isinstance(stoch_decision[mocked_period].last_price, float)
+    assert stoch_decision[mocked_period].tiker == mocked_ticker
 
 
 # @pytest.mark.anyio

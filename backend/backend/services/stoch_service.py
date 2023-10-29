@@ -18,12 +18,12 @@ class StochService:
         self.company_dao = company_dao
         self.cron_dao = cron_dao
 
-    async def _fetch_stoch_decision(self, st, period):
-        return await self.stoch_calculator.get_stoch_decision(
+    async def _fetch_stoch_decisions(self, st, period):
+        return await self.stoch_calculator.get_stoch_decisions(
             st.tiker,
             st.type,
             period,
-            st.stops[0].value if st.stops else None
+            st.stops
         )
 
     def _fill_message(self, decision, companies, period):
@@ -50,47 +50,44 @@ class StochService:
     async def get_stochs(self, period: str = 'W', is_cron: bool = False,
                          send_messages: bool = True, send_test: bool = False):
         companies = await self.company_dao.get_all_companies()
-        des_futures = [self._fetch_stoch_decision(st, period) for st in companies]
+        des_futures = [self._fetch_stoch_decisions(st, period) for st in companies]
         decisions = await asyncio.gather(*des_futures)
 
-        companies_to_buy = list(
-            filter(lambda d: d.decision == StochDecisionEnum.BUY, decisions))
-        companies_to_sell = list(
-            filter(lambda d: d.decision == StochDecisionEnum.SELL, decisions))
-        companies_to_relax = list(
-            filter(lambda d: d.decision == StochDecisionEnum.RELAX, decisions))
+        result = dict()
+        for per_des in decisions:
+            for p in per_des:
+                decision = per_des[p].decision
+                result.setdefault(p, {}).setdefault(decision.name, []).append(per_des[p])
 
         if send_messages:
-            send_tasks = [
-                send_tg_message(
-                    self._fill_message("продавать", companies_to_sell, period)),
-                send_tg_message(
-                    self._fill_message("покупать", companies_to_buy, period))
-            ]
-            if send_test:
-                send_tasks.append(
+            for per in result.keys():
+                send_tasks = [
                     send_tg_message(
-                        self._fill_message("тест", companies_to_relax, period)))
+                        self._fill_message("продавать", result[per].setdefault('SELL', []), per)),
+                    send_tg_message(
+                        self._fill_message("покупать", result[per].setdefault('BUY', []), per))
+                ]
+                if send_test:
+                    send_tasks.append(
+                        send_tg_message(
+                            self._fill_message("тест", result[per].setdefault('RELUX', []), per)))
 
-            await asyncio.gather(*send_tasks)
+                await asyncio.gather(*send_tasks)
 
-        return decisions
+        return result
 
     async def get_stoch(
         self,
         tiker: str, period: str = 'All', send_messages: bool = False
     ) -> StochDecisionModel:
         company = await self.company_dao.get_company_model_by_tiker(tiker=tiker)
-        stops_same_period = list(filter(lambda s: s.period == period, company.stops))
-        stop_value = stops_same_period[0].value if stops_same_period else None
-
-        decision_model = await self.stoch_calculator.get_stoch_decision(
-            tiker, company.type, period, stop_value
+        decision_model = await self.stoch_calculator.get_stoch_decisions(
+            tiker, company.type, period, company.stops
         )
 
         if send_messages:
             message = f""" Акции {tiker}
-                Вывод: {decision_model.decision.name}
+                Вывод: {decision_model[period].decision.name}
                 """
             await send_tg_message(message)
 

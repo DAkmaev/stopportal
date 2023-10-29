@@ -2,7 +2,7 @@ import asyncio
 import logging
 import time
 from _datetime import datetime
-from typing import List
+from typing import List, Dict
 
 from fastapi import APIRouter, Depends
 
@@ -19,12 +19,12 @@ logger = logging.getLogger(__name__)
 
 @router.get("/")
 async def get_stochs(
-    period: str = 'W',
+    period: str = 'ALL',
     is_cron: bool = False,
     send_messages: bool = True,
     send_test: bool = False,
     stoch_service: StochService = Depends()
-) -> List[StochDecisionModel]:
+) -> Dict[str, Dict[str, List[StochDecisionModel]]]:
     stochs = await stoch_service.get_stochs(period, is_cron, send_messages, send_test)
     return stochs
 
@@ -38,7 +38,7 @@ async def get_stoch(
     company_dao: CompanyDAO = Depends(),
     stoch_calculator: StochCalculator = Depends(),
     stoch_service: StochService = Depends()
-) -> StochDecisionModel:
+) -> Dict[str, StochDecisionModel]:
     return await stoch_service.get_stoch(
         tiker=tiker, period=period,send_messages=send_messages
     )
