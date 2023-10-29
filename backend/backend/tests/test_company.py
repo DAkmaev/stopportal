@@ -20,8 +20,6 @@ async def create_test_company(
     name = uuid.uuid4().hex
     company = await dao.create_company_model(tiker_name, name, "MOEX")
 
-
-
     if need_add_stop:
         company.stops.append(CompanyStopModel(period='D', value=100))
 
