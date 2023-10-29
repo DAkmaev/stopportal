@@ -1,4 +1,6 @@
 import asyncio
+import concurrent
+import time
 
 from fastapi import Depends
 
@@ -76,7 +78,7 @@ class StochService:
 
     async def get_stoch(
         self,
-        tiker: str, period: str = 'W', send_messages: bool = False
+        tiker: str, period: str = 'All', send_messages: bool = False
     ) -> StochDecisionModel:
         company = await self.company_dao.get_company_model_by_tiker(tiker=tiker)
         stops_same_period = list(filter(lambda s: s.period == period, company.stops))
@@ -93,3 +95,28 @@ class StochService:
             await send_tg_message(message)
 
         return decision_model
+
+
+    # def sync_function(self, tiker:str):
+    #     time.sleep(1)
+    #     return StochDecisionModel(
+    #         decision=StochDecisionEnum.RELAX,
+    #         tiker=tiker
+    #     )
+    # async def _get_decision_test(self, tiker, semaphore):
+    #     async with semaphore:
+    #         with concurrent.futures.ThreadPoolExecutor() as executor:
+    #             result = await asyncio.get_event_loop().run_in_executor(executor, lambda: self.sync_function(tiker))
+    #             return result
+    #
+    #
+    # async def get_stochs_test(self) -> StochDecisionModel:
+    #     print(f"\nstarted at {time.strftime('%X')}")
+    #
+    #     semaphore = asyncio.Semaphore(2)  # Ограничение на количество одновременных потоков
+    #     tasks = [self._get_decision_test(f'{_}', semaphore) for _ in range(10)]
+    #     results = await asyncio.gather(*tasks)
+    #
+    #     print(f"finished at {time.strftime('%X')}")
+    #     return results
+

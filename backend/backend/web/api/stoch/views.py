@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from _datetime import datetime
 from typing import List
 
@@ -13,6 +14,8 @@ from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
 from backend.services.stoch_service import StochService
 
 router = APIRouter()
+logging.basicConfig(level = logging.INFO)
+logger = logging.getLogger(__name__)
 
 @router.get("/")
 async def get_stochs(
