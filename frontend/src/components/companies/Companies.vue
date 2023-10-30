@@ -173,11 +173,7 @@ export default {
     },
     handleStoch() {
       this.checkingStoch = true
-      Promise.all([
-        getData(endpoints.STOCH, { period: 'D' }),
-        getData(endpoints.STOCH, { period: 'W' }),
-        getData(endpoints.STOCH, { period: 'M' })
-      ]).then((results) => {
+      getData(endpoints.STOCH, { period: 'ALL' }).then((results) => {
         this.checkingStoch = false
         console.log(results)
       })

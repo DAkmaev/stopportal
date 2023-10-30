@@ -47,17 +47,17 @@ class StochService:
 
         return result
 
-    async def get_stochs(self, period: str = 'W', is_cron: bool = False,
+    async def get_stochs(self, period: str = 'ALL', is_cron: bool = False,
                          send_messages: bool = True, send_test: bool = False):
         companies = await self.company_dao.get_all_companies()
         des_futures = [self._fetch_stoch_decisions(st, period) for st in companies]
         decisions = await asyncio.gather(*des_futures)
 
         result = dict()
-        for per_des in decisions:
-            for p in per_des:
-                decision = per_des[p].decision
-                result.setdefault(p, {}).setdefault(decision.name, []).append(per_des[p])
+        for per_desisions in decisions:
+            for p in per_desisions:
+                decision = per_desisions[p].decision
+                result.setdefault(p, {}).setdefault(decision.name, []).append(per_desisions[p])
 
         if send_messages:
             for per in result.keys():
@@ -70,7 +70,7 @@ class StochService:
                 if send_test:
                     send_tasks.append(
                         send_tg_message(
-                            self._fill_message("тест", result[per].setdefault('RELUX', []), per)))
+                            self._fill_message("тест", result[per].setdefault('RELAX', []), per)))
 
                 await asyncio.gather(*send_tasks)
 

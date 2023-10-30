@@ -48,14 +48,17 @@ class StochCalculator:
 
         return stoch
 
-    async def get_period_decision(
-        self,  df: DataFrame, period: str, skip_check_borders: bool = False
+    async def _get_period_decision(
+        self,  df: DataFrame, period: str,
+        skip_check_borders: bool = False,
+        bottom_border: float = 25,
+        top_border: float = 80,
     ) -> StochDecision:
 
         stoch = await StochCalculator()._get_stoch(df, period)
         last_row = stoch.df.iloc[-1]
-        need_buy = last_row.d < last_row.k and (skip_check_borders or last_row.k < 25)
-        need_sell = last_row.d > last_row.k and (skip_check_borders or last_row.k > 80)
+        need_buy = last_row.d < last_row.k and (skip_check_borders or last_row.k < bottom_border)
+        need_sell = last_row.d > last_row.k and (skip_check_borders or last_row.k > top_border)
 
         decision = (
             StochDecisionEnum.BUY if need_buy
@@ -67,20 +70,31 @@ class StochCalculator:
 
 
     async def _calculate_decision(self, tiker: str, period: str, df: DataFrame, stop: CompanyStopModel | None, last_price: float):
-        # для продажи проверяем границы и разворот
-        per_decision = await self.get_period_decision(df, period)
-        # для покупки проверяем другие периоды, они должны сопавсть, без границ
-        if per_decision.decision != StochDecisionEnum.SELL and period != 'M':
-            decision_week = await self.get_period_decision(df, 'W', True)
-            decision_month = await self.get_period_decision(df, 'M', True)
-            need_buy = (decision_month.decision == decision_week.decision and
-                        decision_week.decision == StochDecisionEnum.BUY)
+        # для продажи проверяем границы и разворот для всех периодов
+        per_decision = await self._get_period_decision(df, period)
 
-            if period == 'D':
-                decision_day = await self.get_period_decision(df, 'D', True)
-                need_buy = need_buy and decision_day.decision == StochDecisionEnum.BUY
+        # для покупки проверяем другие периоды, они должны сопавсть, без границ
+        # месяц считается полностью по _get_period_decision, это остальные по другому
+        if period != 'M' and per_decision.decision != StochDecisionEnum.SELL:
+            need_buy = False
+            if period == 'W':
+                decision_month, decision_week = await asyncio.gather(
+                    self._get_period_decision(df, 'M', skip_check_borders=True),
+                    self._get_period_decision(df, 'W', bottom_border=40)
+                )
+                need_buy = decision_month.decision == decision_week.decision == StochDecisionEnum.BUY
+
+            elif period == 'D':
+                decision_day, decision_week, decision_month = await asyncio.gather(
+                    self._get_period_decision(df, 'D'),
+                    self._get_period_decision(df, 'W', True),
+                    self._get_period_decision(df, 'M', True)
+                )
+
+                need_buy = decision_day.decision == decision_week.decision == decision_month.decision == StochDecisionEnum.BUY
 
             per_decision.decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.RELAX
+
 
         last_row = per_decision.df.iloc[-1]
         return StochDecisionModel(
@@ -102,28 +116,33 @@ class StochCalculator:
 
         results = dict()
 
-        for cur_period in ['W', 'M', 'D']:
+        for cur_period in ['M', 'W', 'D']:
             if period == cur_period or period == 'ALL':
+
+                # проверяем, что вообще есть данные
                 if df.size == 0:
                     results[cur_period] = StochDecisionModel(
                         decision=StochDecisionEnum.UNKNOWN,
                         tiker=tiker
                     )
+                    continue
+
+                last_price = df.iloc[-1]['CLOSE']
+                stops_or_none = None if not stops else list(filter(lambda s: s.period == cur_period, stops))
+                stop = stops_or_none[0] if stops_or_none and stops_or_none[0] is not None else None
+
+                # Проверяем, что не пробит стоп
+                if stops_or_none and last_price <= stop.value:
+                    results[cur_period] = StochDecisionModel(
+                        decision=StochDecisionEnum.SELL,
+                        last_price=last_price,
+                        stop=stop,
+                        tiker=tiker
+                    )
                 else:
-                    last_price = df.iloc[-1]['CLOSE']
-                    stops_or_none = None if not stops else list(filter(lambda s: s.period == cur_period, stops))
-                    stop = stops_or_none[0] if stops_or_none and stops_or_none[0] is not None else None
-                    if stops_or_none and last_price <= stop.value:
-                        results[cur_period] = StochDecisionModel(
-                            decision=StochDecisionEnum.SELL,
-                            last_price=last_price,
-                            stop=stop,
-                            tiker=tiker
-                        )
-                    else:
-                        results[cur_period] = await self._calculate_decision(
-                            tiker, period, df, stop, last_price
-                        )
+                    results[cur_period] = await self._calculate_decision(
+                        tiker, period, df, stop, last_price
+                    )
 
         return results
 

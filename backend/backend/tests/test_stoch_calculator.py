@@ -35,7 +35,7 @@ class MockYahooReader:
 @pytest.mark.anyio
 async def test_get_period_decision():
     calculator = StochCalculator()
-    stoch_decision = await calculator.get_period_decision(mocked_dataframe, period="D")
+    stoch_decision = await calculator._get_period_decision(mocked_dataframe, period="D")
 
     assert isinstance(stoch_decision, StochDecision)
     assert stoch_decision.decision in [StochDecisionEnum.BUY, StochDecisionEnum.SELL, StochDecisionEnum.RELAX]
