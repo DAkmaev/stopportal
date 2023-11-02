@@ -137,7 +137,7 @@ class StochCalculator:
                     results[cur_period] = StochDecisionModel(
                         decision=StochDecisionEnum.SELL,
                         last_price=last_price,
-                        stop=stop,
+                        stop=stop.value,
                         tiker=tiker
                     )
                 else:

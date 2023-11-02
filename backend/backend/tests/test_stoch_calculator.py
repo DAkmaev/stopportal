@@ -1,83 +1,115 @@
 from pathlib import Path
 
-import pandas as pd
 import pytest
+import pandas as pd
 
-from backend.utils.stoch.stoch_calculator import StochCalculator, StochDecision
+from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
-from backend.web.api.company.scheme import CompanyTypeEnum
+from backend.db.models.companies import CompanyStopModel
+
+from unittest.mock import patch
 
 
-# Mocked data for testing
-def load_mocked_data():
+@pytest.fixture
+def sample_dataframe():
     file_path = Path(__file__).parent / 'data/mocked_data.csv'
-    return pd.read_csv(file_path)
+    df = pd.read_csv(file_path)
+    df['DATE'] = pd.to_datetime(df['DATE'])  # Convert DATE column to datetime
+    df.set_index('DATE', inplace=True)  # Set DATE as the index
+    df = df.rename(columns={'OPEN': 'OPEN', 'CLOSE': 'CLOSE', 'HIGH': 'HIGH', 'LOW': 'LOW'})
 
-mocked_dataframe = load_mocked_data()
-mocked_ticker = "LKOH"
-mocked_type = CompanyTypeEnum.MOEX
-mocked_period = "D"
-mocked_stop = None
+    return df
 
 
 class MockMoexReader:
     @staticmethod
     async def get_company_history(start, ticker):
-        return mocked_dataframe
-
-
-class MockYahooReader:
-    @staticmethod
-    async def get_company_history(start, ticker):
-        return mocked_dataframe
+        return sample_dataframe
 
 
 @pytest.mark.anyio
-async def test_get_period_decision():
+async def test_get_period_decision(sample_dataframe):
     calculator = StochCalculator()
-    stoch_decision = await calculator._get_period_decision(mocked_dataframe, period="D")
 
-    assert isinstance(stoch_decision, StochDecision)
-    assert stoch_decision.decision in [StochDecisionEnum.BUY, StochDecisionEnum.SELL, StochDecisionEnum.RELAX]
+    # Test with a sample DataFrame
+    decision = await calculator._get_period_decision(sample_dataframe, 'D')
+
+    assert decision.decision in {StochDecisionEnum.BUY, StochDecisionEnum.SELL,
+                                 StochDecisionEnum.RELAX}
+    assert isinstance(decision.df, pd.DataFrame)
 
 
 @pytest.mark.anyio
-async def test_get_stoch_decision(monkeypatch):
-    # Mocking the external calls to MoexReader and YahooReader
-    monkeypatch.setattr("backend.utils.moex.moex_reader.MoexReader", MockMoexReader)
-    monkeypatch.setattr("backend.utils.yahoo.yahoo_reader.YahooReader", MockYahooReader)
-
+async def test_calculate_decision(sample_dataframe):
     calculator = StochCalculator()
-    stoch_decision = await calculator.get_stoch_decisions(mocked_ticker, mocked_type, mocked_period, mocked_stop)
+    tiker = 'LKOH'
+    period = 'D'
+    last_price = 130.0
+    stop = CompanyStopModel(period='D', value=120.0)
 
-    assert isinstance(stoch_decision[mocked_period], StochDecisionModel)
-    assert stoch_decision[mocked_period].decision in [StochDecisionEnum.BUY, StochDecisionEnum.SELL, StochDecisionEnum.RELAX]
-    assert isinstance(stoch_decision[mocked_period].k, float)
-    assert isinstance(stoch_decision[mocked_period].d, float)
-    # assert isinstance(stoch_decision[mocked_period].last_price, float)
-    assert stoch_decision[mocked_period].tiker == mocked_ticker
+    decision = await calculator._calculate_decision(tiker, period, sample_dataframe,
+                                                    stop, last_price)
+
+    assert decision.decision in {StochDecisionEnum.BUY, StochDecisionEnum.SELL,
+                                 StochDecisionEnum.RELAX}
+    assert isinstance(decision.k, float)
+    assert isinstance(decision.d, float)
+    assert isinstance(decision.last_price, float)
+    assert decision.tiker == tiker
 
 
-# @pytest.mark.anyio
-# async def test_get_stoch_decision_bye(monkeypatch):
-#     # Mocking the external calls to MoexReader and YahooReader
-#     monkeypatch.setattr("backend.utils.moex.moex_reader.MoexReader", MockMoexReader)
-#     monkeypatch.setattr("backend.utils.yahoo.yahoo_reader.YahooReader", MockYahooReader)
-#
+@pytest.mark.anyio
+async def test_get_stoch_decisions_no_data():
+    calculator = StochCalculator()
+    tiker = 'AAPL'
+    tiker_type = 'MOEX'
+    period = 'D'
+
+    # Simulate the case where there's no data available
+    decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [])
+
+    assert isinstance(decisions, dict)
+    assert isinstance(decisions[period], StochDecisionModel)
+    assert decisions[period].decision == StochDecisionEnum.UNKNOWN
+    assert decisions[period].tiker == tiker
+
+
+@pytest.mark.anyio
+async def test_get_stoch_decisions_with_stop(sample_dataframe):
+    calculator = StochCalculator()
+    tiker = 'LKOH'
+    tiker_type = 'MOEX'
+    period = 'D'
+    stop = CompanyStopModel(period='D', value=120.0)
+
+    # Mock the mreader.get_company_history_async to return sample_dataframe
+    with patch('backend.utils.moex.moex_reader.MoexReader.get_company_history_async') as mock_method:
+        mock_method.return_value = sample_dataframe
+        decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [stop])
+
+        assert isinstance(decisions, dict)
+        assert isinstance(decisions[period], StochDecisionModel)
+        assert decisions[period].decision == StochDecisionEnum.SELL
+        assert decisions[period].stop == stop.value
+        assert decisions[period].tiker == tiker
+
+
+# @pytest.mark.asyncio
+# async def test_get_stoch_decisions_buy(sample_dataframe):
 #     calculator = StochCalculator()
-#     stoch_decision = await calculator.get_stoch_decision(mocked_ticker, mocked_type, 'D', None)
+#     tiker = 'LKOH'
+#     tiker_type = 'MOEX'
+#     period = 'M'
 #
-#     assert isinstance(stoch_decision, StochDecisionModel)
-#     assert stoch_decision.decision == StochDecisionEnum.BUY
+#     with patch('backend.utils.moex.moex_reader.MoexReader.get_company_history_async') as mock_method:
+#         #  значений назад цифры подходящие для покупки
+#         mock_method.return_value = sample_dataframe #.iloc[:-0]
+#         # Simulate a case where the conditions suggest a buy
+#         decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [])
 #
-# @pytest.mark.anyio
-# async def test_get_stoch_decision_bye(monkeypatch):
-#     # Mocking the external calls to MoexReader and YahooReader
-#     monkeypatch.setattr("backend.utils.moex.moex_reader.MoexReader", MockMoexReader)
-#     monkeypatch.setattr("backend.utils.yahoo.yahoo_reader.YahooReader", MockYahooReader)
-#
-#     calculator = StochCalculator()
-#     stoch_decision = await calculator.get_stoch_decision(mocked_ticker, mocked_type, 'D', None)
-#
-#     assert isinstance(stoch_decision, StochDecisionModel)
-#     assert stoch_decision.decision == StochDecisionEnum.BUY
+#         assert decisions == {
+#             'M': StochDecisionEnum.BUY,
+#             'W': StochDecisionEnum.BUY,
+#             'D': StochDecisionEnum.BUY,
+#         }
+
