@@ -9,7 +9,7 @@ end_date = start_date + timedelta(days=930)  # End date
 date_range = pd.date_range(start=start_date, end=end_date, freq='D')
 
 # Generate wave-like CLOSE values
-close_values = np.sin(np.linspace(0, 20 * np.pi, len(date_range))) * 20 + 120
+close_values = np.sin(np.linspace(0, 40 * np.pi, len(date_range))) * 40 + 120
 
 data = {
     'DATE': date_range.strftime('%Y-%m-%d'),

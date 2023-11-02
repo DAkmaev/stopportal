@@ -3,6 +3,7 @@ from typing import List
 from dataclasses import dataclass
 
 import btalib
+import asyncio
 import pandas as pd
 from pandas import DataFrame
 
@@ -141,7 +142,7 @@ class StochCalculator:
                     )
                 else:
                     results[cur_period] = await self._calculate_decision(
-                        tiker, period, df, stop, last_price
+                        tiker, cur_period, df, stop, last_price
                     )
 
         return results

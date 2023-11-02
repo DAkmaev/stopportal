@@ -80,6 +80,7 @@ async def test_get_stoch(
     assert response.status_code == status.HTTP_200_OK
     assert response.json()[period]['decision'] == 'UNKNOWN'
 
+
 # @pytest.mark.anyio
 # async def test_get_stoch_temp(
 #     fastapi_app: FastAPI,
@@ -91,10 +92,29 @@ async def test_get_stoch(
 #     :param fastapi_app: current application.
 #     :param client: client for the app.
 #     """
-#     stoch_service = StochService()
-#     decision = await stoch_service.get_stochs_test()
-#     assert len(decision) == 2
-#     assert decision[0].decision == 'RELAX'
-#     assert decision[0].tiker == 'A'
+#     dao = CompanyDAO(dbsession)
+#     tiker_name1 = 'LKOH'
+#     name1 = 'Лукойл'
+#     # tiker_name2 = uuid.uuid4().hex
+#     # name2 = uuid.uuid4().hex
+#     period = 'ALL'
+#
+#     # create test companies
+#     await asyncio.gather(
+#         dao.create_company_model(tiker_name1, name1, "MOEX"),
+#         # dao.create_company_model(tiker_name2, name2, "MOEX")
+#     )
+#
+#     url = fastapi_app.url_path_for("get_stochs")
+#     response = await client.get(
+#         url, params={
+#             'period': period,
+#             'is_cron': 'false',
+#             'send_messages': 'false',
+#             'send_test': 'false'
+#         }
+#     )
+#     assert response.status_code == status.HTTP_200_OK
+
 
 
