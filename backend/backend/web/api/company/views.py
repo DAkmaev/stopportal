@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.companies import CompanyDAO
+from backend.db.dao.company_stops import CompanyStopsDAO
 from backend.db.models.companies import CompanyModel
 from backend.web.api.company.scheme import (
     CompanyModelDTO,
@@ -13,9 +14,24 @@ from backend.web.api.company.scheme import (
 router = APIRouter()
 
 
+@router.get("/{company_id}", response_model=CompanyModelDTO)
+async def get_company_models(
+    company_id: int,
+    company_dao: CompanyDAO = Depends(),
+) -> CompanyModel:
+    """
+    Retrieve all company objects from the database.
+
+    :param company_dao: DAO for company models.
+    :param limit: limit of company objects, defaults to 10.
+    :param offset: offset of company objects, defaults to 0.
+    :return: list of company objects from database.
+    """
+    return await company_dao.get_company_model(company_id)
+
 @router.get("/", response_model=List[CompanyModelDTO])
 async def get_company_models(
-    limit: int = 10,
+    limit: int = 100,
     offset: int = 0,
     company_dao: CompanyDAO = Depends(),
 ) -> List[CompanyModel]:
@@ -116,7 +132,7 @@ async def update_company_model(
 async def add_company_stop_model(
     new_stop: CompanyStopInputDTO,
     company_id: int,
-    company_dao: CompanyDAO = Depends(),
+    dao: CompanyStopsDAO = Depends(),
 ) -> None:
     """
     Creates companies models in the database.
@@ -126,7 +142,7 @@ async def add_company_stop_model(
     :param company_dao: DAO for company models.
     """
 
-    await company_dao.add_stop_model(company_id, period=new_stop.period, value=new_stop.value)
+    await dao.add_stop_model(company_id, period=new_stop.period, value=new_stop.value)
 
 
 @router.delete("/{company_id}", status_code=204)
@@ -147,7 +163,7 @@ async def delete_company_model(
 async def delete_company_stop_model(
     stop_id: int,
     company_id: int,
-    company_dao: CompanyDAO = Depends(),
+    dao: CompanyStopsDAO = Depends(),
 ) -> None:
     """
     Delete company model from the database.
@@ -155,4 +171,4 @@ async def delete_company_stop_model(
     :param company_dao:
     """
 
-    await company_dao.delete_company_stop_model(stop_id, company_id)
+    await dao.delete_company_stop_model(stop_id, company_id)

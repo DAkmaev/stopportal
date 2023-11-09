@@ -19,6 +19,12 @@ class CompanyStopDTO(CompanyStopInputDTO):
     id: int
 
 
+class StrategiesDTO(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+
+
 class CompanyModelDTO(BaseModel):
     """
     Scheme for company.
@@ -28,6 +34,7 @@ class CompanyModelDTO(BaseModel):
     name: Optional[str] = None
     type: CompanyTypeEnum
     stops: Optional[List[CompanyStopDTO]]
+    strategies: Optional[List[StrategiesDTO]]
 
 
 class CompanyModelInputDTO(BaseModel):

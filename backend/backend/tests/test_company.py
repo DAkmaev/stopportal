@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from backend.db.dao.companies import CompanyDAO
+from backend.db.dao.company_stops import CompanyStopsDAO
 from backend.db.models.companies import CompanyModel, CompanyStopModel
 
 
@@ -16,6 +17,7 @@ async def create_test_company(
     need_add_stop: bool = False
 ) -> CompanyModel:
     dao = CompanyDAO(dbsession)
+    stops_dao = CompanyStopsDAO(dbsession)
     tiker_name = uuid.uuid4().hex
     name = uuid.uuid4().hex
     company = await dao.create_company_model(tiker_name, name, "MOEX")
@@ -45,6 +47,31 @@ async def test_creation(
     dao = CompanyDAO(dbsession)
     instances = await dao.filter(tiker=tiker_name)
     assert instances[0].tiker == tiker_name
+
+
+@pytest.mark.anyio
+async def test_get_company_by_id(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """Test retrieving a company by ID."""
+    # Создаем тестовую компанию в базе данных
+    company = await create_test_company(dbsession, True)
+
+    # Формируем URL для запроса к API с учетом идентификатора созданной компании
+    url = fastapi_app.url_path_for("get_company_models", company_id=company.id)
+
+    # Отправляем GET-запрос
+    response = await client.get(url)
+
+    # Проверяем успешный ответ и соответствие данных полученным из базы
+    assert response.status_code == status.HTTP_200_OK
+    company_response = response.json()
+    assert company_response["tiker"] == company.tiker
+    assert company_response["name"] == company.name
+    assert len(company_response["stops"]) == 1
+    assert company_response["stops"][0]["value"] == company.stops[0].value
 
 
 @pytest.mark.anyio
@@ -139,6 +166,6 @@ async def test_stop_deleting(
     response = await client.delete(url)
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    dao = CompanyDAO(dbsession)
+    dao = CompanyStopsDAO(dbsession)
     stop = await dao.get_company_stop_model(stop_id)
     assert stop is None
