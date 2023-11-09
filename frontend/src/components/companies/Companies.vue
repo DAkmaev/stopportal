@@ -22,6 +22,9 @@
         :disable-pagination="true"
         :hide-default-footer="true"
       >
+        <template v-slot:item.num="{ index }">
+          {{ index + 1 }}
+        </template>
         <template v-slot:item.name="{ item }">
           <div @click="handleEdit(item)">{{ item.name }}</div>
         </template>
@@ -32,7 +35,14 @@
           <v-icon v-if="item.has_mos_index" color="primary">mdi-check</v-icon>
         </template>
         <template v-slot:item.stops="{ item }">
-          <v-chip @click="handleEditStops(item)">{{ item.stops.length }}</v-chip>
+          <template v-if="item.stops && item.stops.length > 0">
+            <v-chip v-for="s in item.stops" :key="s.period" @click="handleEditStops(item)">
+              {{ s.period }}: {{ s.value }}
+            </v-chip>
+          </template>
+          <template v-else>
+            <v-chip @click="handleEditStops(item)">Нет</v-chip>
+          </template>
         </template>
       </v-data-table>
       <company-dialog
@@ -86,6 +96,7 @@ export default {
       checkingStoch: false,
       selected: [],
       headers: [
+        { text: '№', value: 'num', sortable: false },
         {
           text: 'Название',
           align: 'start',
@@ -108,7 +119,7 @@ export default {
         },
         {
           text: 'Стопы',
-          align: 'center',
+          align: 'start',
           value: 'stops'
         }
         // ,{
