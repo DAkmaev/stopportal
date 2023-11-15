@@ -43,6 +43,8 @@ class StochCalculator:
                 {'OPEN': 'first', 'CLOSE': 'last', 'HIGH': 'max', 'LOW': 'min'})
 
         #print(df)
+        if len(df.index) < 15:
+            return None
 
         stoch = btalib.stochastic(df)
         #print(stoch.df)
@@ -56,7 +58,13 @@ class StochCalculator:
         top_border: float = 80,
     ) -> StochDecision:
 
+        if df.empty:
+            return  StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
+
         stoch = await StochCalculator()._get_stoch(df, period)
+        if not stoch:
+            return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
+
         last_row = stoch.df.iloc[-1]
         need_buy = last_row.d < last_row.k and (skip_check_borders or last_row.k < bottom_border)
         need_sell = last_row.d > last_row.k and (skip_check_borders or last_row.k > top_border)
@@ -66,13 +74,15 @@ class StochCalculator:
             else StochDecisionEnum.SELL if need_sell
             else StochDecisionEnum.RELAX
         )
-
         return StochDecision(decision=decision, df=stoch.df)
 
 
     async def _calculate_decision(self, tiker: str, period: str, df: DataFrame, stop: CompanyStopModel | None, last_price: float):
         # для продажи проверяем границы и разворот для всех периодов
         per_decision = await self._get_period_decision(df, period)
+
+        if per_decision.decision == StochDecisionEnum.UNKNOWN:
+            return StochDecisionModel(decision=per_decision.decision, tiker=tiker)
 
         # для покупки проверяем другие периоды, они должны сопавсть, без границ
         # месяц считается полностью по _get_period_decision, это остальные по другому
@@ -105,6 +115,8 @@ class StochCalculator:
             last_price=last_price,
             tiker=tiker
         )
+
+
 
     async def get_stoch_decisions(
             self, tiker: str, type: str, period: str, stops: List[CompanyStopModel] | None
