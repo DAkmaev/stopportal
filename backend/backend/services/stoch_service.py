@@ -1,6 +1,4 @@
 import asyncio
-import concurrent
-import time
 
 from fastapi import Depends
 
@@ -8,8 +6,9 @@ from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.cron_job import CronJobRunDao
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.utils.telegram.telegramm_client import send_tg_message
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
+from backend.web.api.stoch.scheme import StochDecisionModel
 
+PERIOD_NAMES = {'M': 'месяц', 'D': 'день', 'W': 'неделя'}
 
 class StochService:
     def __init__(self, company_dao: CompanyDAO = Depends(),
@@ -26,13 +25,11 @@ class StochService:
             st.stops
         )
 
-    def _fill_message(self, decision, companies, period):
+    def _fill_messages(self, decision, companies, period):
         if len(companies) == 0:
             return ''
 
-        period_str = 'месяц' if period == 'M' else 'день' if period == 'D' else 'неделя'
-
-        result = f'Акции {decision} ({period_str})!\n'
+        result = f'Акции {decision} ({PERIOD_NAMES[period]})!\n'
         for dec in companies:
             name = f'[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})'
             price_str = f' - цена: {round(dec.last_price, 2)}'
@@ -47,9 +44,16 @@ class StochService:
 
         return result
 
+
     async def get_stochs(self, period: str = 'ALL', is_cron: bool = False,
                          send_messages: bool = True, send_test: bool = False):
         companies = await self.company_dao.get_all_companies()
+
+        # decisions = []
+        # for st in companies:
+        #     print(f'{st.tiker} - {period}')
+        #     des = await self._fetch_stoch_decisions(st, period)
+        #     decisions.append(des)
         des_futures = [self._fetch_stoch_decisions(st, period) for st in companies]
         decisions = await asyncio.gather(*des_futures)
 
@@ -63,14 +67,14 @@ class StochService:
             for per in result.keys():
                 send_tasks = [
                     send_tg_message(
-                        self._fill_message("продавать", result[per].setdefault('SELL', []), per)),
+                        self._fill_messages("продавать", result[per].setdefault('SELL', []), per)),
                     send_tg_message(
-                        self._fill_message("покупать", result[per].setdefault('BUY', []), per))
+                        self._fill_messages("покупать", result[per].setdefault('BUY', []), per))
                 ]
                 if send_test:
                     send_tasks.append(
                         send_tg_message(
-                            self._fill_message("тест", result[per].setdefault('RELAX', []), per)))
+                            self._fill_messages("тест", result[per].setdefault('RELAX', []), per)))
 
                 await asyncio.gather(*send_tasks)
 
@@ -86,34 +90,9 @@ class StochService:
         )
 
         if send_messages:
-            message = f""" Акции {tiker}
-                Вывод: {decision_model[period].decision.name}
-                """
-            await send_tg_message(message)
+            for per in decision_model.keys():
+                name = f'[{tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={tiker})'
+                message = f'Акции {name} ({PERIOD_NAMES[per]}) - {decision_model[per].decision.name}'
+                await send_tg_message(message)
 
         return decision_model
-
-
-    # def sync_function(self, tiker:str):
-    #     time.sleep(1)
-    #     return StochDecisionModel(
-    #         decision=StochDecisionEnum.RELAX,
-    #         tiker=tiker
-    #     )
-    # async def _get_decision_test(self, tiker, semaphore):
-    #     async with semaphore:
-    #         with concurrent.futures.ThreadPoolExecutor() as executor:
-    #             result = await asyncio.get_event_loop().run_in_executor(executor, lambda: self.sync_function(tiker))
-    #             return result
-    #
-    #
-    # async def get_stochs_test(self) -> StochDecisionModel:
-    #     print(f"\nstarted at {time.strftime('%X')}")
-    #
-    #     semaphore = asyncio.Semaphore(2)  # Ограничение на количество одновременных потоков
-    #     tasks = [self._get_decision_test(f'{_}', semaphore) for _ in range(10)]
-    #     results = await asyncio.gather(*tasks)
-    #
-    #     print(f"finished at {time.strftime('%X')}")
-    #     return results
-
