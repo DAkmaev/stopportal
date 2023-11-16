@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 
-from backend.db.models.companies import StrategyModel
+from backend.db.models.companies import StrategyModel, CompanyModel
 
 
 class StrategiesDAO:
@@ -88,3 +88,102 @@ class StrategiesDAO:
         strategy.description = description
         self.session.add(strategy)
         return strategy
+
+    # COMPANY
+    async def add_strategy_to_company(self, company_id: int, strategy_id: int) -> CompanyModel:
+        """
+        Add strategy to company.
+        :param strategy_id:
+        :param company_id:
+        """
+        company = await self.session.get(CompanyModel, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Компания не найдена")
+
+        strategy = await self.session.get(StrategyModel, strategy_id)
+        if not strategy:
+            raise HTTPException(status_code=404, detail="Стратегия не найдена")
+
+        if strategy in company.strategies:
+            raise HTTPException(status_code=400, detail="Стратегия уже добавлена")
+
+        company.strategies.append(strategy)
+        return company
+
+    async def update_strategies_in_company(self, company_id: int,
+                                           strategy_ids: List[int]) -> CompanyModel:
+        """
+        Update strategies in company.
+        :param company_id:
+        :param strategy_ids: List of strategy IDs to replace in the company
+        """
+        company = await self.session.get(CompanyModel, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Компания не найдена")
+
+        strategies = []
+        for strategy_id in strategy_ids:
+            strategy = await self.session.get(StrategyModel, strategy_id)
+            if not strategy:
+                raise HTTPException(status_code=404,
+                                    detail=f"Стратегия с ID {strategy_id} не найдена")
+            strategies.append(strategy)
+
+        # Замена списка стратегий в компании на новый список по переданным ID
+        company.strategies = strategies
+
+        return company
+
+    async def remove_strategy_from_company(self, company_id: int,
+                                           strategy_id: int) -> CompanyModel:
+        """
+        Remove strategy from company.
+        :param company_id:
+        :param strategy_id: ID of the strategy to remove from the company
+        """
+        company = await self.session.get(CompanyModel, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Компания не найдена")
+
+        strategy_to_remove = None
+        for strategy in company.strategies:
+            if strategy.id == strategy_id:
+                strategy_to_remove = strategy
+                break
+
+        if strategy_to_remove:
+            company.strategies.remove(strategy_to_remove)
+        else:
+            raise HTTPException(status_code=404,
+                                detail=f"Стратегия с ID {strategy_id} не найдена в компании")
+
+        return company
+
+    # async def update_company_stop(self, company_id: int, stop_data: dict) -> CompanyStopModel:
+    #     stop_id = stop_data.get("id")
+    #     if stop_id:
+    #         stop = await self.get_company_stop_model(stop_id)
+    #         if stop:
+    #             for field, value in stop_data.items():
+    #                 setattr(stop, field, value)
+    #             return stop
+    #
+    #     # If stop_id is not provided or stop with given id is not found, create a new stop
+    #     stop = CompanyStopModel(**stop_data, company_id=company_id)
+    #     self.session.add(stop)
+    #     return stop
+    #
+    async def delete_company_stop_model(self, stop_id: int, company_id: int) -> None:
+        """
+        Delete company_stop in session.
+        :param company_id:
+        :param stop_id:
+        """
+        stop = await self.session.get(CompanyStopModel, stop_id)
+        if not stop:
+            raise HTTPException(status_code=404, detail="Стоп не найден")
+
+        if stop.company_id != company_id:
+            raise HTTPException(status_code=400, detail="Стоп id не от данной акции")
+
+        await self.session.delete(stop)

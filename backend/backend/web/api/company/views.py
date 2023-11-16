@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.company_stops import CompanyStopsDAO
+from backend.db.dao.strategies import StrategiesDAO
 from backend.db.models.companies import CompanyModel
 from backend.web.api.company.scheme import (
     CompanyModelDTO,
@@ -172,3 +173,52 @@ async def delete_company_stop_model(
     """
 
     await dao.delete_company_stop_model(stop_id, company_id)
+
+
+# Strategy
+@router.post("/{company_id}/strategies/{strategy_id}")
+async def add_strategy_to_company_model(
+    company_id: int,
+    strategy_id: int,
+    dao: StrategiesDAO = Depends(),
+) -> None:
+    """
+    Creates strategy model in the database.
+
+    :param new_strategy_object: new strategy model item.
+    :param dao: DAO for strategy models.
+    """
+    company = await dao.add_strategy_to_company(company_id, strategy_id)
+    return company
+
+
+@router.put("/{company_id}/strategies/")
+async def update_strategies_in_company(
+    company_id: int,
+    strategies_ids: List[int],
+    dao: StrategiesDAO = Depends(),
+) -> None:
+    """
+    Creates strategy model in the database.
+
+    :param strategies_ids:
+    :param company_id:
+    :param dao: DAO for strategy models.
+    """
+    company = await dao.update_strategies_in_company(company_id, strategies_ids)
+    return company
+
+@router.delete("/{company_id}/strategies/{strategy_id}", status_code=204)
+async def remove_company_strategy(
+    strategy_id: int,
+    company_id: int,
+    dao: StrategiesDAO = Depends(),
+) -> None:
+    """
+    Delete strategy from company.
+    :param strategy_id:
+    :param company_id:
+
+    """
+
+    await dao.remove_strategy_from_company(company_id, strategy_id)
