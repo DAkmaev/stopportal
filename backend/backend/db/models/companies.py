@@ -25,13 +25,13 @@ class CompanyModel(Base):
     name: Mapped[str] = mapped_column(String, index=True, unique=True, nullable=True)
     tiker: Mapped[str] = mapped_column(String, index=True, unique=True)
     type: Mapped[str] = mapped_column(String, default='MOEX', nullable=True)
-    stops: Mapped[List["CompanyStopModel"]] = relationship(lazy="selectin", cascade="all,delete")
+    stops: Mapped[List["StopModel"]] = relationship(lazy="selectin", cascade="all,delete")
     strategies: Mapped[List["StrategyModel"]] = relationship(
         secondary=association_table, back_populates="companies", lazy="selectin"
     )
 
 
-class CompanyStopModel(Base):
+class StopModel(Base):
     __tablename__ = "companies_stop"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     period: Mapped[str] = mapped_column(String)

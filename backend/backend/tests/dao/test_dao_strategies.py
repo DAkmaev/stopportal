@@ -123,18 +123,16 @@ async def test_get_all_strategies_model(
     for name, description in zip(strategy_names, strategy_descriptions):
         await strategies_dao.create_strategy_model(name=name, description=description)
 
-    # Получаем все стратегии с ограничением и смещением
-    limit = 2
-    offset = 1
-    retrieved_strategies = await strategies_dao.get_all_strategies_model(limit=limit, offset=offset)
+    # Получаем все стратегии
+    retrieved_strategies = await strategies_dao.get_all_strategies_model()
 
     # Проверяем, что количество полученных стратегий соответствует ограничению
-    assert len(retrieved_strategies) == limit
+    assert len(retrieved_strategies) == len(strategy_names)
 
     # Проверяем, что данные стратегий соответствуют ожидаемым
     for index, strategy in enumerate(retrieved_strategies):
-        expected_name = strategy_names[index + offset]
-        expected_description = strategy_descriptions[index + offset]
+        expected_name = strategy_names[index]
+        expected_description = strategy_descriptions[index]
 
         assert strategy.name == expected_name
         assert strategy.description == expected_description

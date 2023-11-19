@@ -2,7 +2,8 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dao.companies import CompanyDAO
-from backend.db.dao.company_stops import CompanyStopsDAO
+from backend.db.dao.stops import StopsDAO
+from backend.db.dao.strategies import StrategiesDAO
 
 
 @pytest.mark.anyio
@@ -42,13 +43,15 @@ async def test_update_company_model(
     TIKER = "TEST_TIKER"
     NAME = "Test Company"
     NEW_NAME = "Updated Company"
-    STOP_PERIOD1 = "W"
-    STOP_VALUE1 = 100.0
-    STOP_PERIOD2 = "M"
-    STOP_VALUE2 = 200.0
+    STRATEGY_NAME1 = "Strategy1"
+    STRATEGY_DESCRIPTION1 = "Strategy Description 1"
+    STRATEGY_NAME2 = "Strategy2"
+    STRATEGY_DESCRIPTION2 = "Strategy Description 2"
+
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
+    company_stops_dao = StopsDAO(dbsession)
+    strategies_dao = StrategiesDAO(dbsession)
 
     # Create a new company
     await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
@@ -57,20 +60,23 @@ async def test_update_company_model(
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
     assert company.name == NAME
 
-    # Add two stop models for the company
-    await company_stops_dao.add_stop_model(company.id, STOP_PERIOD1, STOP_VALUE1)
-    await company_stops_dao.add_stop_model(company.id, STOP_PERIOD2, STOP_VALUE2)
+    # Add two strategies models for the company
+    await strategies_dao.create_strategy_model(STRATEGY_NAME1, STRATEGY_DESCRIPTION1)
+    await strategies_dao.create_strategy_model(STRATEGY_NAME2, STRATEGY_DESCRIPTION2)
 
-    # Retrieve the created company
+    # Retrieve the created company and strategies
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
-    assert len(company.stops) == 2
+    strategies = await strategies_dao.get_all_strategies_model()
+    assert company is not None
+    assert len(company.strategies) == 0
+    assert len(strategies) == 2
 
     # Update the company
     updated_fields = {
         "name": NEW_NAME,
-        "stops": [
-            {"period": "M", "value": 300.0, "id": 1},
-            {"period": "D", "value": 400.0}
+        "strategies": [
+            {"id": strategies[0].id},
+            {"id": strategies[1].id}
         ]
     }
     await company_dao.update_company_model(company.id, updated_fields, partial=True)
@@ -79,59 +85,13 @@ async def test_update_company_model(
     updated_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
     assert updated_company is not None
     assert updated_company.name == NEW_NAME
-    # assert len(updated_company.stops) == 1
-    # assert updated_company.stops[0].value == 300
+    assert len(updated_company.strategies) == 2
 
     # Clean up - delete the test company
     await company_dao.delete_company_model(updated_company.id)
+    for strategy in strategies:
+        await strategies_dao.delete_strategy_model(strategy.id)
 
-@pytest.mark.anyio
-async def test_update_company_model_null_values(
-    fastapi_app: FastAPI,
-    dbsession: AsyncSession,
-) -> None:
-    TIKER = "TEST_TIKER"
-    NAME = "Test Company"
-    NEW_NAME = "Updated Company"
-    STOP_PERIOD1 = "W"
-    STOP_VALUE1 = 100.0
-    STOP_PERIOD2 = "M"
-    # STOP_VALUE2 = 200.0
-
-    company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
-
-    # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
-
-    # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
-    assert company.name == NAME
-
-    # Add stop models for the company
-    await company_stops_dao.add_stop_model(company.id, STOP_PERIOD1, STOP_VALUE1)
-
-    # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
-    assert len(company.stops) == 1
-
-    # Update the company
-    stop = company.stops[0]
-    updated_fields = {
-        "stops": [
-            {"period": STOP_PERIOD1, "value": None, "id": stop.id},
-            {"period": STOP_PERIOD2, "value": None}
-        ]
-    }
-    await company_dao.update_company_model(company.id, updated_fields, partial=True)
-
-    # Verify the company was updated
-    updated_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
-    assert updated_company is not None
-    assert len(updated_company.stops) == 0
-
-    # Clean up - delete the test company
-    await company_dao.delete_company_model(updated_company.id)
 
 @pytest.mark.anyio
 async def test_update_company_model_not_found(

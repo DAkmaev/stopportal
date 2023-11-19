@@ -11,7 +11,7 @@ from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
 from backend.web.api.company.scheme import CompanyTypeEnum
-from backend.db.models.companies import CompanyStopModel
+from backend.db.models.companies import StopModel
 
 
 @dataclass
@@ -77,7 +77,7 @@ class StochCalculator:
         return StochDecision(decision=decision, df=stoch.df)
 
 
-    async def _calculate_decision(self, tiker: str, period: str, df: DataFrame, stop: CompanyStopModel | None, last_price: float):
+    async def _calculate_decision(self, tiker: str, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
         # для продажи проверяем границы и разворот для всех периодов
         per_decision = await self._get_period_decision(df, period)
 
@@ -119,7 +119,7 @@ class StochCalculator:
 
 
     async def get_stoch_decisions(
-            self, tiker: str, type: str, period: str, stops: List[CompanyStopModel] | None
+            self, tiker: str, type: str, period: str, stops: List[StopModel] | None
         ) -> dict[str, StochDecisionModel]:
         days_diff_month = 30 * 31
 

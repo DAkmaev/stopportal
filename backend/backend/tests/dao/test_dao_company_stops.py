@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.dao.companies import CompanyDAO
-from backend.db.dao.company_stops import CompanyStopsDAO
+from backend.db.dao.stops import StopsDAO
 
 
 @pytest.mark.anyio
@@ -17,7 +17,7 @@ async def test_add_stop_model(
     STOP_VALUE = 100.0
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
+    company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
     await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
@@ -50,7 +50,7 @@ async def test_delete_company_stop_model(
     STOP_VALUE = 100.0
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
+    company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
     await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
@@ -68,7 +68,7 @@ async def test_delete_company_stop_model(
     assert len(stop_models) == 1
 
     # Delete the stop
-    await company_stops_dao.delete_company_stop_model(stop_models[0].id, company.id)
+    await company_stops_dao.delete_company_stop_model(stop_models[0].id)
 
     # Verify the stop was deleted
     remaining_stops = await company_stops_dao.get_company_stop_model(stop_models[0].id)
@@ -89,7 +89,7 @@ async def test_get_company_stop_model(
     STOP_VALUE = 100.0
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
+    company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
     await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
@@ -127,7 +127,7 @@ async def test_update_company_stop_model(
     STOP_VALUE = 100.0
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
+    company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
     await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
@@ -171,7 +171,7 @@ async def test_get_company_stops_by_id(
     STOP_VALUE = 100.0
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = CompanyStopsDAO(dbsession)
+    company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
     await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")

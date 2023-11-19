@@ -3,13 +3,12 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.companies import CompanyDAO
-from backend.db.dao.company_stops import CompanyStopsDAO
 from backend.db.dao.strategies import StrategiesDAO
 from backend.db.models.companies import CompanyModel
 from backend.web.api.company.scheme import (
     CompanyModelDTO,
     CompanyModelInputDTO,
-    CompanyStopInputDTO, CompanyModelPatchDTO
+    CompanyModelPatchDTO
 )
 
 router = APIRouter()
@@ -29,6 +28,7 @@ async def get_company_models(
     :return: list of company objects from database.
     """
     return await company_dao.get_company_model(company_id)
+
 
 @router.get("/", response_model=List[CompanyModelDTO])
 async def get_company_models(
@@ -61,13 +61,9 @@ async def create_company_model(
     await company_dao.create_company_model(
         tiker=new_company_object.tiker,
         name=new_company_object.name if new_company_object.name else new_company_object.tiker,
-        type=new_company_object.type
+        type=new_company_object.type,
+        strategies=map(lambda i: i.id, new_company_object.strategies) if new_company_object.strategies else None
     )
-    if new_company_object.stops:
-        company = await company_dao.get_company_model_by_tiker(new_company_object.tiker)
-        for stop in new_company_object.stops:
-            await company_dao.add_stop_model(company_id=company.id, period=stop.period,
-                                             value=stop.value)
 
 
 @router.post("/batch")
@@ -129,23 +125,6 @@ async def update_company_model(
     )
 
 
-@router.post("/{company_id}/stop")
-async def add_company_stop_model(
-    new_stop: CompanyStopInputDTO,
-    company_id: int,
-    dao: CompanyStopsDAO = Depends(),
-) -> None:
-    """
-    Creates companies models in the database.
-
-    :param company_id:
-    :param new_stop:
-    :param company_dao: DAO for company models.
-    """
-
-    await dao.add_stop_model(company_id, period=new_stop.period, value=new_stop.value)
-
-
 @router.delete("/{company_id}", status_code=204)
 async def delete_company_model(
     company_id: int,
@@ -158,67 +137,3 @@ async def delete_company_model(
     """
 
     await company_dao.delete_company_model(company_id)
-
-
-@router.delete("/{company_id}/stop/{stop_id}", status_code=204)
-async def delete_company_stop_model(
-    stop_id: int,
-    company_id: int,
-    dao: CompanyStopsDAO = Depends(),
-) -> None:
-    """
-    Delete company model from the database.
-    :param stop_id:
-    :param company_dao:
-    """
-
-    await dao.delete_company_stop_model(stop_id, company_id)
-
-
-# Strategy
-@router.post("/{company_id}/strategies/{strategy_id}")
-async def add_strategy_to_company_model(
-    company_id: int,
-    strategy_id: int,
-    dao: StrategiesDAO = Depends(),
-) -> None:
-    """
-    Creates strategy model in the database.
-
-    :param new_strategy_object: new strategy model item.
-    :param dao: DAO for strategy models.
-    """
-    company = await dao.add_strategy_to_company(company_id, strategy_id)
-    return company
-
-
-@router.put("/{company_id}/strategies/")
-async def update_strategies_in_company(
-    company_id: int,
-    strategies_ids: List[int],
-    dao: StrategiesDAO = Depends(),
-) -> None:
-    """
-    Creates strategy model in the database.
-
-    :param strategies_ids:
-    :param company_id:
-    :param dao: DAO for strategy models.
-    """
-    company = await dao.update_strategies_in_company(company_id, strategies_ids)
-    return company
-
-@router.delete("/{company_id}/strategies/{strategy_id}", status_code=204)
-async def remove_company_strategy(
-    strategy_id: int,
-    company_id: int,
-    dao: StrategiesDAO = Depends(),
-) -> None:
-    """
-    Delete strategy from company.
-    :param strategy_id:
-    :param company_id:
-
-    """
-
-    await dao.remove_strategy_from_company(company_id, strategy_id)

@@ -176,46 +176,6 @@ async def test_delete_strategy_model(
     assert deleted_strategy is None
 
 
-@pytest.mark.anyio
-async def test_add_strategy_to_company(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    dbsession: AsyncSession,
-) -> None:
-    """Tests adding a strategy to a company."""
-    # Создаем компанию и стратегию для добавления
-    company_name = "Test Company"
-    company_tiker = "TIKER"
-    company_type = "MOEX"
-    strategy_name = "Test Strategy"
-    company_dao = CompanyDAO(dbsession)
-    strategies_dao = StrategiesDAO(dbsession)
-
-    await company_dao.create_company_model(name=company_name, tiker=company_tiker, type=company_type)
-    await strategies_dao.create_strategy_model(name=strategy_name, description="Test description")
-
-    # Получаем созданную компанию и стратегию
-    retrieved_company = await company_dao.get_company_model_by_tiker(company_tiker)
-    retrieved_strategy = await strategies_dao.get_strategy_model_by_name(strategy_name)
-
-    assert retrieved_company is not None
-    assert retrieved_strategy is not None
-
-    # Отправляем POST-запрос для добавления стратегии к компании
-    url = fastapi_app.url_path_for("add_strategy_to_company_model", company_id=retrieved_company.id, strategy_id=retrieved_strategy.id)
-    response = await client.post(url)
-
-    # Проверяем успешный ответ и добавление стратегии к компании в базе данных
-    assert response.status_code == status.HTTP_200_OK
-    updated_company = await company_dao.get_company_model(retrieved_company.id)
-    assert updated_company is not None
-    assert retrieved_strategy in updated_company.strategies
-
-    # Удаляем созданные компанию и стратегию после теста
-    await company_dao.delete_company_model(updated_company.id)
-    await strategies_dao.delete_strategy_model(retrieved_strategy.id)
-
-
 async def test_update_strategies_in_company(
     fastapi_app: FastAPI,
     client: AsyncClient,
@@ -244,62 +204,60 @@ async def test_update_strategies_in_company(
     assert retrieved_company is not None
     assert all(strategy is not None for strategy in retrieved_strategies)
 
-    # Формируем список ID стратегий для обновления компании
-    strategy_ids = [strategy.id for strategy in retrieved_strategies]
 
-    # Отправляем PUT-запрос для обновления списка стратегий у компании
-    url = fastapi_app.url_path_for("update_strategies_in_company", company_id=retrieved_company.id)
-    response = await client.put(url, json=strategy_ids)
+    # Отправляем PATCH-запрос для обновления списка стратегий у компании
+    url = fastapi_app.url_path_for("partial_update_company_model", company_id=retrieved_company.id)
+    response = await client.patch(
+        url, json={
+            "strategies": [
+                {"id": retrieved_strategies[0].id},
+                {"id": retrieved_strategies[1].id},
+                {"id": retrieved_strategies[2].id}
+            ]
+        },
+    )
 
     # Проверяем успешный ответ и обновление списка стратегий компании в базе данных
     assert response.status_code == status.HTTP_200_OK
     updated_company = await company_dao.get_company_model(retrieved_company.id)
     assert updated_company is not None
-    assert len(updated_company.strategies) == len(strategy_ids)
+    assert len(updated_company.strategies) == 3
+
+    # Пробуем оставить одну стратегию
+    # Отправляем PATCH-запрос для обновления списка стратегий у компании
+    url = fastapi_app.url_path_for("partial_update_company_model",
+                                   company_id=retrieved_company.id)
+    response = await client.patch(
+        url, json={
+            "strategies": [
+                {"id": retrieved_strategies[1].id}
+            ]
+        },
+    )
+
+    # Проверяем успешный ответ и обновление списка стратегий компании в базе данных
+    assert response.status_code == status.HTTP_200_OK
+    updated_company = await company_dao.get_company_model(retrieved_company.id)
+    assert len(updated_company.strategies) == 1
+    assert updated_company.strategies[0].name == strategy_names[1]
+
+    # Пробуем удалить все стратегии
+    # Отправляем PATCH-запрос для обновления списка стратегий у компании
+    url = fastapi_app.url_path_for("partial_update_company_model",
+                                   company_id=retrieved_company.id)
+    response = await client.patch(
+        url, json={
+            "strategies": []
+        },
+    )
+
+    # Проверяем успешный ответ и обновление списка стратегий компании в базе данных
+    assert response.status_code == status.HTTP_200_OK
+    updated_company = await company_dao.get_company_model(retrieved_company.id)
+    assert len(updated_company.strategies) == 0
 
     # Удаляем созданные компанию и стратегии после теста
     await company_dao.delete_company_model(updated_company.id)
     for strategy in retrieved_strategies:
         await strategies_dao.delete_strategy_model(strategy.id)
 
-
-async def test_remove_strategy_from_company(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    dbsession: AsyncSession,
-) -> None:
-    """Tests removing a strategy from a company."""
-    # Создаем компанию и стратегию для добавления и последующего удаления
-    company_name = "Test Company"
-    company_ticker = "TIKER"
-    company_type = "MOEX"
-    strategy_name = "Test Strategy"
-    company_dao = CompanyDAO(dbsession)
-    strategies_dao = StrategiesDAO(dbsession)
-
-    await company_dao.create_company_model(name=company_name, tiker=company_ticker, type=company_type)
-    await strategies_dao.create_strategy_model(name=strategy_name, description="Test description")
-
-    # Получаем созданную компанию и стратегию
-    retrieved_company = await company_dao.get_company_model_by_tiker(company_ticker)
-    retrieved_strategy = await strategies_dao.get_strategy_model_by_name(strategy_name)
-
-    assert retrieved_company is not None
-    assert retrieved_strategy is not None
-
-    # Добавляем стратегию к компании
-    await strategies_dao.add_strategy_to_company(retrieved_company.id, retrieved_strategy.id)
-
-    # Отправляем DELETE-запрос для удаления стратегии из компании
-    url = fastapi_app.url_path_for("remove_company_strategy", company_id=retrieved_company.id, strategy_id=retrieved_strategy.id)
-    response = await client.delete(url)
-
-    # Проверяем успешный ответ и удаление стратегии из списка компании в базе данных
-    assert response.status_code == status.HTTP_204_NO_CONTENT
-    updated_company = await company_dao.get_company_model(retrieved_company.id)
-    assert updated_company is not None
-    assert retrieved_strategy not in updated_company.strategies
-
-    # Удаляем созданные компанию и стратегию после теста
-    await company_dao.delete_company_model(updated_company.id)
-    await strategies_dao.delete_strategy_model(retrieved_strategy.id)

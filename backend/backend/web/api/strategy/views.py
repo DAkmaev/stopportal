@@ -22,8 +22,6 @@ async def get_strategy_model(
 
 @router.get("/", response_model=List[StrategiesDTO])
 async def get_strategy_models(
-    limit: int = 100,
-    offset: int = 0,
     dao: StrategiesDAO = Depends(),
 ) -> List[StrategyModel]:
     """
@@ -34,7 +32,7 @@ async def get_strategy_models(
     :param offset: offset of company objects, defaults to 0.
     :return: list of strategies objects from database.
     """
-    return await dao.get_all_strategies_model(limit=limit, offset=offset)
+    return await dao.get_all_strategies_model()
 
 
 @router.post("/")
