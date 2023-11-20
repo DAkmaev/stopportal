@@ -45,10 +45,10 @@ export default [
     component: () => import(`@/components/catalogs/CatalogSimple`),
     props: { type: 'otrasli' }
   }, {
-    path: '/catalogs/strategii',
-    name: 'catalogStrategii',
-    component: () => import(`@/components/catalogs/CatalogSimple`),
-    props: { type: 'strategii' }
+    path: '/catalogs/strategies',
+    name: 'strategies',
+    component: () => import(`@/components/catalogs/Strategies`),
+    props: { type: 'strategies' }
   }, {
     path: '/catalogs/coefficients',
     name: 'coefficients',

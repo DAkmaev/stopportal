@@ -16,7 +16,7 @@
       <v-data-table
         dense
         :items="list"
-        :items-per-page="50"
+        :items-per-page="100"
         :headers="headers"
         item-key="name"
         :disable-pagination="true"
@@ -30,6 +30,9 @@
         </template>
         <template v-slot:item.tiker="{ item }">
           <div @click="handleEdit(item)">{{ item.tiker }}</div>
+        </template>
+        <template v-slot:item.strategies="{ item }">
+          <div>{{ item.strategies.map(s => s.name).join(', ') }}</div>
         </template>
         <template v-slot:item.has_mos_index="{ item }">
           <v-icon v-if="item.has_mos_index" color="primary">mdi-check</v-icon>
@@ -72,7 +75,7 @@
 <script>
 import {
   getData,
-  // getCategoriesSimple, getStrategies, getStrategies,
+  // getCategoriesSimple,
   endpoints
 } from '@/api/invmos-back'
 // import { getDividends } from '@/api/open-broker'
@@ -89,7 +92,6 @@ export default {
       priceSynchronizer: new PriceSynchronizer(),
       list: [],
       otrasli: [],
-      strategies: [],
       dialog: false,
       dialogStops: false,
       dialogMode: '',
@@ -107,11 +109,11 @@ export default {
         //   align: 'start',
         //   value: 'otrasl'
         // },
-        // {
-        //   text: 'Стратегии',
-        //   align: 'start',
-        //   value: 'strategies_str_names'
-        // },
+        {
+          text: 'Стратегии',
+          align: 'start',
+          value: 'strategies'
+        },
         {
           text: 'Тикер',
           align: 'start',
@@ -151,18 +153,16 @@ export default {
   },
   methods: {
     fetchList() {
-      // getStrategies().then(strategies => {
-      //   this.strategies = strategies
-      // })
       // getCategoriesSimple('otrasli').then(otrasli => {
       //   this.otrasli = otrasli
       // })
-      getData(endpoints.COMPANIES).then(data => {
-        this.list = data
+      getData(endpoints.COMPANIES, { limit: 500, offset: 0 }).then(data => {
+        this.$set(this, 'list', data)
       })
     },
     handleAdd() {
       this.dialogMode = 'add'
+      this.editData = {}
       this.dialog = true
     },
     handleEdit(item) {
@@ -180,6 +180,9 @@ export default {
     },
     handleSaveStopsDialog() {
       this.dialogStops = false
+      this.$nextTick(() => {
+        this.fetchList()
+      })
       this.fetchList()
     },
     handleStoch() {

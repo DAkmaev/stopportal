@@ -40,31 +40,31 @@
               <!--                    />-->
               <!--                  </v-col>-->
             </v-row>
-            <!--                <v-row>-->
-            <!--                  <v-col cols="12" sm="6" md="6">-->
-            <!--                    <v-autocomplete-->
-            <!--                      v-model="temp.otrasl_id"-->
-            <!--                      no-data-text="Нет данных"-->
-            <!--                      label="Выберите отрасль"-->
-            <!--                      :items="otrasli"-->
-            <!--                      item-text="name"-->
-            <!--                      item-value="id"-->
-            <!--                      clearable-->
-            <!--                    />-->
-            <!--                  </v-col>-->
-            <!--                  <v-col cols="12" sm="6" md="6">-->
-            <!--                    <v-autocomplete-->
-            <!--                      v-model="temp.strategies_ids"-->
-            <!--                      no-data-text="Нет данных"-->
-            <!--                      label="Выберите стратегии"-->
-            <!--                      :items="strategies"-->
-            <!--                      item-text="name"-->
-            <!--                      item-value="id"-->
-            <!--                      multiple-->
-            <!--                      clearable-->
-            <!--                    />-->
-            <!--                  </v-col>-->
-            <!--                </v-row>-->
+            <v-row>
+              <!--                  <v-col cols="12" sm="6" md="6">-->
+              <!--                    <v-autocomplete-->
+              <!--                      v-model="temp.otrasl_id"-->
+              <!--                      no-data-text="Нет данных"-->
+              <!--                      label="Выберите отрасль"-->
+              <!--                      :items="otrasli"-->
+              <!--                      item-text="name"-->
+              <!--                      item-value="id"-->
+              <!--                      clearable-->
+              <!--                    />-->
+              <!--                  </v-col>-->
+              <v-col cols="12" sm="6" md="6">
+                <v-autocomplete
+                  v-model="temp.strategies_ids"
+                  no-data-text="Нет данных"
+                  label="Выберите стратегии"
+                  :items="strategies"
+                  item-text="name"
+                  item-value="id"
+                  multiple
+                  clearable
+                />
+              </v-col>
+            </v-row>
             <v-card-actions>
               <v-spacer />
               <v-btn text color="warning" @click="handleDelete">Удалить</v-btn>
@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import { deleteData, endpoints, postData, putData } from '@/api/invmos-back'
+import { deleteData, getStrategies, endpoints, postData, putData } from '@/api/invmos-back'
 
 export default {
   name: 'CompanyDialog',
@@ -105,6 +105,7 @@ export default {
   data() {
     return {
       valid: true,
+      strategies: [],
       dialogModes: {
         add: 'Добавить компанию',
         edit: 'Редактировать компанию'
@@ -117,6 +118,7 @@ export default {
         tiker: '',
         has_mos_index: true,
         strategies_ids: [],
+        strategies: [],
         otrasl_id: undefined,
         currency: 'RUB'
       },
@@ -140,10 +142,22 @@ export default {
       this.resetTemp()
       if (this.editData) {
         this.temp = Object.assign({}, this.editData)
+        this.temp.strategies_ids = this.editData.strategies.map(s => s.id)
       }
     }
   },
+  created() {
+    this.fetchStrategies()
+  },
   methods: {
+    fetchStrategies() {
+      getStrategies().then(strategies => {
+        this.strategies = strategies
+      })
+    },
+    fillStrategies() {
+      this.temp.strategies = this.strategies.filter(strategy => this.temp.strategies_ids.includes(strategy.id))
+    },
     resetTemp() {
       this.temp = {
         id: undefined,
@@ -152,11 +166,13 @@ export default {
         tiker: '',
         has_mos_index: true,
         strategies_ids: [],
+        strategies: [],
         otrasl_id: undefined,
         currency: 'RUB'
       }
     },
     saveItem() {
+      this.fillStrategies()
       if (this.dialogMode === 'add') this.addItem()
       else this.editItem()
     },

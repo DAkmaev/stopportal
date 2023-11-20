@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.stops import StopsDAO
-from backend.web.api.stop.scheme import StopInputDTO
+from backend.web.api.stop.scheme import StopInputDTO, StopDTO
 
 router = APIRouter()
 
 
 @router.post("/")
-async def add_company_stop_model(
+async def add_stop_model(
     new_stop: StopInputDTO,
     dao: StopsDAO = Depends(),
 ) -> None:
@@ -23,7 +23,7 @@ async def add_company_stop_model(
 
 
 @router.delete("/{stop_id}", status_code=204)
-async def delete_company_stop_model(
+async def delete_stop_model(
     stop_id: int,
     dao: StopsDAO = Depends(),
 ) -> None:
@@ -33,5 +33,18 @@ async def delete_company_stop_model(
     :param stop_id:
     """
 
-    await dao.delete_company_stop_model(stop_id)
+    await dao.delete_stop_model(stop_id)
+
+
+@router.put("/")
+async def update_stop_model(
+    updated_stop: StopDTO,
+    dao: StopsDAO = Depends(),
+) -> None:
+    """
+    Update company model from the database.
+    :param dao:
+    """
+
+    await dao.update_stop_model(updated_stop.model_dump())
 
