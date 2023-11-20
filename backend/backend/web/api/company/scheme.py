@@ -3,20 +3,20 @@ from typing import Optional, List
 from pydantic import BaseModel
 from enum import Enum
 
+from backend.web.api.stop.scheme import StopInputDTO, StopDTO
+
 
 class CompanyTypeEnum(str, Enum):
     MOEX = 'MOEX'
     YAHOO = 'YAHOO'
 
 
-class CompanyStopInputDTO(BaseModel):
-    id: Optional[int] = None
-    period: str
-    value: Optional[float] = None
-
-
-class CompanyStopDTO(CompanyStopInputDTO):
+class StrategiesInputDTO(BaseModel):
     id: int
+
+
+class StrategiesDTO(StrategiesInputDTO):
+    name: str
 
 
 class CompanyModelDTO(BaseModel):
@@ -27,7 +27,8 @@ class CompanyModelDTO(BaseModel):
     tiker: str
     name: Optional[str] = None
     type: CompanyTypeEnum
-    stops: Optional[List[CompanyStopDTO]]
+    stops: Optional[List[StopDTO]]
+    strategies: Optional[List[StrategiesDTO]]
 
 
 class CompanyModelInputDTO(BaseModel):
@@ -36,7 +37,7 @@ class CompanyModelInputDTO(BaseModel):
     tiker: str
     name: Optional[str] = None
     type: Optional[CompanyTypeEnum] = CompanyTypeEnum.MOEX
-    stops: Optional[List[CompanyStopInputDTO]] = []
+    strategies: Optional[List[StrategiesInputDTO]] = []
 
 
 class CompanyModelPatchDTO(CompanyModelInputDTO):
@@ -44,6 +45,6 @@ class CompanyModelPatchDTO(CompanyModelInputDTO):
 
     tiker: Optional[str] = None
     type: Optional[CompanyTypeEnum] = None
-    stops: Optional[List[CompanyStopInputDTO]] = None
+    strategies: Optional[List[StrategiesInputDTO]] = []
 
 

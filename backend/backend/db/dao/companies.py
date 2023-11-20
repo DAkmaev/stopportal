@@ -4,7 +4,9 @@ from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 from typing import List, Optional, Type
 
-from backend.db.models.companies import CompanyModel, CompanyStopModel
+from backend.db.models.companies import CompanyModel, StopModel, StrategyModel
+from backend.db.dao.stops import StopsDAO
+from backend.db.dao.strategies import StrategiesDAO
 
 
 class CompanyDAO:
@@ -12,8 +14,10 @@ class CompanyDAO:
 
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
+        self.stop_dao = StopsDAO(session)
+        self.strategy_dao = StrategiesDAO(session)
 
-    async def create_company_model(self, tiker: str, name: str, type: str) -> CompanyModel:
+    async def create_company_model(self, tiker: str, name: str, type: str, strategies: list[int] = None) -> CompanyModel:
         """
         Add single company to session.
 
@@ -28,7 +32,8 @@ class CompanyDAO:
 
         if exist_company:
             raise HTTPException(status_code=400,
-                                detail=f"Тикер {exist_company.tiker} уже существует")
+                                detail=f"Компания {exist_company.tiker} уже существует")
+
 
         company = CompanyModel(tiker=tiker, name=name, type=type)
         self.session.add(company)
@@ -55,45 +60,31 @@ class CompanyDAO:
 
         self.session.add_all(items)
 
-    async def update_company_model(self, company_id: int, updated_fields: dict,
-                                   partial: bool = False) -> CompanyModel:
+    async def update_company_model(
+        self, company_id: int, updated_fields: dict, partial: bool = False
+    ) -> CompanyModel:
         """
-        Add single update company to session.
-
+        Update company model in the session.
         """
         company = await self.get_company_model(company_id)
 
         if not company:
             raise HTTPException(status_code=404, detail="Компания не найдена")
 
-        stops_data = updated_fields.pop("stops", None)  # Extract stops data if present
+        # Extract Strategies data if present and handle updates
+        strategies_data = updated_fields.pop("strategies", None)
+        if strategies_data is not None:
+            updated_strategies_ids = {strategy['id'] for strategy in
+                                      strategies_data}
+            company.strategies = [
+                await self.strategy_dao.get_strategy_model(strategy_id)
+                for strategy_id in updated_strategies_ids
+            ]
+
+        # Update other fields if specified and allowed
         for field, value in updated_fields.items():
             if not partial or (hasattr(company, field) and value is not None):
                 setattr(company, field, value)
-
-        # Collect the IDs of updated stops
-        updated_stop_ids = set()
-        if stops_data != None:
-            # Update the stops for the company
-            updated_stops = []
-            for stop_data in stops_data:
-                if 'id' in stop_data and stop_data['id'] is not None:
-                    if stop_data['value'] is not None:
-                        stop = await self.update_company_stop(company_id, stop_data)
-                        updated_stops.append(stop)
-                        updated_stop_ids.add(stop.id)
-
-                elif stop_data['value'] is not None:
-                    stop = await self.add_stop_model(company_id, stop_data['period'], stop_data['value'])
-                    updated_stops.append(stop)
-                    updated_stop_ids.add(stop.id)
-
-            # Remove stops that are not in updated_stops
-            stops_to_remove = [stop for stop in company.stops if stop.id not in updated_stop_ids and stop.id is not None ]
-            for stop in stops_to_remove:
-                await self.session.delete(stop)
-
-            company.stops = updated_stops
 
         return company
 
@@ -149,19 +140,6 @@ class CompanyDAO:
 
         return company.scalars().one_or_none()
 
-    async def get_company_stop_model(self, id: int) -> CompanyStopModel:
-        """
-        Get company stop models by id.
-
-        :param id: company stop id.
-        :return: company.
-        """
-        company = await self.session.execute(
-            select(CompanyStopModel).where(CompanyStopModel.id == id)
-        )
-
-        return company.scalars().one_or_none()
-
     async def filter(
         self,
         tiker: Optional[str] = None,
@@ -177,50 +155,3 @@ class CompanyDAO:
             query = query.where(CompanyModel.tiker == tiker)
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
-
-
-    # Company Stops
-    async def add_stop_model(self, company_id: int, period: str, value: float) -> CompanyStopModel:
-        """
-        Add stop to company.
-
-        :param value:
-        :param period:
-        :param company_id:
-        """
-        company = await self.session.get(CompanyModel, company_id)
-        if not company:
-            raise HTTPException(status_code=404, detail="Акция не найдена")
-
-        stop = CompanyStopModel(period=period, value=value)
-        company.stops.append(stop)
-        return stop
-
-    async def update_company_stop(self, company_id: int, stop_data: dict) -> CompanyStopModel:
-        stop_id = stop_data.get("id")
-        if stop_id:
-            stop = await self.get_company_stop_model(stop_id)
-            if stop:
-                for field, value in stop_data.items():
-                    setattr(stop, field, value)
-                return stop
-
-        # If stop_id is not provided or stop with given id is not found, create a new stop
-        stop = CompanyStopModel(**stop_data, company_id=company_id)
-        self.session.add(stop)
-        return stop
-
-    async def delete_company_stop_model(self, stop_id: int, company_id: int) -> None:
-        """
-        Delete company_stop in session.
-        :param company_id:
-        :param stop_id:
-        """
-        stop = await self.session.get(CompanyStopModel, stop_id)
-        if not stop:
-            raise HTTPException(status_code=404, detail="Стоп не найден")
-
-        if stop.company_id != company_id:
-            raise HTTPException(status_code=400, detail="Стоп id не от данной акции")
-
-        await self.session.delete(stop)

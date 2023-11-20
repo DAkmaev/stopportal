@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import { endpoints, patchData } from '@/api/invmos-back'
+import { endpoints, postData, deleteData, putData } from '@/api/invmos-back'
 
 export default {
   name: 'CompanyStops',
@@ -85,29 +85,61 @@ export default {
       this.$emit('closed-stops')
     },
     saveStops() {
-      const stops = Object.keys(this.temp).map(period => ({
-        id: this.temp[period].id,
-        value: this.temp[period].value,
-        period
-      }))
+      const stops_remove_ids = this.stops
+        .filter(stop => this.temp[stop.period] && this.temp[stop.period].value === null)
+        .map(stop => stop.id)
 
-      patchData(endpoints.COMPANIES + this.companyId, { 'stops': stops }, false)
-        .then(() => {
-          this.$emit('changed-company-stops')
-        })
+      const stops_new = Object.keys(this.temp)
+        .filter(period => !this.stops.some(stop => stop.period === period) && this.temp[period].value !== null)
+        .map(period => ({
+          'company_id': this.companyId,
+          'period': period,
+          'value': this.temp[period].value
+        }))
+
+      const stops_updated = Object.keys(this.temp)
+        .filter(period => this.stops.some(stop => stop.period === period && this.temp[period].value !== null))
+        .map(period => ({
+          'id': this.temp[period].id,
+          'company_id': this.companyId,
+          'period': period,
+          'value': this.temp[period].value
+        }))
+
+      const tasks = []
+      stops_remove_ids.forEach(id => {
+        tasks.push(deleteData(endpoints.STOPS + id))
+      })
+
+      stops_new.forEach(s => {
+        tasks.push(postData(endpoints.STOPS, s))
+      })
+
+      stops_updated.forEach(s => {
+        tasks.push(putData(endpoints.STOPS, s))
+      })
+
+      Promise.all(tasks)
+        .then(this.$emit('changed-company-stops'))
         .catch(err => {
           console.error(err)
         })
-      // const diffValues = Object.keys(this.temp).filter(period => {
-      //   const existStop = this.stops.find(s => s.period === period)
-      //   const newStopValue = this.temp[period].value
-      //   return !!newStopValue && !existStop || existStop && existStop.value !== newStopValue
-      // })
-      // const diffValues = this.stops.filter(s => {
-      //   const editValue = this.temp[s.period].value
-      //   return editValue !== null && s.value !== null && editValue !== s.value
-      // })
-      // console.log(diffValues)
+      // patchData(endpoints.COMPANIES + this.companyId, { 'stops': stops }, false)
+      //     .then(() => {
+      //       this.$emit('changed-company-stops')
+      //     })
+      //     .catch(err => {
+      //       console.error(err)
+      //     })
+
+      // const stops_updated = Object.keys(this.temp)
+      //     .filter(period => this.stops.some(stop => stop.period === period && this.temp[period].value !== null))
+      //     .map(period => ({
+      //       "id": this.temp[period].id,
+      //       "company_id": this.companyId,
+      //       "period": period,
+      //       "value": this.temp[period].value
+      //     }));
     }
   }
 }

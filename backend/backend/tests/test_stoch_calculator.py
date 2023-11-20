@@ -5,7 +5,7 @@ import pandas as pd
 
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
-from backend.db.models.companies import CompanyStopModel
+from backend.db.models.companies import StopModel
 
 from unittest.mock import patch
 
@@ -45,7 +45,7 @@ async def test_calculate_decision(sample_dataframe):
     tiker = 'LKOH'
     period = 'D'
     last_price = 130.0
-    stop = CompanyStopModel(period='D', value=120.0)
+    stop = StopModel(period='D', value=120.0)
 
     decision = await calculator._calculate_decision(tiker, period, sample_dataframe,
                                                     stop, last_price)
@@ -80,7 +80,7 @@ async def test_get_stoch_decisions_with_stop(sample_dataframe):
     tiker = 'LKOH'
     tiker_type = 'MOEX'
     period = 'D'
-    stop = CompanyStopModel(period='D', value=120.0)
+    stop = StopModel(period='D', value=120.0)
 
     # Mock the mreader.get_company_history_async to return sample_dataframe
     with patch('backend.utils.moex.moex_reader.MoexReader.get_company_history_async') as mock_method:

@@ -1,17 +1,18 @@
 const Menu = [
-  // {
-  //   icon: 'mdi-file-tree',
-  //   'icon-alt': 'mdi-file-tree',
-  //   title: 'Справочники',
-  //   model: false,
-  //   children: [
-  //     { title: 'Статьи баланса', name: 'catalogBalance' },
-  //     { title: 'Статьи ПиУ', name: 'catalogPiu' },
-  //     { title: 'Статьи ДДС', name: 'catalogDds' },
-  //     { title: 'Отрасли', name: 'catalogOtrasli' },
-  //     { title: 'Коэффициенты', name: 'coefficients' }
-  //   ]
-  // },
+  {
+    icon: 'mdi-file-tree',
+    'icon-alt': 'mdi-file-tree',
+    title: 'Справочники',
+    model: false,
+    children: [
+      // { title: 'Статьи баланса', name: 'catalogBalance' },
+      // { title: 'Статьи ПиУ', name: 'catalogPiu' },
+      // { title: 'Статьи ДДС', name: 'catalogDds' },
+      // { title: 'Отрасли', name: 'catalogOtrasli' },
+      // { title: 'Коэффициенты', name: 'coefficients' }
+      { title: 'Стратегии', name: 'strategies' }
+    ]
+  },
   { icon: 'mdi-factory', title: 'Компании', name: 'companies' }//,
   // { icon: 'mdi-currency-rub', title: 'Цены', name: 'prices' },
   // { icon: 'mdi-human-pregnant', title: 'Дивиденды', name: 'dividends' },

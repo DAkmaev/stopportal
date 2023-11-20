@@ -66,15 +66,15 @@ export async function getCategoriesSimple(type) {
 }
 
 export async function getStrategies() {
-  return await getData('strategies')
+  return await getData(endpoints.STRATEGIES)
 }
 
 export const endpoints = Object.freeze({
   BRIEFCASE: 'briefcase',
   BRIEFCASE_COMPANIES: 'briefcase/companies',
-  COMPANIES: 'api/company/',
+  COMPANIES: 'api/companies/',
   COMPANIES_CATEGORIES: 'companies/categories',
-  COMPANIES_STRATEGIES: 'companies/strategies',
+  COMPANIES_STRATEGIES: 'api/companies/strategies',
   DIVIDENDS: 'dividends',
   DIVIDENDS_DATA: 'dividends/data',
   DIVIDENDS_DOHODNOST: 'dividends/dohodnost',
@@ -97,7 +97,8 @@ export const endpoints = Object.freeze({
   REPORTS_VALUE: 'reports/value',
   REPORTS_UNITS: 'reports/units',
   STOCH: 'api/stoch/',
-  STRATEGIES: 'strategies',
+  STOPS: 'api/stops/',
+  STRATEGIES: 'api/strategies/',
   STRATEGIES_MIH: 'strategies/mih',
   STRATEGIES_MIH_DETAILS: 'strategies/mih/details'
 })
