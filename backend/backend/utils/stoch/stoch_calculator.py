@@ -11,7 +11,7 @@ from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
 from backend.web.api.company.scheme import CompanyTypeEnum
-from backend.db.models.companies import StopModel
+from backend.db.models.company import StopModel
 
 
 @dataclass

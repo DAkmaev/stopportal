@@ -4,7 +4,7 @@ from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 from typing import List, Optional, Type
 
-from backend.db.models.companies import CompanyModel, StopModel, StrategyModel
+from backend.db.models.company import CompanyModel, StopModel, StrategyModel
 from backend.db.dao.stops import StopsDAO
 from backend.db.dao.strategies import StrategiesDAO
 

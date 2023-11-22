@@ -8,7 +8,7 @@ from starlette import status
 
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.stops import StopsDAO
-from backend.db.models.companies import CompanyModel, StopModel
+from backend.db.models.company import CompanyModel, StopModel
 
 from backend.tests.utils.common import create_test_company
 

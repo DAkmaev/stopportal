@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.strategies import StrategiesDAO
-from backend.db.models.companies import StrategyModel
+from backend.db.models.company import StrategyModel
 from backend.web.api.strategy.scheme import StrategiesDTO, StrategiesInputDTO
 
 router = APIRouter()

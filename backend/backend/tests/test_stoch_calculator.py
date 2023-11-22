@@ -5,7 +5,7 @@ import pandas as pd
 
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
-from backend.db.models.companies import StopModel
+from backend.db.models.company import StopModel
 
 from unittest.mock import patch
 

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.stops import StopsDAO
-from backend.db.models.companies import CompanyModel, StopModel, StrategyModel
+from backend.db.models.company import CompanyModel, StopModel, StrategyModel
 
 
 async def create_test_company(
