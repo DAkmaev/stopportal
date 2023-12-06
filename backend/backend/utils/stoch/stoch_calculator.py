@@ -9,7 +9,7 @@ from pandas import DataFrame
 
 from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
+from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO
 from backend.web.api.company.scheme import CompanyTypeEnum
 from backend.db.models.company import StopModel
 
@@ -82,7 +82,7 @@ class StochCalculator:
         per_decision = await self._get_period_decision(df, period)
 
         if per_decision.decision == StochDecisionEnum.UNKNOWN:
-            return StochDecisionModel(decision=per_decision.decision, tiker=tiker)
+            return StochDecisionDTO(decision=per_decision.decision, tiker=tiker)
 
         # для покупки проверяем другие периоды, они должны сопавсть, без границ
         # месяц считается полностью по _get_period_decision, это остальные по другому
@@ -108,7 +108,7 @@ class StochCalculator:
 
 
         last_row = per_decision.df.iloc[-1]
-        return StochDecisionModel(
+        return StochDecisionDTO(
             decision=per_decision.decision,
             k=last_row.k,
             d=last_row.d,
@@ -120,7 +120,7 @@ class StochCalculator:
 
     async def get_stoch_decisions(
             self, tiker: str, type: str, period: str, stops: List[StopModel] | None
-        ) -> dict[str, StochDecisionModel]:
+        ) -> dict[str, StochDecisionDTO]:
         days_diff_month = 30 * 31
 
         start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
@@ -134,7 +134,7 @@ class StochCalculator:
 
                 # проверяем, что вообще есть данные
                 if df.size == 0:
-                    results[cur_period] = StochDecisionModel(
+                    results[cur_period] = StochDecisionDTO(
                         decision=StochDecisionEnum.UNKNOWN,
                         tiker=tiker
                     )
@@ -146,7 +146,7 @@ class StochCalculator:
 
                 # Проверяем, что не пробит стоп
                 if stops_or_none and last_price <= stop.value:
-                    results[cur_period] = StochDecisionModel(
+                    results[cur_period] = StochDecisionDTO(
                         decision=StochDecisionEnum.SELL,
                         last_price=last_price,
                         stop=stop.value,

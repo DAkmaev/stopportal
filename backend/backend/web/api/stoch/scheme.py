@@ -18,17 +18,22 @@ class StochPeriodEnum(str, Enum):
     ALL = 'All'
 
 
-class StochDecisionModel(BaseModel):
+class StochCompanyDTO(BaseModel):
+    id: int
+    name: str
+    tiker: str
+
+
+class StochDecisionDTO(BaseModel):
     """
     Scheme for Stoch decision.
 
     """
-
-    tiker: str
+    company: StochCompanyDTO
     decision: StochDecisionEnum
     last_price: Optional[float] = None
     k: Optional[float] = None
     d: Optional[float] = None
-    stop: Optional[float] = None
+    period: str
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None

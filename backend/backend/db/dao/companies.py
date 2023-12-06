@@ -99,7 +99,7 @@ class CompanyDAO:
 
         await self.session.delete(company)
 
-    async def get_all_companies(self, limit: int = 100,
+    async def get_all_companies(self, limit: int = 10000,
                                 offset: int = 0) -> List[CompanyModel]:
         """
         Get all companies models with limit/offset pagination.

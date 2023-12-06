@@ -12,7 +12,7 @@ from backend.db.dao.companies import CompanyDAO
 
 
 @pytest.mark.anyio
-async def test_get_stochs(
+async def test_generate_stoch_decisions(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
@@ -35,8 +35,8 @@ async def test_get_stochs(
         dao.create_company_model(tiker_name2, name2, "MOEX")
     )
 
-    url = fastapi_app.url_path_for("get_stochs")
-    response = await client.get(
+    url = fastapi_app.url_path_for("generate_stoch_decisions")
+    response = await client.post(
         url, params={
             'period': period,
             'is_cron': 'false',
@@ -50,7 +50,7 @@ async def test_get_stochs(
     assert response.json()['W']['UNKNOWN'][0]['tiker'] == tiker_name1
 
 @pytest.mark.anyio
-async def test_get_stoch(
+async def test_generate_stoch_decision(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
@@ -67,8 +67,8 @@ async def test_get_stoch(
     await dao.create_company_model(tiker_name, name, "MOEX")
 
     print(f"\nstarted at {time.strftime('%a')}")
-    url = fastapi_app.url_path_for("get_stoch", tiker=tiker_name)
-    response = await client.get(
+    url = fastapi_app.url_path_for("generate_stoch_decision", tiker=tiker_name)
+    response = await client.post(
         url, params={
             'period': period,
             'type': 'MOEX',
@@ -80,40 +80,40 @@ async def test_get_stoch(
     assert response.json()[period]['decision'] == 'UNKNOWN'
 
 
-@pytest.mark.anyio
-async def test_get_stoch_temp(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    dbsession: AsyncSession,
-) -> None:
-    """
-
-    :param fastapi_app: current application.
-    :param client: client for the app.
-    """
-    dao = CompanyDAO(dbsession)
-    tiker_name1 = 'LKOH'
-    name1 = 'Лукойл'
-    # tiker_name2 = uuid.uuid4().hex
-    # name2 = uuid.uuid4().hex
-    period = 'ALL'
-
-    # create test companies
-    await asyncio.gather(
-        dao.create_company_model(tiker_name1, name1, "MOEX"),
-        # dao.create_company_model(tiker_name2, name2, "MOEX")
-    )
-
-    url = fastapi_app.url_path_for("get_stochs")
-    response = await client.get(
-        url, params={
-            'period': period,
-            'is_cron': 'false',
-            'send_messages': 'false',
-            'send_test': 'false'
-        }
-    )
-    assert response.status_code == status.HTTP_200_OK
+# @pytest.mark.anyio
+# async def test_get_stoch_temp(
+#     fastapi_app: FastAPI,
+#     client: AsyncClient,
+#     dbsession: AsyncSession,
+# ) -> None:
+#     """
+#
+#     :param fastapi_app: current application.
+#     :param client: client for the app.
+#     """
+#     dao = CompanyDAO(dbsession)
+#     tiker_name1 = 'LKOH'
+#     name1 = 'Лукойл'
+#     # tiker_name2 = uuid.uuid4().hex
+#     # name2 = uuid.uuid4().hex
+#     period = 'ALL'
+#
+#     # create test companies
+#     await asyncio.gather(
+#         dao.create_company_model(tiker_name1, name1, "MOEX"),
+#         # dao.create_company_model(tiker_name2, name2, "MOEX")
+#     )
+#
+#     url = fastapi_app.url_path_for("generate_stoch_decisions")
+#     response = await client.post(
+#         url, params={
+#             'period': period,
+#             'is_cron': 'false',
+#             'send_messages': 'false',
+#             'send_test': 'false'
+#         }
+#     )
+#     assert response.status_code == status.HTTP_200_OK
 
 
 

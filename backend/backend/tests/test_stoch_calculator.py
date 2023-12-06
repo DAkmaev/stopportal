@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 
 from backend.utils.stoch.stoch_calculator import StochCalculator
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
+from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO
 from backend.db.models.company import StopModel
 
 from unittest.mock import patch
@@ -69,7 +69,7 @@ async def test_get_stoch_decisions_no_data():
     decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [])
 
     assert isinstance(decisions, dict)
-    assert isinstance(decisions[period], StochDecisionModel)
+    assert isinstance(decisions[period], StochDecisionDTO)
     assert decisions[period].decision == StochDecisionEnum.UNKNOWN
     assert decisions[period].tiker == tiker
 
@@ -88,7 +88,7 @@ async def test_get_stoch_decisions_with_stop(sample_dataframe):
         decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [stop])
 
         assert isinstance(decisions, dict)
-        assert isinstance(decisions[period], StochDecisionModel)
+        assert isinstance(decisions[period], StochDecisionDTO)
         assert decisions[period].decision == StochDecisionEnum.SELL
         assert decisions[period].stop == stop.value
         assert decisions[period].tiker == tiker
