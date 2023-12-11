@@ -48,9 +48,11 @@ class StochService:
 
         result = f'Акции {decision} ({PERIOD_NAMES[period]})!\n'
         for dec in companies:
-            name = f'[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})'
+            name = f'[{dec.company.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.company.tiker})'
             price_str = f' - цена: {round(dec.last_price, 2)}'
-            stop_str = f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
+
+            # Сейчас не возвращается stop
+            stop_str = '' # f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
             stoch_data_str = ''
             if dec.k and dec.d:
                 k = round(dec.k, 2)
@@ -64,16 +66,21 @@ class StochService:
     async def generate_stoch_decisions(self, period: str = 'ALL', is_cron: bool = False,
                          send_messages: bool = True, send_test: bool = False):
         companies = await self.company_dao.get_all_companies()
-        companies = companies[:200:]
-        des_futures = [self._fetch_stoch_decisions(st, period) for st in companies]
-        decisions = await asyncio.gather(*des_futures)
-
+        # companies = companies[:200:]
         result = dict()
-        for per_desisions in decisions:
-            for p in per_desisions:
-                decision = per_desisions[p]
-                await self._update_stoch(decision.company, p, decision)
-                result.setdefault(p, {}).setdefault(decision.decision.name, []).append(decision)
+
+        # Разбиваем список компаний на группы по 100 итераций
+        for i in range(0, len(companies), 150):
+            batch_companies = companies[i:i + 150]
+
+            des_futures = [self._fetch_stoch_decisions(st, period) for st in batch_companies]
+            decisions = await asyncio.gather(*des_futures)
+
+            for per_desisions in decisions:
+                for p in per_desisions:
+                    decision = per_desisions[p]
+                    await self._update_stoch(decision.company, p, decision)
+                    result.setdefault(p, {}).setdefault(decision.decision.name, []).append(decision)
 
         if send_messages:
             for per in result.keys():
