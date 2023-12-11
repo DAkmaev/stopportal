@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 
-from backend.db.models.companies import StrategyModel, CompanyModel
+from backend.db.models.company import StrategyModel
 
 
 class StrategiesDAO:

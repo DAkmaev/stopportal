@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.strategies import StrategiesDAO
-from backend.db.models.companies import CompanyModel
+from backend.db.models.company import CompanyModel
 from backend.web.api.company.scheme import (
     CompanyModelDTO,
     CompanyModelInputDTO,

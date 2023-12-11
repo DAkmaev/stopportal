@@ -76,7 +76,7 @@
 import {
   getData,
   // getCategoriesSimple,
-  endpoints
+  endpoints, postData
 } from '@/api/invmos-back'
 // import { getDividends } from '@/api/open-broker'
 import PriceSynchronizer from '@/utils/PriceSynchronizer'
@@ -124,6 +124,11 @@ export default {
           align: 'start',
           value: 'stops'
         }
+        // {
+        //   text: 'Последний stoch',
+        //   align: 'start',
+        //   value: 'stoch'
+        // }
         // ,{
         //   text: 'Индекс МОС биржи',
         //   value: 'has_mos_index',
@@ -187,7 +192,7 @@ export default {
     },
     handleStoch() {
       this.checkingStoch = true
-      getData(endpoints.STOCH, { period: 'ALL' }).then((results) => {
+      postData(endpoints.STOCH, {}, true, { period: 'ALL' }).then((results) => {
         this.checkingStoch = false
         console.log(results)
       })

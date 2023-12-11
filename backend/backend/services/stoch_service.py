@@ -4,26 +4,43 @@ from fastapi import Depends
 
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.cron_job import CronJobRunDao
+from backend.db.dao.stoch_decisions import StochDecisionDAO
+from backend.db.models.company import CompanyModel
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.utils.telegram.telegramm_client import send_tg_message
-from backend.web.api.stoch.scheme import StochDecisionModel
+from backend.web.api.stoch.scheme import StochDecisionDTO
 
 PERIOD_NAMES = {'M': 'месяц', 'D': 'день', 'W': 'неделя'}
 
+
 class StochService:
-    def __init__(self, company_dao: CompanyDAO = Depends(),
-                 cron_dao: CronJobRunDao = Depends()):
+    def __init__(
+        self,
+        company_dao: CompanyDAO = Depends(),
+        cron_dao: CronJobRunDao = Depends(),
+        stoch_dao: StochDecisionDAO = Depends()
+    ):
         self.stoch_calculator = StochCalculator()
         self.company_dao = company_dao
+        self.stoch_dao = stoch_dao
         self.cron_dao = cron_dao
 
-    async def _fetch_stoch_decisions(self, st, period):
-        return await self.stoch_calculator.get_stoch_decisions(
-            st.tiker,
-            st.type,
-            period,
-            st.stops
+    async def _update_stoch(self, company: CompanyModel, period: str, decision: StochDecisionDTO):
+        exist_stoch_decision = await self.stoch_dao.get_stoch_decision_model_by_company_period(
+            company_id=company.id, period=period)
+        stoch_decision = await self.stoch_dao.update_or_create_stoch_decision_model(
+            id=exist_stoch_decision.id if exist_stoch_decision else None,
+            company=company,
+            period=period,
+            decision=decision.decision.name,
+            k=decision.k,
+            d=decision.d,
+            last_price=decision.last_price
         )
+        return stoch_decision
+
+    async def _fetch_stoch_decisions(self, st, period):
+        return await self.stoch_calculator.get_stoch_decisions(st, period)
 
     def _fill_messages(self, decision, companies, period):
         if len(companies) == 0:
@@ -31,9 +48,11 @@ class StochService:
 
         result = f'Акции {decision} ({PERIOD_NAMES[period]})!\n'
         for dec in companies:
-            name = f'[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})'
+            name = f'[{dec.company.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.company.tiker})'
             price_str = f' - цена: {round(dec.last_price, 2)}'
-            stop_str = f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
+
+            # Сейчас не возвращается stop
+            stop_str = '' # f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
             stoch_data_str = ''
             if dec.k and dec.d:
                 k = round(dec.k, 2)
@@ -44,24 +63,24 @@ class StochService:
 
         return result
 
-
-    async def get_stochs(self, period: str = 'ALL', is_cron: bool = False,
+    async def generate_stoch_decisions(self, period: str = 'ALL', is_cron: bool = False,
                          send_messages: bool = True, send_test: bool = False):
         companies = await self.company_dao.get_all_companies()
-
-        # decisions = []
-        # for st in companies:
-        #     print(f'{st.tiker} - {period}')
-        #     des = await self._fetch_stoch_decisions(st, period)
-        #     decisions.append(des)
-        des_futures = [self._fetch_stoch_decisions(st, period) for st in companies]
-        decisions = await asyncio.gather(*des_futures)
-
+        # companies = companies[:200:]
         result = dict()
-        for per_desisions in decisions:
-            for p in per_desisions:
-                decision = per_desisions[p].decision
-                result.setdefault(p, {}).setdefault(decision.name, []).append(per_desisions[p])
+
+        # Разбиваем список компаний на группы по 100 итераций
+        for i in range(0, len(companies), 150):
+            batch_companies = companies[i:i + 150]
+
+            des_futures = [self._fetch_stoch_decisions(st, period) for st in batch_companies]
+            decisions = await asyncio.gather(*des_futures)
+
+            for per_desisions in decisions:
+                for p in per_desisions:
+                    decision = per_desisions[p]
+                    await self._update_stoch(decision.company, p, decision)
+                    result.setdefault(p, {}).setdefault(decision.decision.name, []).append(decision)
 
         if send_messages:
             for per in result.keys():
@@ -80,17 +99,18 @@ class StochService:
 
         return result
 
-    async def get_stoch(
+    async def generate_stoch_decision(
         self,
         tiker: str, period: str = 'All', send_messages: bool = False
-    ) -> StochDecisionModel:
+    ) -> StochDecisionDTO:
         company = await self.company_dao.get_company_model_by_tiker(tiker=tiker)
         decision_model = await self.stoch_calculator.get_stoch_decisions(
-            tiker, company.type, period, company.stops
+            company, period
         )
 
-        if send_messages:
-            for per in decision_model.keys():
+        for per in decision_model.keys():
+            await self._update_stoch(company, per, decision_model[per])
+            if send_messages:
                 name = f'[{tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={tiker})'
                 message = f'Акции {name} ({PERIOD_NAMES[per]}) - {decision_model[per].decision.name}'
                 await send_tg_message(message)

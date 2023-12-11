@@ -8,29 +8,30 @@ from fastapi import APIRouter, Depends
 
 from backend.db.dao.cron_job import CronJobRunDao
 from backend.db.dao.companies import CompanyDAO
+from backend.db.dao.stoch_decisions import StochDecisionDAO
 from backend.utils.telegram.telegramm_client import send_tg_message
 from backend.utils.stoch.stoch_calculator import StochCalculator
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
+from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO
 from backend.services.stoch_service import StochService
 
 router = APIRouter()
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger(__name__)
 
-@router.get("/")
-async def get_stochs(
+@router.post("/")
+async def generate_stoch_decisions(
     period: str = 'ALL',
     is_cron: bool = False,
     send_messages: bool = True,
     send_test: bool = False,
     stoch_service: StochService = Depends()
-) -> Dict[str, Dict[str, List[StochDecisionModel]]]:
-    stochs = await stoch_service.get_stochs(period, is_cron, send_messages, send_test)
+) -> Dict[str, Dict[str, List[StochDecisionDTO]]]:
+    stochs = await stoch_service.generate_stoch_decisions(period, is_cron, send_messages, send_test)
     return stochs
 
 
-@router.get("/{tiker}")
-async def get_stoch(
+@router.post("/{tiker}")
+async def generate_stoch_decision(
     tiker: str,
     period: str = 'W',
     type: str = 'MOEX',
@@ -38,7 +39,14 @@ async def get_stoch(
     company_dao: CompanyDAO = Depends(),
     stoch_calculator: StochCalculator = Depends(),
     stoch_service: StochService = Depends()
-) -> Dict[str, StochDecisionModel]:
-    return await stoch_service.get_stoch(
+) -> Dict[str, StochDecisionDTO]:
+    return await stoch_service.generate_stoch_decision(
         tiker=tiker, period=period,send_messages=send_messages
     )
+
+@router.get("/")
+async def get_stochs(
+    stoch_dao: StochDecisionDAO = Depends()
+) -> List[StochDecisionDTO]:
+    stochs = await stoch_dao.get_stoch_decision_models()
+    return stochs

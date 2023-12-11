@@ -4,7 +4,7 @@ from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 from typing import List, Optional, Type
 
-from backend.db.models.companies import CompanyModel, StopModel, StrategyModel
+from backend.db.models.company import CompanyModel, StopModel, StrategyModel
 from backend.db.dao.stops import StopsDAO
 from backend.db.dao.strategies import StrategiesDAO
 
@@ -99,7 +99,7 @@ class CompanyDAO:
 
         await self.session.delete(company)
 
-    async def get_all_companies(self, limit: int = 100,
+    async def get_all_companies(self, limit: int = 10000,
                                 offset: int = 0) -> List[CompanyModel]:
         """
         Get all companies models with limit/offset pagination.

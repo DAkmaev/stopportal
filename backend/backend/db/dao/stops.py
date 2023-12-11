@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 
-from backend.db.models.companies import CompanyModel, StopModel
+from backend.db.models.company import CompanyModel, StopModel
 
 
 class StopsDAO:

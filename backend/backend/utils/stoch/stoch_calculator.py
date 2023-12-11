@@ -9,9 +9,9 @@ from pandas import DataFrame
 
 from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionModel
+from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO, StochCompanyDTO
 from backend.web.api.company.scheme import CompanyTypeEnum
-from backend.db.models.companies import StopModel
+from backend.db.models.company import StopModel, CompanyModel
 
 
 @dataclass
@@ -77,12 +77,18 @@ class StochCalculator:
         return StochDecision(decision=decision, df=stoch.df)
 
 
-    async def _calculate_decision(self, tiker: str, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
+    async def _calculate_decision(self, company: CompanyModel, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
         # для продажи проверяем границы и разворот для всех периодов
         per_decision = await self._get_period_decision(df, period)
 
         if per_decision.decision == StochDecisionEnum.UNKNOWN:
-            return StochDecisionModel(decision=per_decision.decision, tiker=tiker)
+            return StochDecisionDTO(
+                decision=per_decision.decision,
+                company=StochCompanyDTO(
+                    id=company.id,
+                    name=company.name,
+                    tiker=company.tiker
+                ))
 
         # для покупки проверяем другие периоды, они должны сопавсть, без границ
         # месяц считается полностью по _get_period_decision, это остальные по другому
@@ -108,24 +114,29 @@ class StochCalculator:
 
 
         last_row = per_decision.df.iloc[-1]
-        return StochDecisionModel(
+        return StochDecisionDTO(
+            company=StochCompanyDTO(
+                id=company.id,
+                name=company.name,
+                tiker=company.tiker
+            ),
             decision=per_decision.decision,
+            period=period,
             k=last_row.k,
             d=last_row.d,
-            last_price=last_price,
-            tiker=tiker
+            last_price=last_price
         )
 
 
 
     async def get_stoch_decisions(
-            self, tiker: str, type: str, period: str, stops: List[StopModel] | None
-        ) -> dict[str, StochDecisionModel]:
+            self, company: CompanyModel, period: str
+        ) -> dict[str, StochDecisionDTO]:
         days_diff_month = 30 * 31
 
         start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
         mreader = MoexReader()
-        df = (await mreader.get_company_history_async(start=start, tiker=tiker) if type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start, tiker))
+        df = (await mreader.get_company_history_async(start=start, tiker=company.tiker) if company.type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start=start, tiker=company.tiker))
 
         results = dict()
 
@@ -134,27 +145,37 @@ class StochCalculator:
 
                 # проверяем, что вообще есть данные
                 if df.size == 0:
-                    results[cur_period] = StochDecisionModel(
+                    results[cur_period] = StochDecisionDTO(
                         decision=StochDecisionEnum.UNKNOWN,
-                        tiker=tiker
+                        period=cur_period,
+                        company=StochCompanyDTO(
+                            id=company.id,
+                            name=company.name,
+                            tiker=company.tiker
+                        )
                     )
                     continue
 
                 last_price = df.iloc[-1]['CLOSE']
-                stops_or_none = None if not stops else list(filter(lambda s: s.period == cur_period, stops))
+                stops_or_none = None if not company.stops else list(filter(lambda s: s.period == cur_period, company.stops))
                 stop = stops_or_none[0] if stops_or_none and stops_or_none[0] is not None else None
 
                 # Проверяем, что не пробит стоп
                 if stops_or_none and last_price <= stop.value:
-                    results[cur_period] = StochDecisionModel(
+                    results[cur_period] = StochDecisionDTO(
+                        company=StochCompanyDTO(
+                            id=company.id,
+                            name=company.name,
+                            tiker=company.tiker
+                        ),
+                        period=cur_period,
                         decision=StochDecisionEnum.SELL,
                         last_price=last_price,
-                        stop=stop.value,
-                        tiker=tiker
+                        stop=stop.value
                     )
                 else:
                     results[cur_period] = await self._calculate_decision(
-                        tiker, cur_period, df, stop, last_price
+                        company, cur_period, df, stop, last_price
                     )
 
         return results
