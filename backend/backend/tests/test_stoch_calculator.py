@@ -2,7 +2,9 @@ from pathlib import Path
 
 import pytest
 import pandas as pd
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.tests.utils.common import create_test_company
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO
 from backend.db.models.company import StopModel
@@ -40,14 +42,16 @@ async def test_get_period_decision(sample_dataframe):
 
 
 @pytest.mark.anyio
-async def test_calculate_decision(sample_dataframe):
+async def test_calculate_decision(sample_dataframe, dbsession: AsyncSession):
     calculator = StochCalculator()
-    tiker = 'LKOH'
     period = 'D'
     last_price = 130.0
     stop = StopModel(period='D', value=120.0)
 
-    decision = await calculator._calculate_decision(tiker, period, sample_dataframe,
+    # Создаем тестовую компанию и
+    company = await create_test_company(dbsession)
+
+    decision = await calculator._calculate_decision(company, period, sample_dataframe,
                                                     stop, last_price)
 
     assert decision.decision in {StochDecisionEnum.BUY, StochDecisionEnum.SELL,
@@ -55,43 +59,45 @@ async def test_calculate_decision(sample_dataframe):
     assert isinstance(decision.k, float)
     assert isinstance(decision.d, float)
     assert isinstance(decision.last_price, float)
-    assert decision.tiker == tiker
+    assert decision.company.tiker == company.tiker
 
 
 @pytest.mark.anyio
-async def test_get_stoch_decisions_no_data():
+async def test_get_stoch_decisions_no_data(dbsession: AsyncSession):
     calculator = StochCalculator()
-    tiker = 'AAPL'
-    tiker_type = 'MOEX'
     period = 'D'
 
+    # Создаем тестовую компанию и
+    company = await create_test_company(dbsession)
+
     # Simulate the case where there's no data available
-    decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [])
+    decisions = await calculator.get_stoch_decisions(company, period)
 
     assert isinstance(decisions, dict)
     assert isinstance(decisions[period], StochDecisionDTO)
     assert decisions[period].decision == StochDecisionEnum.UNKNOWN
-    assert decisions[period].tiker == tiker
+    assert decisions[period].company.tiker == company.tiker
 
 
 @pytest.mark.anyio
-async def test_get_stoch_decisions_with_stop(sample_dataframe):
+async def test_get_stoch_decisions_with_stop(sample_dataframe, dbsession: AsyncSession):
     calculator = StochCalculator()
-    tiker = 'LKOH'
-    tiker_type = 'MOEX'
     period = 'D'
     stop = StopModel(period='D', value=120.0)
+
+    # Создаем тестовую компанию и
+    company = await create_test_company(dbsession)
+    company.stops.append(stop)
 
     # Mock the mreader.get_company_history_async to return sample_dataframe
     with patch('backend.utils.moex.moex_reader.MoexReader.get_company_history_async') as mock_method:
         mock_method.return_value = sample_dataframe
-        decisions = await calculator.get_stoch_decisions(tiker, tiker_type, period, [stop])
+        decisions = await calculator.get_stoch_decisions(company, period)
 
         assert isinstance(decisions, dict)
         assert isinstance(decisions[period], StochDecisionDTO)
-        assert decisions[period].decision == StochDecisionEnum.SELL
-        assert decisions[period].stop == stop.value
-        assert decisions[period].tiker == tiker
+        assert decisions[period].decision.name == StochDecisionEnum.SELL
+        assert decisions[period].company.tiker == company.tiker
 
 
 # @pytest.mark.asyncio

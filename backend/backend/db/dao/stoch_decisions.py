@@ -81,7 +81,7 @@ class StochDecisionDAO:
                 k=k,
                 d=d,
                 last_price=last_price,
-                company=company
+                company_id=company.id
             )
             self.session.add(stoch_decision)
 

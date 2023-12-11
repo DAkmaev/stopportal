@@ -13,7 +13,6 @@ async def create_test_company(
     need_add_strategy: bool = False
 ) -> CompanyModel:
     dao = CompanyDAO(dbsession)
-    stops_dao = StopsDAO(dbsession)
     tiker_name = uuid.uuid4().hex
     name = uuid.uuid4().hex
     company = await dao.create_company_model(tiker_name, name, "MOEX")
