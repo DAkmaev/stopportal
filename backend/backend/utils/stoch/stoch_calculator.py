@@ -78,8 +78,12 @@ class StochCalculator:
 
 
     async def _calculate_decision(self, company: CompanyModel, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
+        # Для некоторых акций увеличиваем bottom_border
+        TIKERS_HIGH_BOTTOM = ['LKOH']
+        bottom_border = 40 if company.tiker in TIKERS_HIGH_BOTTOM else 25
+
         # для продажи проверяем границы и разворот для всех периодов
-        per_decision = await self._get_period_decision(df, period)
+        per_decision = await self._get_period_decision(df, period, bottom_border=bottom_border)
 
         if per_decision.decision == StochDecisionEnum.UNKNOWN:
             return StochDecisionDTO(
