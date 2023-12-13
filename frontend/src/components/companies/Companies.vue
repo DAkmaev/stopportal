@@ -47,6 +47,22 @@
             <v-chip @click="handleEditStops(item)">Нет</v-chip>
           </template>
         </template>
+        <template v-slot:item.stochs="{ item }">
+          <template v-if="stochs[item.id]">
+            <v-chip
+              v-for="s in Object.keys(stochs[item.id])"
+              :key="s"
+              outlined
+              :color="stochsChipData[stochs[item.id][s].decision].color"
+            >
+              {{ s }}
+              <v-icon right>
+                mdi-{{ stochsChipData[stochs[item.id][s].decision].icon }}
+              </v-icon>
+            </v-chip>
+          </template>
+
+        </template>
       </v-data-table>
       <company-dialog
         :open="dialog"
@@ -123,12 +139,12 @@ export default {
           text: 'Стопы',
           align: 'start',
           value: 'stops'
+        },
+        {
+          text: 'Последний stoch',
+          align: 'start',
+          value: 'stochs'
         }
-        // {
-        //   text: 'Последний stoch',
-        //   align: 'start',
-        //   value: 'stoch'
-        // }
         // ,{
         //   text: 'Индекс МОС биржи',
         //   value: 'has_mos_index',
@@ -136,7 +152,14 @@ export default {
         // },
         // { text: 'Валюта', value: 'currency' }
       ],
-      editData: {}
+      editData: {},
+      stochs: {},
+      stochsChipData: {
+        'SELL': { 'color': 'red', 'icon': 'trending-down' },
+        'BUY': { 'color': 'green', 'icon': 'trending-up' },
+        'RELAX': { 'color': 'primary', 'icon': 'trending-neutral' },
+        'UNKNOWN': { 'color': 'default', 'icon': 'help' }
+      }
     }
   },
   computed: {
@@ -157,13 +180,28 @@ export default {
     this.fetchList()
   },
   methods: {
-    fetchList() {
+    async fetchList() {
       // getCategoriesSimple('otrasli').then(otrasli => {
       //   this.otrasli = otrasli
       // })
-      getData(endpoints.COMPANIES, { limit: 500, offset: 0 }).then(data => {
-        this.$set(this, 'list', data)
-      })
+
+      await Promise.all([
+        this.fetchCompanyList(), this.fetchStochDataList()
+      ])
+    },
+    async fetchCompanyList() {
+      const companies = await getData(endpoints.COMPANIES, { limit: 1000, offset: 0 })
+      this.$set(this, 'list', companies)
+    },
+    async fetchStochDataList() {
+      const stochs = await getData(endpoints.STOCH)
+      this.stochs = stochs.reduce((acc, curr) => {
+        if (!acc[curr.company.id]) {
+          acc[curr.company.id] = {}
+        }
+        acc[curr.company.id][curr.period] = curr
+        return acc
+      }, {})
     },
     handleAdd() {
       this.dialogMode = 'add'

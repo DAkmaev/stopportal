@@ -84,6 +84,7 @@ class StochCalculator:
         if per_decision.decision == StochDecisionEnum.UNKNOWN:
             return StochDecisionDTO(
                 decision=per_decision.decision,
+                period=period,
                 company=StochCompanyDTO(
                     id=company.id,
                     name=company.name,
