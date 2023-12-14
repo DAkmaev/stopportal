@@ -232,6 +232,7 @@ export default {
       this.checkingStoch = true
       postData(endpoints.STOCH, {}, true, { period: 'ALL' }).then((results) => {
         this.checkingStoch = false
+        this.fetchList()
         console.log(results)
       })
     }
