@@ -2,8 +2,10 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.stops import StopsDAO
+from backend.db.models.briefcase import BriefcaseItemModel
 from backend.db.models.company import CompanyModel, StopModel, StrategyModel
 
 
@@ -27,3 +29,17 @@ async def create_test_company(
 
     companies = await dao.filter(tiker=tiker_name)
     return companies[0]
+
+
+async def create_test_briefcase_item(
+    dbsession: AsyncSession,
+) -> BriefcaseItemModel:
+    company = await create_test_company(dbsession)
+    dao = BriefcaseDAO(dbsession)
+    await dao.create_briefcase_item_model(
+        count=1, dividends=10, company_id=company.id
+    )
+    briefcase_items = await dao.get_all_briefcase_items()
+    assert len(briefcase_items) == 1
+
+    return briefcase_items[0]
