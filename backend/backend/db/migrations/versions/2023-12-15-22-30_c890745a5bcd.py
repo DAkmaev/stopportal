@@ -1,15 +1,15 @@
 """empty message
 
-Revision ID: 670e5b3d463d
+Revision ID: c890745a5bcd
 Revises: 5e00b622e2b1
-Create Date: 2023-12-14 19:08:41.419515
+Create Date: 2023-12-15 22:30:32.894375
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "670e5b3d463d"
+revision = "c890745a5bcd"
 down_revision = "5e00b622e2b1"
 branch_labels = None
 depends_on = None
@@ -30,6 +30,11 @@ def upgrade() -> None:
         sa.Column("dividends", sa.DECIMAL(), nullable=True),
         sa.Column("company_id", sa.Integer(), nullable=False),
         sa.Column("strategy_id", sa.Integer(), nullable=True),
+        sa.Column("briefcase_id", sa.Integer(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["briefcase_id"],
+            ["briefcases.id"],
+        ),
         sa.ForeignKeyConstraint(
             ["company_id"],
             ["companies.id"],

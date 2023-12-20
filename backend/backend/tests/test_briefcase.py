@@ -4,7 +4,8 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.dao.briefcases import BriefcaseDAO
-from backend.tests.utils.common import create_test_company, create_test_briefcase_item
+from backend.tests.utils.common import (create_test_company, create_test_briefcase_item,
+                                        create_test_briefcase)
 
 
 @pytest.mark.anyio
@@ -41,6 +42,7 @@ async def test_create_briefcase_item_model(
     url = fastapi_app.url_path_for("create_briefcase_item_model", briefcase_id=briefcase_id)
 
     company = await create_test_company(dbsession)
+    briefcase = await create_test_briefcase(dbsession)
 
     # Проверяем с передачей стратегии
     response = await client.post(
@@ -49,7 +51,8 @@ async def test_create_briefcase_item_model(
             "count": count,
             "dividends": dividends,
             "company": {"id": company.id},
-            "strategy": {"id": 1}
+            "strategy": {"id": 1},
+            "briefcase_id": briefcase.id
         },
     )
 
@@ -70,16 +73,21 @@ async def test_create_briefcase_item_model_no_strategy(
     count = 5
     dividends = 50.0
     briefcase_id = 1
-    url = fastapi_app.url_path_for("create_briefcase_item_model", briefcase_id=briefcase_id)
 
     company = await create_test_company(dbsession, False, True)
+    briefcase = await create_test_briefcase(dbsession)
+
+    url = fastapi_app.url_path_for("create_briefcase_item_model",
+                                   briefcase_id=briefcase.id)
+
     # Проверяем с пустой стратегией
     response = await client.post(
         url,
         json={
             "count": count,
             "dividends": dividends,
-            "company": {"id": company.id}
+            "company": {"id": company.id},
+            "briefcase_id": briefcase.id
         },
     )
     assert response.status_code == status.HTTP_200_OK
@@ -101,13 +109,16 @@ async def test_create_briefcase_item_model_wrong_company(
     briefcase_id = 1
     url = fastapi_app.url_path_for("create_briefcase_item_model", briefcase_id=briefcase_id)
 
+    briefcase = await create_test_briefcase(dbsession)
+
     # Проверяем с несуществующей компанией
     response = await client.post(
         url,
         json={
             "count": count,
             "dividends": dividends,
-            "company": {"id": 1000}
+            "company": {"id": 1000},
+            "briefcase_id": briefcase.id
         },
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -180,7 +191,8 @@ async def test_update_briefcase_item(
         json={
             "count": updated_count,
             "dividends": updated_dividends,
-            "company": {"id": test_item.company_id}
+            "company": {"id": test_item.company_id},
+            "briefcase_id": test_item.briefcase_id
         },
     )
 

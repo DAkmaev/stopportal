@@ -136,6 +136,7 @@ async def create_briefcase_item_model(
         dividends=new_item.dividends,
         company_id=new_item.company.id,
         strategy_id=new_item.strategy.id if new_item.strategy else None,
+        briefcase_id=briefcase_id
     )
 
 

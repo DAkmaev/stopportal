@@ -2,7 +2,7 @@ import pytest
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dao.briefcases import BriefcaseDAO
-from backend.tests.utils.common import create_test_company
+from backend.tests.utils.common import create_test_company, create_test_briefcase
 
 
 @pytest.mark.anyio
@@ -17,14 +17,19 @@ async def test_create_and_update_briefcase_item_model(
     briefcase_dao = BriefcaseDAO(dbsession)
 
     company = await create_test_company(dbsession, need_add_strategy=True)
+    briefcase = await create_test_briefcase(dbsession)
 
     # Create a briefcase item
     await briefcase_dao.create_briefcase_item_model(
-        count=COUNT, dividends=DIVIDENDS, company_id=company.id, strategy_id=company.strategies[0].id
+        count=COUNT,
+        dividends=DIVIDENDS,
+        briefcase_id=briefcase.id,
+        company_id=company.id,
+        strategy_id=company.strategies[0].id
     )
-    briefcases = await briefcase_dao.get_all_briefcase_items()
-    assert len(briefcases) == 1
-    new_briefcase_item = briefcases[0]
+    briefcase_items = await briefcase_dao.get_all_briefcase_items()
+    assert len(briefcase_items) == 1
+    new_briefcase_item = briefcase_items[0]
     assert new_briefcase_item is not None
     assert new_briefcase_item.count == COUNT
     assert new_briefcase_item.dividends == DIVIDENDS
@@ -85,10 +90,10 @@ async def test_get_briefcase_item_model(
     briefcase_dao = BriefcaseDAO(dbsession)
 
     company = await create_test_company(dbsession)
-
+    briefcase = await create_test_briefcase(dbsession)
     # Create a briefcase item
     await briefcase_dao.create_briefcase_item_model(
-        count=1, dividends=1, company_id=company.id
+        count=1, dividends=1, company_id=company.id, briefcase_id=briefcase.id
     )
     briefcase_items = await briefcase_dao.get_all_briefcase_items()
     assert len(briefcase_items) == 1
@@ -97,3 +102,54 @@ async def test_get_briefcase_item_model(
     existing_briefcase_item = await briefcase_dao.get_briefcase_item_model(briefcase_items[0].id)
     assert existing_briefcase_item is not None
     assert existing_briefcase_item.id is briefcase_items[0].id
+
+@pytest.mark.anyio
+async def test_get_briefcase_items_by_company(
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+
+    company = await create_test_company(dbsession)
+    briefcase = await create_test_briefcase(dbsession)
+    # Create briefcase items for the company
+    await briefcase_dao.create_briefcase_item_model(
+        count=1, dividends=1, company_id=company.id, briefcase_id=briefcase.id
+    )
+    await briefcase_dao.create_briefcase_item_model(
+        count=2, dividends=2, company_id=company.id, briefcase_id=briefcase.id
+    )
+
+    # Get briefcase items for the company
+    company_briefcase_items = await briefcase_dao.get_briefcase_items_by_company(company.id)
+    assert len(company_briefcase_items) == 2
+
+    # Make sure the retrieved items belong to the correct company
+    for item in company_briefcase_items:
+        assert item.company_id == company.id
+
+
+@pytest.mark.anyio
+async def test_get_briefcase_items_by_briefcase(
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+
+    company = await create_test_company(dbsession)
+    briefcase = await create_test_briefcase(dbsession)
+    # Create briefcase items for the briefcase
+    await briefcase_dao.create_briefcase_item_model(
+        count=1, dividends=1, company_id=company.id, briefcase_id=briefcase.id
+    )
+    await briefcase_dao.create_briefcase_item_model(
+        count=2, dividends=2, company_id=company.id, briefcase_id=briefcase.id
+    )
+
+    # Get briefcase items for the briefcase
+    briefcase_items = await briefcase_dao.get_briefcase_items_by_briefcase(briefcase.id)
+    assert len(briefcase_items) == 2
+
+    # Make sure the retrieved items belong to the correct briefcase
+    for item in briefcase_items:
+        assert item.briefcase_id == briefcase.id

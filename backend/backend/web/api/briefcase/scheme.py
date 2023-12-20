@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class BriefcaseInputDTO(BaseModel):
     id: Optional[int] = None
-    fill_up: float
+    fill_up: Optional[float] = None
 
 
 class BriefcaseDTO(BriefcaseInputDTO):

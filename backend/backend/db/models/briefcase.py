@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -14,7 +14,9 @@ class BriefcaseModel(Base):
     __tablename__ = "briefcases"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    fill_up: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
+    fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
+    items: Mapped[List["BriefcaseItemModel"]] = relationship(lazy="selectin",
+                                                    cascade="all,delete")
 
 
 class BriefcaseItemModel(Base):
@@ -29,4 +31,5 @@ class BriefcaseItemModel(Base):
     strategy_id: Mapped[int] = mapped_column(ForeignKey("strategies.id"), nullable=True)
     company: Mapped['CompanyModel'] = relationship(lazy="selectin")
     strategy: Mapped[Optional['StrategyModel']] = relationship()
+    briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
 

@@ -2,13 +2,14 @@ import asyncio
 
 from fastapi import Depends
 
+from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.cron_job import CronJobRunDao
 from backend.db.dao.stoch_decisions import StochDecisionDAO
 from backend.db.models.company import CompanyModel
 from backend.utils.stoch.stoch_calculator import StochCalculator
 from backend.utils.telegram.telegramm_client import send_tg_message
-from backend.web.api.stoch.scheme import StochDecisionDTO
+from backend.web.api.stoch.scheme import StochDecisionDTO, StochDecisionEnum
 
 PERIOD_NAMES = {'M': 'месяц', 'D': 'день', 'W': 'неделя'}
 
@@ -18,12 +19,14 @@ class StochService:
         self,
         company_dao: CompanyDAO = Depends(),
         cron_dao: CronJobRunDao = Depends(),
-        stoch_dao: StochDecisionDAO = Depends()
+        stoch_dao: StochDecisionDAO = Depends(),
+        briefcase_dao: BriefcaseDAO = Depends()
     ):
         self.stoch_calculator = StochCalculator()
         self.company_dao = company_dao
         self.stoch_dao = stoch_dao
         self.cron_dao = cron_dao
+        self.briefcase_dao = briefcase_dao
 
     async def _update_stoch(self, company: CompanyModel, period: str, decision: StochDecisionDTO):
         exist_stoch_decision = await self.stoch_dao.get_stoch_decision_model_by_company_period(
@@ -63,13 +66,16 @@ class StochService:
 
         return result
 
-    async def generate_stoch_decisions(self, period: str = 'ALL', is_cron: bool = False,
+    async def generate_stoch_decisions(self, briefcase_id: int, period: str = 'ALL', is_cron: bool = False,
                          send_messages: bool = True, send_test: bool = False):
         companies = await self.company_dao.get_all_companies()
         # companies = companies[:200:]
         result = dict()
 
-        # Разбиваем список компаний на группы по 100 итераций
+        briefcase_items = await self.briefcase_dao.get_briefcase_items_by_briefcase(briefcase_id)
+        briefcase_dict = {b.company.id: b for b in briefcase_items}
+
+        # Разбиваем список компаний на группы по 150 итераций
         for i in range(0, len(companies), 150):
             batch_companies = companies[i:i + 150]
 
@@ -79,6 +85,11 @@ class StochService:
             for per_desisions in decisions:
                 for p in per_desisions:
                     decision = per_desisions[p]
+
+                    # для SELL проверяем, есть ли акции в портфеле, если нет, то Relax
+                    if decision.decision == StochDecisionEnum.SELL and decision.company.id not in briefcase_dict:
+                        decision.decision = StochDecisionEnum.RELAX
+
                     await self._update_stoch(decision.company, p, decision)
                     result.setdefault(p, {}).setdefault(decision.decision.name, []).append(decision)
 

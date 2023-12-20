@@ -26,7 +26,10 @@ async def generate_stoch_decisions(
     send_test: bool = False,
     stoch_service: StochService = Depends()
 ) -> Dict[str, Dict[str, List[StochDecisionDTO]]]:
-    stochs = await stoch_service.generate_stoch_decisions(period, is_cron, send_messages, send_test)
+    # todo заменить на получение портфеля для user
+    briefcase_id = 1
+
+    stochs = await stoch_service.generate_stoch_decisions(briefcase_id, period, is_cron, send_messages, send_test)
     return stochs
 
 

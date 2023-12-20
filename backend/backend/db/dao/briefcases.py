@@ -25,21 +25,28 @@ class BriefcaseDAO:
         return briefcase
 
     async def create_briefcase_item_model(
-        self, count: int, company_id: int, strategy_id: int = None, dividends: float = None,
+        self, count: int, briefcase_id: int, company_id: int, strategy_id: int = None,
+        dividends: float = None,
     ) -> BriefcaseItemModel:
         """
         Add a single briefcase item to the session.
 
+        :param briefcase_id:
         :param count: Number of items in the briefcase.
         :param dividends: Dividends for the briefcase item.
         :param company_id: ID of the associated company.
         :param strategy_id: ID of the associated strategy.
         """
+        briefcase = await self.session.get(BriefcaseModel, briefcase_id)
+        if not briefcase:
+            raise HTTPException(status_code=404, detail="Портфель не найдена")
+
         company = await self.session.get(CompanyModel, company_id)
         if not company:
             raise HTTPException(status_code=404, detail="Компания не найдена")
+
         briefcase_item = BriefcaseItemModel(
-            count=count, dividends=dividends, company=company
+            count=count, dividends=dividends, company=company, briefcase_id=briefcase.id
         )
         if strategy_id:
             strategy = await self.session.get(StrategyModel, strategy_id)
@@ -48,7 +55,8 @@ class BriefcaseDAO:
         self.session.add(briefcase_item)
         return briefcase_item
 
-    async def get_all_briefcases(self, limit: int = 10000, offset: int = 0) -> List[BriefcaseModel]:
+    async def get_all_briefcases(self, limit: int = 10000, offset: int = 0) -> List[
+        BriefcaseModel]:
         """
         Get all briefcase models with limit/offset pagination.
 
@@ -88,7 +96,8 @@ class BriefcaseDAO:
         )
         return list(raw_briefcase_items.scalars().fetchall())
 
-    async def get_briefcase_item_model(self, briefcase_item_id: int) -> BriefcaseItemModel:
+    async def get_briefcase_item_model(self,
+                                       briefcase_item_id: int) -> BriefcaseItemModel:
         """
         Get briefcase item model by ID.
 
@@ -102,7 +111,36 @@ class BriefcaseDAO:
 
         return briefcase_item
 
-    async def update_briefcase_model(self, briefcase_id: int, fill_up: float) -> BriefcaseModel:
+    async def get_briefcase_items_by_company(
+        self, company_id: int
+    ) -> List[BriefcaseItemModel]:
+        """
+        Get briefcase item models by company ID.
+
+        :param company_id: ID of the company.
+        :return: List of briefcase item models.
+        """
+        raw_briefcase_items = await self.session.execute(
+            select(BriefcaseItemModel).filter_by(company_id=company_id)
+        )
+        return list(raw_briefcase_items.scalars().fetchall())
+
+    async def get_briefcase_items_by_briefcase(
+        self, briefcase_id: int
+    ) -> List[BriefcaseItemModel]:
+        """
+        Get briefcase item models by briefcase ID.
+
+        :param briefcase_id: ID of the briefcase.
+        :return: List of briefcase item models.
+        """
+        raw_briefcase_items = await self.session.execute(
+            select(BriefcaseItemModel).filter_by(briefcase_id=briefcase_id)
+        )
+        return list(raw_briefcase_items.scalars().fetchall())
+
+    async def update_briefcase_model(self, briefcase_id: int,
+                                     fill_up: float) -> BriefcaseModel:
         """
         Update briefcase model in the session.
 
