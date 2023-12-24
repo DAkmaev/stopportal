@@ -26,7 +26,7 @@ async def get_all_cron_job_run_models(
     return await cron_job_run_dao.get_all_cron_job_runs(limit=limit, offset=offset)
 
 
-@router.get("/{id}]", response_model=CronJobRunDTO)
+@router.get("/{id}", response_model=CronJobRunDTO)
 async def get_cron_job_run_models(
     id: int,
     cron_job_run_dao: CronJobRunDao = Depends(),

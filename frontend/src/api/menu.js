@@ -13,7 +13,7 @@ const Menu = [
       { title: 'Стратегии', name: 'strategies' }
     ]
   },
-  { icon: 'mdi-factory', title: 'Компании', name: 'companies' }//,
+  { icon: 'mdi-factory', title: 'Компании', name: 'companies' },
   // { icon: 'mdi-currency-rub', title: 'Цены', name: 'prices' },
   // { icon: 'mdi-human-pregnant', title: 'Дивиденды', name: 'dividends' },
   // { icon: 'mdi-billboard', title: 'Отчетность', name: 'reports' },
@@ -32,7 +32,7 @@ const Menu = [
   //     { title: 'Формирование портфеля', name: 'ratingBriefcase' }
   //   ]
   // },
-  // { icon: 'mdi-bag-checked', title: 'Портфель', name: 'briefcase' },
+  { icon: 'mdi-bag-checked', title: 'Портфель', name: 'briefcase' }
   // { icon: 'mdi-bag-checked', title: 'Мих стратегия', name: 'strategyMih' }
 ]
 // reorder menu
