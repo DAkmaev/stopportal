@@ -1,4 +1,6 @@
 import datetime
+import time
+import concurrent.futures
 from typing import List
 from dataclasses import dataclass
 
@@ -21,7 +23,7 @@ class StochDecision:
 
 
 class StochCalculator:
-    async def _get_stoch(self,  df: DataFrame, period: str = "D"):
+    def _get_stoch(self,  df: DataFrame, period: str = "D"):
 
         if period == "W":
             # Функция для определения начала недели с понедельника
@@ -44,14 +46,18 @@ class StochCalculator:
 
         #print(df)
         if len(df.index) < 15:
-            return None
+            return DataFrame()
 
-        stoch = btalib.stochastic(df)
-        #print(stoch.df)
-
+        # return df
+        #stoch = btalib.stochastic(df)
+        stoch = self._generate_stoch_df(df)
         return stoch
 
-    async def _get_period_decision(
+    # Вынесено в отдельный метод для тестирования
+    def _generate_stoch_df(self, df: DataFrame):
+        return btalib.stochastic(df).df
+
+    def _get_period_decision(
         self,  df: DataFrame, period: str,
         skip_check_borders: bool = False,
         bottom_border: float = 25,
@@ -59,13 +65,13 @@ class StochCalculator:
     ) -> StochDecision:
 
         if df.empty:
-            return  StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
-
-        stoch = await StochCalculator()._get_stoch(df, period)
-        if not stoch:
             return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
 
-        last_row = stoch.df.iloc[-1]
+        stoch_df = self._get_stoch(df, period)
+        if stoch_df.empty:
+            return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
+
+        last_row = stoch_df.iloc[-1]
         need_buy = last_row.d < last_row.k and (skip_check_borders or last_row.k < bottom_border)
         need_sell = last_row.d > last_row.k and (skip_check_borders or last_row.k > top_border)
 
@@ -74,16 +80,16 @@ class StochCalculator:
             else StochDecisionEnum.SELL if need_sell
             else StochDecisionEnum.RELAX
         )
-        return StochDecision(decision=decision, df=stoch.df)
+        return StochDecision(decision=decision, df=stoch_df)
 
 
-    async def _calculate_decision(self, company: CompanyModel, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
+    def _calculate_decision(self, company: CompanyModel, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
         # Для некоторых акций увеличиваем bottom_border
         TIKERS_HIGH_BOTTOM = ['LKOH']
         bottom_border = 40 if company.tiker in TIKERS_HIGH_BOTTOM else 25
 
         # для продажи проверяем границы и разворот для всех периодов
-        per_decision = await self._get_period_decision(df, period, bottom_border=bottom_border)
+        per_decision = self._get_period_decision(df, period, bottom_border=bottom_border)
 
         if per_decision.decision == StochDecisionEnum.UNKNOWN:
             return StochDecisionDTO(
@@ -100,18 +106,15 @@ class StochCalculator:
         if period != 'M' and per_decision.decision != StochDecisionEnum.SELL:
             need_buy = False
             if period == 'W':
-                decision_month, decision_week = await asyncio.gather(
-                    self._get_period_decision(df, 'M', skip_check_borders=True),
-                    self._get_period_decision(df, 'W', bottom_border=40)
-                )
+                decision_month = self._get_period_decision(df, 'M', skip_check_borders=True)
+                decision_week = self._get_period_decision(df, 'W', bottom_border=40)
+
                 need_buy = decision_month.decision == decision_week.decision == StochDecisionEnum.BUY
 
             elif period == 'D':
-                decision_day, decision_week, decision_month = await asyncio.gather(
-                    self._get_period_decision(df, 'D'),
-                    self._get_period_decision(df, 'W', True),
-                    self._get_period_decision(df, 'M', True)
-                )
+                decision_day = self._get_period_decision(df, 'D')
+                decision_week = self._get_period_decision(df, 'W', True)
+                decision_month = self._get_period_decision(df, 'M', True)
 
                 need_buy = decision_day.decision == decision_week.decision == decision_month.decision == StochDecisionEnum.BUY
 
@@ -134,16 +137,17 @@ class StochCalculator:
 
 
 
-    async def get_stoch_decisions(
+    def get_company_stoch_decisions(
             self, company: CompanyModel, period: str
         ) -> dict[str, StochDecisionDTO]:
         days_diff_month = 30 * 31
 
         start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
         mreader = MoexReader()
-        df = (await mreader.get_company_history_async(start=start, tiker=company.tiker) if company.type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start=start, tiker=company.tiker))
+        df = (mreader.get_company_history(start=start, tiker=company.tiker) if company.type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start=start, tiker=company.tiker))
 
         results = dict()
+        tasks = []
 
         for cur_period in ['M', 'W', 'D']:
             if period == cur_period or period == 'ALL':
@@ -179,9 +183,20 @@ class StochCalculator:
                         stop=stop.value
                     )
                 else:
-                    results[cur_period] = await self._calculate_decision(
-                        company, cur_period, df, stop, last_price
+                    results[cur_period] = self._calculate_decision(
+                            company, cur_period, df, stop, last_price
                     )
 
         return results
+
+    async def get_companies_stoch_decisions(
+        self, companies: list[CompanyModel], period: str
+    ):
+        decisions = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            tasks = [executor.submit(self.get_company_stoch_decisions, company, period) for company in companies]
+
+            decisions = [task.result() for task in tasks]
+
+        return decisions
 

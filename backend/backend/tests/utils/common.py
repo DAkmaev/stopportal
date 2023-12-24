@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,11 +13,11 @@ from backend.db.models.company import CompanyModel, StopModel, StrategyModel
 async def create_test_company(
     dbsession: AsyncSession,
     need_add_stop: bool = False,
-    need_add_strategy: bool = False
+    need_add_strategy: bool = False,
+    tiker_name: str = uuid.uuid4().hex,
+    name = uuid.uuid4().hex
 ) -> CompanyModel:
     dao = CompanyDAO(dbsession)
-    tiker_name = uuid.uuid4().hex
-    name = uuid.uuid4().hex
     company = await dao.create_company_model(tiker_name, name, "MOEX")
 
     if need_add_stop:
@@ -29,6 +30,24 @@ async def create_test_company(
 
     companies = await dao.filter(tiker=tiker_name)
     return companies[0]
+
+
+async def create_test_companies(
+    dbsession: AsyncSession,
+    count: int,
+) -> list[CompanyModel]:
+    dao = CompanyDAO(dbsession)
+
+    tasks = []
+    for i in range(count):
+        tiker_name: str = uuid.uuid4().hex
+        name = uuid.uuid4().hex
+        tasks.append(dao.create_company_model(tiker_name, name, "MOEX"))
+
+    await asyncio.gather(*tasks)
+
+    companies = await dao.get_all_companies()
+    return companies
 
 
 async def create_test_briefcase(

@@ -436,12 +436,17 @@ version = "1.0.0"
 description = "bta-lib technical analysis library"
 optional = false
 python-versions = ">=3.6"
-files = [
-    {file = "bta_lib-1.0.0-py2.py3-none-any.whl", hash = "sha256:034e23521282104539f9891b62d0e5447a2482f696dd75e87617dc4a580e80fd"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 pandas = "*"
+
+[package.source]
+type = "git"
+url = "https://github.com/DAkmaev/bta-lib.git"
+reference = "HEAD"
+resolved_reference = "2f35f27366ef439534e9d42cde139e4926aae6c7"
 
 [[package]]
 name = "certifi"
@@ -3273,4 +3278,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "0c656d61bf2670f7ff8f7d800eb167872090b025c22112282db824b0c20287ec"
+content-hash = "73c4b5ae62af5c70b3a99eb4a7d5a622f9d32e42825fbb773c9e5edee41a2c87"
