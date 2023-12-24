@@ -136,6 +136,7 @@ async def test_delete_company_model(
 
 
 @pytest.mark.anyio
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 async def test_get_all_companies(
     fastapi_app: FastAPI,
     dbsession: AsyncSession,

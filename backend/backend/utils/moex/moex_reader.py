@@ -26,41 +26,17 @@ class MoexReader:
         return apimoex.get_board_candles(
             session, security=tiker, interval=10, start=str(start), columns=None)
 
-    async def get_company_history_async(
+    def get_company_history(
             self, start: datetime, tiker: str, add_current: bool = True) -> DataFrame:
 
         COLUMNS = ("OPEN", "HIGH", "LOW", "TRADEDATE", "CLOSE", "VOLUME", "VALUE")
         candle_start = datetime.datetime.today().strftime('%Y-%m-%d')
 
         with requests.Session() as session:
+            data = self._fetch_board_history(session, tiker, start, COLUMNS)
+            if add_current:
+                candles = self._fetch_board_candles(session, tiker, candle_start)
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                data = await asyncio.get_event_loop().run_in_executor(
-                    executor,
-                    lambda: self._fetch_board_history(session, tiker, start, COLUMNS)
-                )
-                if add_current:
-                    candles = await asyncio.get_event_loop().run_in_executor(
-                        executor,
-                        lambda: self._fetch_board_candles(session, tiker, candle_start)
-                    )
-            #
-            # tasks = [
-            #     self._fetch_board_history(
-            #         session, tiker=tiker,start=start, columns=COLUMNS),
-            # ]
-            # if add_current:
-            #     with concurrent.futures.ThreadPoolExecutor() as executor:
-            #
-
-                # candle_start = datetime.datetime.today().strftime('%Y-%m-%d')
-                # tasks.append(self._fetch_board_candles(
-                #     session, tiker=tiker, start=candle_start))
-
-            # results = await asyncio.gather(*tasks)
-
-            # data = results[0]
-            # candles = results[1]
             if add_current and data and candles:
                 last_candle = candles[-1]
                 last_data = {
