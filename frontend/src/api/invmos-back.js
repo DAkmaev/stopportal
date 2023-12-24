@@ -70,8 +70,8 @@ export async function getStrategies() {
 }
 
 export const endpoints = Object.freeze({
-  BRIEFCASE: 'briefcase',
-  BRIEFCASE_COMPANIES: 'briefcase/companies',
+  BRIEFCASE: 'api/briefcase',
+  BRIEFCASE_ITEMS: 'api/briefcase/items',
   COMPANIES: 'api/companies/',
   COMPANIES_CATEGORIES: 'companies/categories',
   COMPANIES_STRATEGIES: 'api/companies/strategies',

@@ -8,13 +8,6 @@
           </v-item-group>
         </v-col>
         <v-col cols="2">
-          <v-switch
-            v-model="hideNoShareCompanies"
-            label="Скрыть если 0 акций"
-            @change="fetchList"
-          />
-        </v-col>
-        <v-col cols="2">
           <v-menu
             ref="menuFrom"
             v-model="dateFromMenu"
@@ -183,7 +176,7 @@
                 <v-row>
                   <v-col cols="12" sm="6" md="6">
                     <v-autocomplete
-                      v-model="temp.company_id"
+                      v-model="temp.company.id"
                       no-data-text="Нет данных"
                       label="Выберите компанию"
                       :items="companies"
@@ -197,7 +190,7 @@
                 <v-row>
                   <v-col cols="8" sm="4" md="4">
                     <v-autocomplete
-                      v-model="temp.strategy_id"
+                      v-model="temp.strategy.id"
                       no-data-text="Нет данных"
                       label="Выберите стратегии"
                       :items="strategies"
@@ -267,8 +260,10 @@
 </template>
 
 <script>
-import { getData, putData, getStrategies, endpoints } from '@/api/invmos-back'
+import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
 
+// todo: переделать когда будет реализовано несколько портфелей
+const BRIEFCASE_ID = 1
 export default {
   name: 'Briefcase',
   filters: {
@@ -302,8 +297,8 @@ export default {
       companies: [],
       list: [],
       headers: [
-        { text: 'Компания', value: 'company_name', class: 'briefcase-val-column' },
-        { text: 'Тикер', value: 'tiker', class: 'briefcase-val-column' },
+        { text: 'Компания', value: 'company.name', class: 'briefcase-val-column' },
+        { text: 'Тикер', value: 'company.tiker', class: 'briefcase-val-column' },
         { text: 'Сектор', value: 'otrasl_name', class: 'briefcase-val-column' },
         /*        { text: 'Часть портфеля', value: 'part_name', class: 'briefcase-val-column' },
         { text: 'Тип документа', value: 'type_document', class: 'briefcase-val-column' },*/
@@ -324,10 +319,9 @@ export default {
       dateTo: undefined,
       dateFromMenu: false,
       dateToMenu: false,
-      hideNoShareCompanies: true,
       temp: {
-        company_id: undefined,
-        strategy_id: undefined,
+        company: { id: undefined },
+        strategy: { id: undefined },
         part_name: undefined,
         type_document: undefined,
         dividends: undefined,
@@ -341,14 +335,13 @@ export default {
   },
   methods: {
     async fetchList() {
-      const [allData, strategies, companies] = await Promise.all([
-        getData(endpoints.BRIEFCASE_COMPANIES, { dateFrom: this.dateFrom, dateTo: this.dateTo }),
+      const [data, strategies, companies] = await Promise.all([
+        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, { dateFrom: this.dateFrom, dateTo: this.dateTo }),
         getStrategies(),
         getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
       ])
       this.strategies = strategies
       this.companies = companies
-      const data = allData.filter(d => !this.hideNoShareCompanies || d.count)
 
       let sumCBstart = 0
       // let sumCBend = 0
@@ -384,18 +377,30 @@ export default {
       })
     },
     saveCompanyBriefcase(item) {
-      putData(endpoints.BRIEFCASE_COMPANIES, item, false)
-        .then(() => {
+      if (item.count) {
+        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, false)
+          .then(() => {
+            this.fetchList()
+            console.log('Updated')
+          })
+      } else {
+        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`).then(() => {
           this.fetchList()
-          console.log('Updated')
+          console.log('Deleted')
         })
+      }
     },
     handleAdd() {
       this.resetTemp()
       this.dialog = true
     },
     addData() {
-      putData(endpoints.BRIEFCASE_COMPANIES, this.temp, false)
+      const temp = { ...this.temp }
+      if (!temp.strategy.id) {
+        temp.strategy = null
+      }
+
+      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, temp, false)
         .then(() => {
           this.dialog = false
           this.fetchList()
@@ -404,8 +409,8 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        company_id: undefined,
-        strategy_id: undefined,
+        company: { id: undefined },
+        strategy: { id: undefined },
         part_name: undefined,
         type_document: undefined,
         dividends: undefined,

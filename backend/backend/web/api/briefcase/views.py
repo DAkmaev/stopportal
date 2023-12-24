@@ -103,7 +103,7 @@ async def get_briefcase_item(
     return await dao.get_briefcase_item_model(item_id)
 
 
-@router.get("/{briefcase_id}/items", response_model=List[BriefcaseItemDTO])
+@router.get("/{briefcase_id}/items/", response_model=List[BriefcaseItemDTO])
 async def get_briefcase_items(
     briefcase_id: int,
     dao: BriefcaseDAO = Depends(),
