@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from backend.db.dao.login import LoginDAO
 from backend.web.api.login.schema import Token
-from backend.web.api.user.schema import UserModelDTO
+from backend.web.api.auth.schema import UserModelDTO
 from backend.web.deps import CurrentUser
 
 router = APIRouter()
