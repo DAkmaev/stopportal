@@ -92,7 +92,7 @@ async def create_test_user(
     is_active: bool = True,
 ) -> UserModel:
     name = name if name else random_lower_string()
-    email = name if email else random_email()
+    email = email if email else random_email()
     password = password if password else random_lower_string()
 
     dao = UserDAO(dbsession)
@@ -116,37 +116,65 @@ def random_email() -> str:
 async def get_superuser_token_headers(
     client: AsyncClient,
     fastapi_app: FastAPI,
-    dbsession: AsyncSession
+    dbsession: AsyncSession,
+    name: str = None,
+    email: str = None,
+    password: str = None
 ) -> dict[str, str]:
-    return await _get_headers(client, fastapi_app, dbsession, is_superuser=True)
+    return await _get_test_user_headers(
+        client, fastapi_app, dbsession,
+        is_superuser=True,
+        name=name,
+        email=email,
+        password=password
+    )
 
 
 async def get_user_token_headers(
     client: AsyncClient,
     fastapi_app: FastAPI,
-    dbsession: AsyncSession
+    dbsession: AsyncSession,
+    name: str = None,
+    email: str = None,
+    password: str = None
 ) -> dict[str, str]:
-    return await _get_headers(client, fastapi_app, dbsession, is_superuser=False)
+    return await _get_test_user_headers(
+        client, fastapi_app, dbsession,
+        is_superuser=False,
+        name=name,
+        email=email,
+        password=password
+    )
 
 
-async def _get_headers(
+async def _get_test_user_headers(
     client: AsyncClient,
     fastapi_app: FastAPI,
     dbsession: AsyncSession,
     is_superuser: bool,
-    # name: str = random_lower_string(),
-    # email: str = random_email(),
-    # password: str = random_lower_string()
+    name: str = None,
+    email: str = None,
+    password: str = None
 ) -> dict[str, str]:
-    name = settings.FIRST_SUPERUSER if is_superuser else random_lower_string()
-    password = settings.FIRST_SUPERUSER_PASSWORD if is_superuser else random_lower_string()
-    email = random_email()
+    name = settings.FIRST_SUPERUSER if is_superuser and not name else random_lower_string()
+    email = email if email else random_email()
+    password = settings.FIRST_SUPERUSER_PASSWORD if is_superuser and not password else random_lower_string()
     await create_test_user(
         dbsession, is_superuser=is_superuser,
         name=name,
         email=email,
         password=password,
     )
+
+    return await get_headers(client, fastapi_app, name, password)
+
+
+async def get_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    name: str,
+    password: str
+) -> dict[str, str]:
     login_data = {
         "username": name,
         "password": password,

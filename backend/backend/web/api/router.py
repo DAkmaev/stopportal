@@ -2,7 +2,7 @@ from fastapi.routing import APIRouter
 
 from backend.web.api import (docs, dummy, echo, monitoring, user,
                              stoch, company, cron_job_run, strategy, stop, briefcase,
-                             login)
+                             login, auth)
 
 api_router = APIRouter()
 api_router.include_router(monitoring.router)
@@ -17,4 +17,5 @@ api_router.include_router(strategy.router, prefix="/strategies", tags=["strategi
 api_router.include_router(cron_job_run.router, prefix="/cron_job_run", tags=["cron_job_run"])
 api_router.include_router(briefcase.router, prefix="/briefcase", tags=["briefcase"])
 api_router.include_router(login.router, prefix="/login", tags=["login"])
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 

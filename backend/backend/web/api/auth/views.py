@@ -1,13 +1,27 @@
 from typing import List
 
-from fastapi import APIRouter
-from fastapi.param_functions import Depends
+from fastapi import APIRouter, Depends
 
 from backend.db.dao.user import UserDAO
 from backend.db.models.user import UserModel
-from backend.web.api.user.schema import UserModelDTO, UserModelInputDTO
-
+from backend.web.api.auth.schema import UserModelInputDTO, UserModelDTO
+from backend.web.deps import CurrentUser
 router = APIRouter()
+
+
+@router.get("/{user_id}", response_model=UserModelDTO)
+async def get_user_model(
+    user_id: int,
+    user_dao: UserDAO = Depends(),
+) -> UserModel:
+    """
+    Retrieve all dummy objects from the database.
+
+    :param user_dao: DAO for user models.
+    :param user_id: ID of user.
+    :return: user object from database.
+    """
+    return await user_dao.get_user(id=user_id)
 
 
 @router.get("/", response_model=List[UserModelDTO])
@@ -25,21 +39,6 @@ async def get_user_models(
     :return: list of dummy objects from database.
     """
     return await user_dao.get_all_users(limit=limit, offset=offset)
-
-
-@router.get("/{user_id}", response_model=UserModelDTO)
-async def get_user_models(
-    user_id: int,
-    user_dao: UserDAO = Depends(),
-) -> UserModel:
-    """
-    Retrieve all dummy objects from the database.
-
-    :param user_dao: DAO for user models.
-    :param user_id: ID of user.
-    :return: user object from database.
-    """
-    return await user_dao.get_user(id=user_id)
 
 
 @router.post("/")
@@ -62,9 +61,9 @@ async def create_user_model(
     )
 
 
-# @router.get("/me", response_model=UserModelDTO)
-# def read_user_me(current_user: CurrentUser) -> UserModelDTO:
-#     """
-#     Get current user.
-#     """
-#     return current_user
+@router.post("/me", response_model=UserModelDTO)
+async def read_user_me(current_user: CurrentUser) -> UserModelDTO:
+    """
+    Get current user.
+    """
+    return current_user
