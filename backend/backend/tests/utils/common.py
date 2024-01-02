@@ -1,13 +1,20 @@
 import asyncio
+import random
+import string
 import uuid
 
+import pytest
+from fastapi import FastAPI, Depends
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.dao.companies import CompanyDAO
-from backend.db.dao.stops import StopsDAO
+from backend.db.dao.user import UserDAO
 from backend.db.models.briefcase import BriefcaseItemModel, BriefcaseModel
 from backend.db.models.company import CompanyModel, StopModel, StrategyModel
+from backend.db.models.user import UserModel
+from backend.settings import settings
 
 
 async def create_test_company(
@@ -74,3 +81,79 @@ async def create_test_briefcase_item(
     assert len(briefcase_items) == 1
 
     return briefcase_items[0]
+
+
+async def create_test_user(
+    dbsession: AsyncSession,
+    name: str = None,
+    email: str = None,
+    password: str = None,
+    is_superuser: bool = False,
+    is_active: bool = True,
+) -> UserModel:
+    name = name if name else random_lower_string()
+    email = name if email else random_email()
+    password = password if password else random_lower_string()
+
+    dao = UserDAO(dbsession)
+
+    await dao.create_user_model(name, email, password, is_superuser, is_active)
+    user = await dao.get_user_by_name(name)
+
+    assert user
+
+    return user
+
+
+def random_lower_string() -> str:
+    return "".join(random.choices(string.ascii_lowercase, k=32))
+
+
+def random_email() -> str:
+    return f"{random_lower_string()}@{random_lower_string()}.com"
+
+
+async def get_superuser_token_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession
+) -> dict[str, str]:
+    return await _get_headers(client, fastapi_app, dbsession, is_superuser=True)
+
+
+async def get_user_token_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession
+) -> dict[str, str]:
+    return await _get_headers(client, fastapi_app, dbsession, is_superuser=False)
+
+
+async def _get_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+    is_superuser: bool,
+    # name: str = random_lower_string(),
+    # email: str = random_email(),
+    # password: str = random_lower_string()
+) -> dict[str, str]:
+    name = settings.FIRST_SUPERUSER if is_superuser else random_lower_string()
+    password = settings.FIRST_SUPERUSER_PASSWORD if is_superuser else random_lower_string()
+    email = random_email()
+    await create_test_user(
+        dbsession, is_superuser=is_superuser,
+        name=name,
+        email=email,
+        password=password,
+    )
+    login_data = {
+        "username": name,
+        "password": password,
+    }
+    url = fastapi_app.url_path_for("login_access_token")
+    response = await client.post(url, data=login_data)
+    tokens = response.json()
+    a_token = tokens["access_token"]
+    headers = {"Authorization": f"Bearer {a_token}"}
+    return headers

@@ -60,3 +60,11 @@ async def create_user_model(
         is_superuser=new_user_object.is_superuser,
         is_active=new_user_object.is_active
     )
+
+
+# @router.get("/me", response_model=UserModelDTO)
+# def read_user_me(current_user: CurrentUser) -> UserModelDTO:
+#     """
+#     Get current user.
+#     """
+#     return current_user

@@ -14,6 +14,7 @@ from backend.db.dependencies import get_db_session
 from backend.db.utils import create_database, drop_database
 from backend.settings import settings
 from backend.web.application import get_app
+from backend.tests.utils.common import get_superuser_token_headers, get_user_token_headers
 
 
 @pytest.fixture(scope="session")
@@ -108,3 +109,13 @@ async def client(
     """
     async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
         yield ac
+
+@pytest.fixture()
+async def superuser_token_headers(client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession) -> dict[str, str]:
+    headers = await get_superuser_token_headers(client, fastapi_app, dbsession)
+    return headers
+
+@pytest.fixture()
+async def user_token_headers(client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession) -> dict[str, str]:
+    headers = await get_user_token_headers(client, fastapi_app, dbsession)
+    return headers
