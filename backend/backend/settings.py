@@ -1,4 +1,5 @@
 import enum
+import secrets
 from pathlib import Path
 # from tempfile import gettempdir
 
@@ -42,6 +43,14 @@ class Settings(BaseSettings):
     # Variables for the database
     db_file: Path = "./db.sqlite3"
     db_echo: bool = False
+
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    API_V1_STR: str = "/api"
+    ALGORITHM: str = "HS256"
+    SECRET_KEY: str = "sdsdsdw34fdfwr2efdfwe2" #secrets.token_urlsafe(32)
+
+    FIRST_SUPERUSER: str = "admin"
+    FIRST_SUPERUSER_PASSWORD: str = "changethis"
 
     @property
     def db_url(self) -> URL:
