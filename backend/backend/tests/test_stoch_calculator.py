@@ -165,6 +165,24 @@ async def test_get_stoch_decisions(sample_dataframe, sample_stoch_dataframe,
                                                                        period)
             assert len(decisions) == 10
 
+@pytest.mark.anyio
+async def test_get_stoch(
+    sample_lkoh_dataframe,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession
+) -> None:
+
+    calculator = StochCalculator()
+    stoch_D = calculator.get_stoch(sample_lkoh_dataframe, 'D')
+    stoch_W = calculator.get_stoch(sample_lkoh_dataframe, 'W')
+    stoch_M = calculator.get_stoch(sample_lkoh_dataframe, 'M')
+
+    assert stoch_D.size != 0
+    assert stoch_W.size != 0
+    assert stoch_M.size != 0
+    assert stoch_W.iloc[-1].name == stoch_M.iloc[-1].name == stoch_D.iloc[-1].name
+
+
 # @pytest.mark.anyio
 # async def test_get_history_stochs(
 #     sample_lkoh_dataframe,
