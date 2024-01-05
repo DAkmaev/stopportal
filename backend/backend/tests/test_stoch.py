@@ -3,13 +3,17 @@ import uuid
 import time
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.dao.companies import CompanyDAO
+from backend.db.dao.cron_job import CronJobRunDao
 from backend.db.dao.stoch_decisions import StochDecisionDAO
+from backend.services.stoch_service import StochService
+from backend.tests.utils.common import create_test_company
 
 
 @pytest.mark.anyio
@@ -112,6 +116,8 @@ async def test_generate_stoch_decision(
     print(f"finished at {time.strftime('%a')}")
     assert response.status_code == status.HTTP_200_OK
     assert response.json()[period]['decision'] == 'UNKNOWN'
+
+
 
 
 # @pytest.mark.anyio

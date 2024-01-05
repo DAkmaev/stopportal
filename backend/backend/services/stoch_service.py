@@ -1,5 +1,6 @@
 import asyncio
 
+import pandas as pd
 from fastapi import Depends
 
 from backend.db.dao.briefcases import BriefcaseDAO
@@ -7,7 +8,7 @@ from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.cron_job import CronJobRunDao
 from backend.db.dao.stoch_decisions import StochDecisionDAO
 from backend.db.models.company import CompanyModel
-from backend.utils.stoch.stoch_calculator import StochCalculator
+from backend.utils.stoch.stoch_calculator import StochCalculator, StochDecision
 from backend.utils.telegram.telegramm_client import send_tg_message
 from backend.web.api.stoch.scheme import StochDecisionDTO, StochDecisionEnum
 
@@ -120,3 +121,49 @@ class StochService:
                 await send_tg_message(message)
 
         return decision_model
+
+    async def history_stochs(self, tiker: str) -> dict:
+        company = await self.company_dao.get_company_model_by_tiker(tiker=tiker)
+        df = self.stoch_calculator.get_history_data(company, 3650, False)
+        low_data = False
+
+        bottom_border: float = 25
+        # top_border: float = 80
+
+        result_df = pd.DataFrame(columns=['Buy', 'Buy_M', 'Sell'])
+
+        while not low_data:
+            if df.size == 0:
+                low_data = True
+                continue
+
+            stoch_D = self.stoch_calculator.get_stoch(df, "D")
+            stoch_M = self.stoch_calculator.get_stoch(df, "D")
+
+            if stoch_D.size == 0 or stoch_M.size == 0:
+                low_data = True
+                continue
+
+            last_row_D = stoch_D.iloc[-1]
+            last_row_M = stoch_M.iloc[-1]
+
+            date = str(last_row_D.name.date())
+
+            if last_row_D.d < last_row_D.k < bottom_border:
+                result_df.loc[date, 'Buy'] = 'X'
+
+            if last_row_D.d < last_row_D.k < bottom_border and last_row_M.d < last_row_M.k:
+                result_df.loc[date, 'Buy_M'] = 'X'
+
+            if last_row_D.k < last_row_D.d:
+                result_df.loc[date, 'Sell'] = 'X'
+
+            df = df[:-1]
+
+        # with pd.ExcelWriter('history.xlsx', mode='a') as writer:
+        #     result_df.to_excel(writer, sheet_name=tiker)
+
+        result_df.to_csv(f'history_{tiker}.csv', ';')
+
+        return {'status': 'SUCCESS'}
+

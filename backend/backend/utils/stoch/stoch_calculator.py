@@ -23,7 +23,7 @@ class StochDecision:
 
 
 class StochCalculator:
-    def _get_stoch(self,  df: DataFrame, period: str = "D"):
+    def get_stoch(self,  df: DataFrame, period: str = "D"):
 
         if period == "W":
             # Функция для определения начала недели с понедельника
@@ -67,7 +67,7 @@ class StochCalculator:
         if df.empty:
             return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
 
-        stoch_df = self._get_stoch(df, period)
+        stoch_df = self.get_stoch(df, period)
         if stoch_df.empty:
             return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
 
@@ -135,17 +135,19 @@ class StochCalculator:
             last_price=last_price
         )
 
+    def get_history_data(self, company: CompanyModel, days_diff_month: int = 30 * 31, add_current: bool = True):
+        start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
+        mreader = MoexReader()
+        df = (mreader.get_company_history(start=start, tiker=company.tiker, add_current=add_current) if company.type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(
+            start=start, tiker=company.tiker))
 
+        return df
 
     def get_company_stoch_decisions(
             self, company: CompanyModel, period: str
         ) -> dict[str, StochDecisionDTO]:
-        days_diff_month = 30 * 31
 
-        start = (datetime.datetime.now() - datetime.timedelta(days_diff_month)).date()
-        mreader = MoexReader()
-        df = (mreader.get_company_history(start=start, tiker=company.tiker) if company.type == CompanyTypeEnum.MOEX else YahooReader.get_company_history(start=start, tiker=company.tiker))
-
+        df = self.get_history_data(company)
         results = dict()
         tasks = []
 
@@ -199,4 +201,3 @@ class StochCalculator:
             decisions = [task.result() for task in tasks]
 
         return decisions
-

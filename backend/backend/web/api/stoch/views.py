@@ -53,3 +53,11 @@ async def get_stochs(
 ) -> List[StochDecisionDTO]:
     stochs = await stoch_dao.get_stoch_decision_models()
     return stochs
+
+@router.get("/history/{tiker}")
+async def get_history_stochs(
+    tiker: str,
+    stoch_service: StochService = Depends(),
+) -> dict:
+    await stoch_service.history_stochs(tiker)
+    return {'status': 'OK'}
