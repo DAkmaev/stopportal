@@ -44,10 +44,11 @@ class StochCalculator:
                 ['OPEN', 'CLOSE', 'HIGH', 'LOW']].agg(
                 {'OPEN': 'first', 'CLOSE': 'last', 'HIGH': 'max', 'LOW': 'min'})
 
+        # Закоментировал пока
         # Добавляем данные для неполной недели, или месяца
-        if last_row.name != df.iloc[-1].name:
-            new_row = last_row.to_frame().T
-            df = df._append(new_row.drop(columns=['VOLUME', 'VALUE'], errors = 'ignore'))
+        # if last_row.name != df.iloc[-1].name:
+        #     new_row = last_row.to_frame().T
+        #     df = df._append(new_row.drop(columns=['VOLUME', 'VALUE'], errors = 'ignore'))
 
         #print(df)
         if len(df.index) < 15:
