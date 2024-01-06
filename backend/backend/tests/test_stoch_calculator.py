@@ -191,12 +191,13 @@ async def test_get_stoch(
 #     dbsession: AsyncSession
 # ) -> None:
 #     company = await create_test_company(dbsession, tiker_name='LKOH')
-#
-#     with patch(
-#         'backend.utils.moex.moex_reader.MoexReader.get_company_history') as mock_method:
+#     with patch('backend.utils.moex.moex_reader.MoexReader.get_company_history') as mock_method:
 #         mock_method.return_value = sample_lkoh_dataframe
+#         #mock_method.return_value = sample_lkoh_dataframe.iloc[:-1980]
+#         #mock_method.return_value = sample_lkoh_dataframe.iloc[:-2014]
 #
-#     url = fastapi_app.url_path_for("get_history_stochs", tiker=company.tiker)
-#     response = await client.get(url)
 #
-#     assert response.status_code == status.HTTP_200_OK
+#         url = fastapi_app.url_path_for("get_history_stochs", tiker=company.tiker)
+#         response = await client.get(url)
+#
+#         assert response.status_code == status.HTTP_200_OK

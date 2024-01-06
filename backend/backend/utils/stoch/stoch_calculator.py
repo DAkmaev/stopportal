@@ -35,6 +35,10 @@ class StochCalculator:
                 ['OPEN', 'CLOSE', 'HIGH', 'LOW']].agg(
                 {'OPEN': 'first', 'CLOSE': 'last', 'HIGH': 'max', 'LOW': 'min'})
 
+            # Удаляем последнюю строку, если она не является полной неделей
+            # if df.index[-1] + pd.DateOffset(weeks=1) > last_row.name:
+            #     df = df.iloc[:-1]
+
         elif period == "M":
             def month_start(date):
                 return date.replace(day=1)
@@ -44,11 +48,9 @@ class StochCalculator:
                 ['OPEN', 'CLOSE', 'HIGH', 'LOW']].agg(
                 {'OPEN': 'first', 'CLOSE': 'last', 'HIGH': 'max', 'LOW': 'min'})
 
-        # Закоментировал пока
-        # Добавляем данные для неполной недели, или месяца
-        # if last_row.name != df.iloc[-1].name:
-        #     new_row = last_row.to_frame().T
-        #     df = df._append(new_row.drop(columns=['VOLUME', 'VALUE'], errors = 'ignore'))
+            # Удаляем последнюю строку, если она не является полным месяцем
+            # if df.index[-1] == last_row.name.replace(day=1):
+            #     df = df.iloc[:-1]
 
         #print(df)
         if len(df.index) < 15:
