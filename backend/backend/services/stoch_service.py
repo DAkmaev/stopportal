@@ -130,7 +130,7 @@ class StochService:
         bottom_border: float = 25
         # top_border: float = 80
 
-        result_df = pd.DataFrame(columns=['Buy', 'Buy_M', 'Sell'])
+        result_df = pd.DataFrame(columns=['Buy', 'Buy_M', 'Sell', 'last_price', 'k', 'd', 'k_M', 'd_M'])
 
         while not low_data:
             if df.size == 0:
@@ -138,7 +138,7 @@ class StochService:
                 continue
 
             stoch_D = self.stoch_calculator.get_stoch(df, "D")
-            stoch_M = self.stoch_calculator.get_stoch(df, "D")
+            stoch_M = self.stoch_calculator.get_stoch(df, "M")
 
             if stoch_D.size == 0 or stoch_M.size == 0:
                 low_data = True
@@ -149,14 +149,26 @@ class StochService:
 
             date = str(last_row_D.name.date())
 
+            has_decision = False
             if last_row_D.d < last_row_D.k < bottom_border:
+                has_decision = True
                 result_df.loc[date, 'Buy'] = 'X'
 
             if last_row_D.d < last_row_D.k < bottom_border and last_row_M.d < last_row_M.k:
+                has_decision = True
                 result_df.loc[date, 'Buy_M'] = 'X'
 
             if last_row_D.k < last_row_D.d:
+                has_decision = True
                 result_df.loc[date, 'Sell'] = 'X'
+
+            if has_decision:
+                last_price = df.iloc[-1]['CLOSE']
+                result_df.loc[date, 'last_price'] = round(last_price, 2)
+                result_df.loc[date, 'k'] = round(last_row_D.k, 2)
+                result_df.loc[date, 'd'] = round(last_row_D.d, 2)
+                result_df.loc[date, 'k_M'] = round(last_row_M.k, 2)
+                result_df.loc[date, 'd_M'] = round(last_row_M.d, 2)
 
             df = df[:-1]
 
