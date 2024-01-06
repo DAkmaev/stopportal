@@ -165,16 +165,17 @@ class StochService:
             if has_decision:
                 last_price = df.iloc[-1]['CLOSE']
                 result_df.loc[date, 'last_price'] = round(last_price, 2)
-                result_df.loc[date, 'k'] = round(last_row_D.k, 2)
-                result_df.loc[date, 'd'] = round(last_row_D.d, 2)
-                result_df.loc[date, 'k_M'] = round(last_row_M.k, 2)
-                result_df.loc[date, 'd_M'] = round(last_row_M.d, 2)
+                result_df.loc[date, 'k'] = round(last_row_D.k, 4)
+                result_df.loc[date, 'd'] = round(last_row_D.d, 4)
+                result_df.loc[date, 'k_M'] = round(last_row_M.k, 4)
+                result_df.loc[date, 'd_M'] = round(last_row_M.d, 4)
 
             df = df[:-1]
 
         # with pd.ExcelWriter('history.xlsx', mode='a') as writer:
         #     result_df.to_excel(writer, sheet_name=tiker)
 
+        # result_df.sort_index(ascending=False, inplace=True)
         result_df.to_csv(f'history_{tiker}.csv', ';')
 
         return {'status': 'SUCCESS'}
