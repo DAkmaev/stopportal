@@ -1,8 +1,10 @@
 import asyncio
 import logging
+import os.path
 import time
 from _datetime import datetime
 from typing import List, Dict
+from starlette.responses import FileResponse
 
 from fastapi import APIRouter, Depends
 
@@ -58,6 +60,7 @@ async def get_stochs(
 async def get_history_stochs(
     tiker: str,
     stoch_service: StochService = Depends(),
-) -> dict:
-    await stoch_service.history_stochs(tiker)
-    return {'status': 'OK'}
+):
+    result = await stoch_service.history_stochs(tiker)
+    return FileResponse(os.path.join(result['path'], result['file_name']), media_type='application/octet-stream',
+                        filename=result['file_name'])

@@ -33,3 +33,24 @@ class BriefcaseItemModel(Base):
     strategy: Mapped[Optional['StrategyModel']] = relationship()
     briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
 
+
+# class BriefcaseRegistryItemModel(Base):
+#     """Model for BriefcaseRegistryItem."""
+#
+#     __tablename__ = "briefcase_registry_items"
+#
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#     datetime: [datetime]
+#     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
+#     company: Mapped['CompanyModel'] = relationship(lazy="selectin")
+#     count: Mapped[int] = mapped_column(Integer)
+#     amount: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
+#
+#     strategy_id: Mapped[int] = mapped_column(ForeignKey("strategies.id"), nullable=True)
+#     strategy: Mapped[Optional['StrategyModel']] = relationship()
+#
+#     валюта
+#     type (тип операции)
+#
+#     briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
+

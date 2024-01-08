@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File
 
 from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.models.briefcase import BriefcaseModel, BriefcaseItemModel
@@ -173,3 +173,11 @@ async def delete_briefcase_item(
     :param dao: DAO for Briefcase models.
     """
     await dao.delete_briefcase_item_model(item_id)
+
+
+# @router.post("/uploadfile/")
+# async def create_upload_files(
+#     file: Annotated[UploadFile, File(description="Multiple files as UploadFile")],
+# ):
+#     return {"filenames": file.filename}
+
