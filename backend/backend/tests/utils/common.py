@@ -11,7 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.dao.companies import CompanyDAO
 from backend.db.dao.user import UserDAO
-from backend.db.models.briefcase import BriefcaseItemModel, BriefcaseModel
+from backend.db.models.briefcase import (BriefcaseItemModel, BriefcaseModel,
+                                         BriefcaseRegistryModel, RegistryOperationEnum)
 from backend.db.models.company import CompanyModel, StopModel, StrategyModel
 from backend.db.models.user import UserModel
 from backend.settings import settings
@@ -21,9 +22,11 @@ async def create_test_company(
     dbsession: AsyncSession,
     need_add_stop: bool = False,
     need_add_strategy: bool = False,
-    tiker_name: str = uuid.uuid4().hex,
-    name = uuid.uuid4().hex
+    tiker_name: str = None,
+    name: str = None
 ) -> CompanyModel:
+    tiker_name = tiker_name if tiker_name else uuid.uuid4().hex
+    name = name if name else uuid.uuid4().hex
     dao = CompanyDAO(dbsession)
     company = await dao.create_company_model(tiker_name, name, "MOEX")
 
@@ -63,9 +66,9 @@ async def create_test_briefcase(
     dao = BriefcaseDAO(dbsession)
     await dao.create_briefcase_model()
     briefcases = await dao.get_all_briefcases()
-    assert len(briefcases) == 1
+    assert briefcases
 
-    return briefcases[0]
+    return briefcases[-1]
 
 
 async def create_test_briefcase_item(
@@ -81,6 +84,27 @@ async def create_test_briefcase_item(
     assert len(briefcase_items) == 1
 
     return briefcase_items[0]
+
+
+async def create_test_briefcase_registry(
+    dbsession: AsyncSession,
+    briefcase: BriefcaseModel = None,
+    company: CompanyModel = None,
+) -> BriefcaseRegistryModel:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    company = company if company else await create_test_company(dbsession)
+    briefcase = briefcase if briefcase else await create_test_briefcase(dbsession)
+
+    # Создаем новую запись briefcase_registry
+    await briefcase_dao.create_briefcase_registry_model(
+        count=10, amount=100.0, company_id=company.id, briefcase_id=briefcase.id,
+        operation=RegistryOperationEnum.BUY
+    )
+
+    registry_items = await briefcase_dao.get_all_briefcase_registry(briefcase.id)
+    assert registry_items
+
+    return registry_items[-1]
 
 
 async def create_test_user(

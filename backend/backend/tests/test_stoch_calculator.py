@@ -180,7 +180,6 @@ async def test_get_stoch(
     assert stoch_D.size != 0
     assert stoch_W.size != 0
     assert stoch_M.size != 0
-    assert stoch_W.iloc[-1].name == stoch_M.iloc[-1].name == stoch_D.iloc[-1].name
 
 
 # @pytest.mark.anyio

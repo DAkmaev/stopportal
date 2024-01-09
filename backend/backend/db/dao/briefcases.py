@@ -1,10 +1,14 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.db.dao.common import update_registry_field
 from backend.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 from typing import List
 
-from backend.db.models.briefcase import BriefcaseModel, BriefcaseItemModel
+from backend.db.models.briefcase import (BriefcaseModel, BriefcaseItemModel,
+                                         BriefcaseRegistryModel, CurrencyEnum,
+                                         RegistryOperationEnum)
 from backend.db.models.company import CompanyModel, StrategyModel
 
 
@@ -55,8 +59,9 @@ class BriefcaseDAO:
         self.session.add(briefcase_item)
         return briefcase_item
 
-    async def get_all_briefcases(self, limit: int = 10000, offset: int = 0) -> List[
-        BriefcaseModel]:
+    async def get_all_briefcases(
+        self, limit: int = 10000, offset: int = 0
+    ) -> List[BriefcaseModel]:
         """
         Get all briefcase models with limit/offset pagination.
 
@@ -185,3 +190,120 @@ class BriefcaseDAO:
         """
         briefcase_item = await self.get_briefcase_item_model(briefcase_item_id)
         await self.session.delete(briefcase_item)
+
+    async def get_all_briefcase_registry(
+        self, briefcase_id: int, limit: int = 100, offset: int = 0
+    ) -> List[BriefcaseRegistryModel]:
+        """
+        Get all briefcase registry models with limit/offset pagination.
+
+        :param briefcase_id:
+        :param limit: Limit of briefcase items.
+        :param offset: Offset of briefcase items.
+        :return: List of briefcase item models.
+        """
+        raw_briefcase_registry = await self.session.execute(
+            select(BriefcaseRegistryModel).filter_by(briefcase_id=briefcase_id).limit(limit).offset(offset),
+        )
+        return list(raw_briefcase_registry.scalars().fetchall())
+
+    async def get_briefcase_registry_model(
+        self, registry_id: int
+    ) -> BriefcaseRegistryModel:
+        """
+        Get briefcase registry model by ID.
+
+        :param registry_id: ID of the briefcase registry.
+        :return: Briefcase registry model.
+        """
+        registry_item = await self.session.get(BriefcaseRegistryModel, registry_id)
+
+        if not registry_item:
+            raise HTTPException(status_code=404, detail="Briefcase registry not found")
+
+        return registry_item
+
+    async def create_briefcase_registry_model(
+        self, count: int, amount: float, company_id: int, briefcase_id: int,
+        operation: RegistryOperationEnum, strategy_id: int = None,
+        price: float = None, currency: CurrencyEnum = CurrencyEnum.RUB
+    ) -> BriefcaseRegistryModel:
+        """
+        Add a single briefcase registry to the session.
+
+        :param currency:
+        :param price:
+        :param operation:
+        :param amount:
+        :param briefcase_id:
+        :param count: Number of items in the briefcase.
+        :param company_id: ID of the associated company.
+        :param strategy_id: ID of the associated strategy.
+        """
+        briefcase = await self.session.get(BriefcaseModel, briefcase_id)
+        if not briefcase:
+            raise HTTPException(status_code=404, detail="Портфель не найдена")
+
+        company = await self.session.get(CompanyModel, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Компания не найдена")
+
+        registry = BriefcaseRegistryModel(
+            count=count, amount=amount, company=company, briefcase=briefcase,
+            operation=operation, currency=currency
+        )
+        if strategy_id:
+            strategy = await self.session.get(StrategyModel, strategy_id)
+            registry.strategy = strategy
+
+        if price:
+            registry.price = price
+
+        if price:
+            registry.price = price
+
+        self.session.add(registry)
+        return registry
+
+    async def update_briefcase_registry_model(
+        self, registry_id: int, updated_fields: dict
+    ) -> BriefcaseRegistryModel:
+        """
+        Update briefcase item model in the session.
+
+        :param updated_fields: Dict
+        :param registry_id: int
+        :return: Updated briefcase registry model.
+        """
+        registry_item = await self.get_briefcase_registry_model(registry_id)
+        if not registry_item:
+            raise HTTPException(status_code=404, detail="Запись не найдена")
+
+        await update_registry_field(
+            self.session, CompanyModel,
+            "company", updated_fields, registry_item, "Компания не найдена"
+        )
+        await update_registry_field(
+            self.session, StrategyModel,
+            "strategy", updated_fields, registry_item, "Стратегия не найдена"
+        )
+        await update_registry_field(
+            self.session, BriefcaseModel,
+            "briefcase", updated_fields, registry_item, "Портфель не найден"
+        )
+
+        # Update other fields if specified and allowed
+        for field, value in updated_fields.items():
+            if hasattr(registry_item, field) and value is not None:
+                setattr(registry_item, field, value)
+
+        return registry_item
+
+    async def delete_briefcase_registry_model(self, registry_id: int) -> None:
+        """
+        Delete briefcase registry model in the session.
+
+        :param registry_id: ID of the briefcase registry to delete.
+        """
+        registry_item = await self.get_briefcase_registry_model(registry_id)
+        await self.session.delete(registry_item)

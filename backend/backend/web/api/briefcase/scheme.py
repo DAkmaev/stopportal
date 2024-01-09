@@ -1,6 +1,10 @@
+from datetime import datetime
 from typing import Optional
 
+import timestamp
 from pydantic import BaseModel
+
+from backend.db.models.briefcase import CurrencyEnum, RegistryOperationEnum
 
 
 class BriefcaseInputDTO(BaseModel):
@@ -32,4 +36,20 @@ class BriefcaseItemInputDTO(BaseModel):
 
 class BriefcaseItemDTO(BriefcaseItemInputDTO):
     id: int
+
+
+class BriefcaseRegistryInputDTO(BaseModel):
+    count: int
+    company: BriefcaseCompanyDTO
+    strategy: Optional[BriefcaseStrategyDTO] = None
+    amount: float
+    price: Optional[float] = None
+    currency: CurrencyEnum
+    operation: RegistryOperationEnum
+    briefcase: BriefcaseDTO
+
+
+class BriefcaseRegistryDTO(BriefcaseRegistryInputDTO):
+    id: int
+    created_date: datetime
 

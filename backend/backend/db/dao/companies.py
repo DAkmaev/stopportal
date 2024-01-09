@@ -34,7 +34,6 @@ class CompanyDAO:
             raise HTTPException(status_code=400,
                                 detail=f"Компания {exist_company.tiker} уже существует")
 
-
         company = CompanyModel(tiker=tiker, name=name, type=type)
         self.session.add(company)
         return company
