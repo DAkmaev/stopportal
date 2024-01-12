@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -92,8 +94,6 @@ class BriefcaseDAO:
         """
         Get all briefcase item models with limit/offset pagination.
 
-        :param limit: Limit of briefcase items.
-        :param offset: Offset of briefcase items.
         :return: List of briefcase item models.
         """
         raw_briefcase_items = await self.session.execute(
@@ -192,18 +192,29 @@ class BriefcaseDAO:
         await self.session.delete(briefcase_item)
 
     async def get_all_briefcase_registry(
-        self, briefcase_id: int, limit: int = 100, offset: int = 0
+        self, briefcase_id: int, limit: int = 100, offset: int = 0,
+        date_from: datetime = None, date_to: datetime = None
     ) -> List[BriefcaseRegistryModel]:
         """
         Get all briefcase registry models with limit/offset pagination.
 
+        :param date_to:
+        :param date_from:
         :param briefcase_id:
         :param limit: Limit of briefcase items.
         :param offset: Offset of briefcase items.
         :return: List of briefcase item models.
         """
+        query = select(BriefcaseRegistryModel).filter_by(briefcase_id=briefcase_id)
+
+        if date_from:
+            query = query.where(BriefcaseRegistryModel.created_date > date_from)
+
+        if date_to:
+            query = query.where(BriefcaseRegistryModel.created_date < date_to)
+
         raw_briefcase_registry = await self.session.execute(
-            select(BriefcaseRegistryModel).filter_by(briefcase_id=briefcase_id).limit(limit).offset(offset),
+            query.limit(limit).offset(offset).order_by(BriefcaseRegistryModel.created_date.desc())
         )
         return list(raw_briefcase_registry.scalars().fetchall())
 
@@ -286,10 +297,6 @@ class BriefcaseDAO:
         await update_registry_field(
             self.session, StrategyModel,
             "strategy", updated_fields, registry_item, "Стратегия не найдена"
-        )
-        await update_registry_field(
-            self.session, BriefcaseModel,
-            "briefcase", updated_fields, registry_item, "Портфель не найден"
         )
 
         # Update other fields if specified and allowed

@@ -1,15 +1,15 @@
 """empty message
 
-Revision ID: 2eaa067ab4e8
+Revision ID: 1d762e7a925c
 Revises: c890745a5bcd
-Create Date: 2024-01-09 22:24:26.323283
+Create Date: 2024-01-10 19:49:37.893088
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "2eaa067ab4e8"
+revision = "1d762e7a925c"
 down_revision = "c890745a5bcd"
 branch_labels = None
 depends_on = None
@@ -36,7 +36,7 @@ def upgrade() -> None:
             sa.Enum("BUY", "SELL", "DIVIDENDS", name="registryoperationenum"),
             nullable=False,
         ),
-        sa.Column("count", sa.Integer(), nullable=False),
+        sa.Column("count", sa.Integer(), nullable=True),
         sa.Column("amount", sa.DECIMAL(), nullable=True),
         sa.Column("price", sa.DECIMAL(), nullable=True),
         sa.Column("company_id", sa.Integer(), nullable=False),

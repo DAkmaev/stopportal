@@ -1,8 +1,10 @@
+from datetime import datetime, timedelta
+
 import pytest
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.db.dao.briefcases import BriefcaseDAO
-from backend.db.models.briefcase import CurrencyEnum, RegistryOperationEnum
+from backend.db.models.briefcase import RegistryOperationEnum
 from backend.tests.utils.common import (create_test_company, create_test_briefcase,
                                         create_test_briefcase_registry)
 
@@ -186,6 +188,55 @@ async def test_get_all_briefcase_registry(
 
     await briefcase_dao.delete_briefcase_registry_model(registry1.id)
     await briefcase_dao.delete_briefcase_registry_model(registry2.id)
+
+
+@pytest.mark.anyio
+async def test_get_briefcase_registry_by_date_range(
+    dbsession: AsyncSession
+) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    briefcase = await create_test_briefcase(dbsession)
+    company = await create_test_company(dbsession)
+
+    # Создаем запись briefcase_registry с текущей датой
+    registry = await briefcase_dao.create_briefcase_registry_model(
+        count=10, amount=100.0, company_id=company.id, briefcase_id=briefcase.id,
+        operation=RegistryOperationEnum.SELL
+    )
+
+    # фиксируем транзакцию
+    await dbsession.flush()
+
+    # Получаем записи briefcase_registry с date range меньше сегодняшней даты
+    date_from = datetime.utcnow() - timedelta(days=2)
+    date_to = datetime.utcnow() - timedelta(days=1)
+    briefcase_registry_items = await briefcase_dao.get_all_briefcase_registry(
+        briefcase.id, date_from=date_from, date_to=date_to
+    )
+    # Проверяем, что нет данных
+    assert len(briefcase_registry_items) == 0
+
+    # Получаем записи briefcase_registry с date range больше сегодняшней даты
+    date_from = datetime.utcnow() + timedelta(days=1)
+    date_to = datetime.utcnow() + timedelta(days=2)
+    briefcase_registry_items = await briefcase_dao.get_all_briefcase_registry(
+        briefcase.id, date_from=date_from, date_to=date_to
+    )
+    # Проверяем, что нет данных
+    assert len(briefcase_registry_items) == 0
+
+    # Получаем записи briefcase_registry с date range. куда входит наша запись
+    date_from = datetime.utcnow() - timedelta(days=1)
+    date_to = datetime.utcnow() + timedelta(days=1)
+    briefcase_registry_items = await briefcase_dao.get_all_briefcase_registry(
+        briefcase.id, date_from=date_from, date_to=date_to
+    )
+    # Проверяем, что только одна запись соответствует датному диапазону
+    assert len(briefcase_registry_items) == 1
+    assert briefcase_registry_items[0].id == registry.id
+
+    # Очищаем тестовые данные
+    await briefcase_dao.delete_briefcase_registry_model(registry.id)
 
 
 @pytest.mark.anyio
