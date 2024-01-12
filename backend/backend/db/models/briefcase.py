@@ -56,9 +56,9 @@ class BriefcaseRegistryModel(Base):
     created_date: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP, server_default=func.now())
     currency: Mapped[str] = mapped_column(Enum(CurrencyEnum), default=CurrencyEnum.RUB)
     operation: Mapped[str] = mapped_column(Enum(RegistryOperationEnum))
-    count: Mapped[int] = mapped_column(Integer)
+    count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     amount: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
-    price: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
+    price: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
 
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
     company: Mapped['CompanyModel'] = relationship(lazy="selectin")

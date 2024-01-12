@@ -1,11 +1,11 @@
-from typing import List, Annotated
+from datetime import datetime
+from typing import List
 
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends
 
 from backend.db.dao.briefcases import BriefcaseDAO
 from backend.db.models.briefcase import (BriefcaseModel, BriefcaseItemModel,
-                                         BriefcaseRegistryModel, RegistryOperationEnum,
-                                         CurrencyEnum)
+                                         BriefcaseRegistryModel)
 from backend.web.api.briefcase.scheme import (BriefcaseDTO, BriefcaseInputDTO,
                                               BriefcaseItemInputDTO, BriefcaseItemDTO,
                                               BriefcaseRegistryDTO,
@@ -206,17 +206,29 @@ async def get_briefcase_registries(
     dao: BriefcaseDAO = Depends(),
     limit: int = 100,
     offset: int = 0,
+    dateFrom: str = None,
+    dateTo: str = None,
 ) -> List[BriefcaseRegistryModel]:
     """
     Retrieve all items in a briefcase from the database.
 
+    :param dateTo:
+    :param dateFrom:
     :param offset:
     :param limit:
     :param briefcase_id: ID of the BriefcaseModel.
     :param dao: DAO for Briefcase models.
     :return: List of BriefcaseRegistryModel objects.
     """
-    return await dao.get_all_briefcase_registry(briefcase_id=briefcase_id, limit=limit, offset=offset)
+
+    result = await dao.get_all_briefcase_registry(
+        briefcase_id=briefcase_id,
+        limit=limit,
+        offset=offset,
+        date_from=datetime.strptime(dateFrom, '%Y-%m-%d') if dateFrom else None,
+        date_to=datetime.strptime(dateTo, '%Y-%m-%d') if dateTo else None
+    )
+    return result
 
 
 @router.post("/{briefcase_id}/registry/")

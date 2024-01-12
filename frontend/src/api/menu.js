@@ -32,7 +32,16 @@ const Menu = [
   //     { title: 'Формирование портфеля', name: 'ratingBriefcase' }
   //   ]
   // },
-  { icon: 'mdi-bag-checked', title: 'Портфель', name: 'briefcase' }
+  {
+    icon: 'mdi-bag-checked',
+    'icon-alt': 'mdi-bag-checked',
+    title: 'Портфель',
+    name: 'briefcaseRoot',
+    children: [
+      { title: 'Журнал', name: 'briefcaseRegistry' },
+      { title: 'Сводка', name: 'briefcaseSummary' }
+    ]
+  }
   // { icon: 'mdi-bag-checked', title: 'Мих стратегия', name: 'strategyMih' }
 ]
 // reorder menu

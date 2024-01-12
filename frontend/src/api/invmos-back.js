@@ -23,8 +23,7 @@ async function requestWithBody(method, endpoint = '', body = {}, parseResponse =
       body: JSON.stringify(body)
     })
     if (parseResponse) {
-      const content = await data.json()
-      return content
+      return await data.json()
     }
     return true
   } catch (e) {
@@ -36,8 +35,7 @@ export async function getData(endpoint = '', params = {}, parseJsonResponse = tr
   try {
     const url = fillUrl(endpoint, params)
     const data = await fetch(url)
-    const content = parseJsonResponse ? await data.json() : await data.text()
-    return content
+    return parseJsonResponse ? await data.json() : await data.text()
   } catch (e) {
     console.error(e.message)
   }
@@ -72,6 +70,7 @@ export async function getStrategies() {
 export const endpoints = Object.freeze({
   BRIEFCASE: 'api/briefcase',
   BRIEFCASE_ITEMS: 'api/briefcase/items',
+  BRIEFCASE_REGISTRY: 'api/briefcase/registry',
   COMPANIES: 'api/companies/',
   COMPANIES_CATEGORIES: 'companies/categories',
   COMPANIES_STRATEGIES: 'api/companies/strategies',

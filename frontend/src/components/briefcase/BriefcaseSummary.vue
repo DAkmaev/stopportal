@@ -265,7 +265,7 @@ import { getData, putData, getStrategies, endpoints, postData, deleteData } from
 // todo: переделать когда будет реализовано несколько портфелей
 const BRIEFCASE_ID = 1
 export default {
-  name: 'Briefcase',
+  name: 'BriefcaseSummary',
   filters: {
     formatPrice: function(price, currency) {
       if (!price) { return '' }
