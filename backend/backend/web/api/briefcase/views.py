@@ -1,11 +1,15 @@
+from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends
 
 from backend.db.dao.briefcases import BriefcaseDAO
-from backend.db.models.briefcase import BriefcaseModel, BriefcaseItemModel
+from backend.db.models.briefcase import (BriefcaseModel, BriefcaseItemModel,
+                                         BriefcaseRegistryModel)
 from backend.web.api.briefcase.scheme import (BriefcaseDTO, BriefcaseInputDTO,
-                                              BriefcaseItemInputDTO, BriefcaseItemDTO)
+                                              BriefcaseItemInputDTO, BriefcaseItemDTO,
+                                              BriefcaseRegistryDTO,
+                                              BriefcaseRegistryInputDTO)
 
 router = APIRouter()
 
@@ -173,3 +177,113 @@ async def delete_briefcase_item(
     :param dao: DAO for Briefcase models.
     """
     await dao.delete_briefcase_item_model(item_id)
+
+
+# @router.post("/uploadfile/")
+# async def create_upload_files(
+#     file: Annotated[UploadFile, File(description="Multiple files as UploadFile")],
+# ):
+#     return {"filenames": file.filename}
+
+
+@router.get("/registry/{item_id}", response_model=BriefcaseRegistryDTO)
+async def get_briefcase_registry(
+    item_id: int,
+    dao: BriefcaseDAO = Depends(),
+) -> BriefcaseRegistryModel:
+    """
+    Retrieve BriefcaseRegistryModel object by id from the database.
+
+    :param item_id: ID of the BriefcaseRegistryModel.
+    :param dao: DAO for Briefcase models.
+    """
+    return await dao.get_briefcase_registry_model(item_id)
+
+
+@router.get("/{briefcase_id}/registry/", response_model=List[BriefcaseRegistryDTO])
+async def get_briefcase_registries(
+    briefcase_id: int,
+    dao: BriefcaseDAO = Depends(),
+    limit: int = 100,
+    offset: int = 0,
+    dateFrom: str = None,
+    dateTo: str = None,
+) -> List[BriefcaseRegistryModel]:
+    """
+    Retrieve all items in a briefcase from the database.
+
+    :param dateTo:
+    :param dateFrom:
+    :param offset:
+    :param limit:
+    :param briefcase_id: ID of the BriefcaseModel.
+    :param dao: DAO for Briefcase models.
+    :return: List of BriefcaseRegistryModel objects.
+    """
+
+    result = await dao.get_all_briefcase_registry(
+        briefcase_id=briefcase_id,
+        limit=limit,
+        offset=offset,
+        date_from=datetime.strptime(dateFrom, '%Y-%m-%d') if dateFrom else None,
+        date_to=datetime.strptime(dateTo, '%Y-%m-%d') if dateTo else None
+    )
+    return result
+
+
+@router.post("/{briefcase_id}/registry/")
+async def create_briefcase_registry_model(
+    briefcase_id: int,
+    new_item: BriefcaseRegistryInputDTO,  # Assuming you have a DTO for creating items
+    dao: BriefcaseDAO = Depends(),
+) -> None:
+    """
+    Create a new registry in a specific briefcase.
+
+    :param briefcase_id: ID of the BriefcaseModel.
+    :param new_item: New BriefcaseRegistryModel object data.
+    :param dao: DAO for Briefcase models.
+    """
+    await dao.create_briefcase_registry_model(
+        count=new_item.count,
+        amount=new_item.amount,
+        company_id=new_item.company.id,
+        briefcase_id=briefcase_id,
+        operation=new_item.operation,
+        strategy_id=new_item.strategy.id if new_item.strategy else None,
+        price=new_item.price,
+        currency=new_item.currency,
+    )
+
+
+@router.put("/registry/{item_id}")
+async def update_briefcase_registry(
+    item_id: int,
+    updated_item: BriefcaseRegistryInputDTO,
+    dao: BriefcaseDAO = Depends(),
+) -> None:
+    """
+    Update a specific registry in a briefcase.
+
+    :param item_id: ID of the BriefcaseRegistryModel to update.
+    :param updated_item: Updated BriefcaseRegistryModel object data.
+    :param dao: DAO for Briefcase models.
+    """
+    await dao.update_briefcase_registry_model(
+        registry_id=item_id,
+        updated_fields=updated_item.model_dump()
+    )
+
+
+@router.delete("/registry/{item_id}", status_code=204)
+async def delete_briefcase_registry(
+    item_id: int,
+    dao: BriefcaseDAO = Depends(),
+) -> None:
+    """
+    Delete a specific registry from a briefcase.
+
+    :param item_id: ID of the BriefcaseRegistryModel to delete.
+    :param dao: DAO for Briefcase models.
+    """
+    await dao.delete_briefcase_registry_model(item_id)

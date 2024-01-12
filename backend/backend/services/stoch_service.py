@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 import pandas as pd
 from fastapi import Depends
@@ -176,7 +177,9 @@ class StochService:
         #     result_df.to_excel(writer, sheet_name=tiker)
 
         # result_df.sort_index(ascending=False, inplace=True)
-        result_df.to_csv(f'history_{tiker}.csv', ';')
+        file_name = f'history_{tiker}.csv'
+        current_directory = os.getcwd()
+        result_df.to_csv(file_name, ';')
 
-        return {'status': 'SUCCESS'}
+        return {'status': 'SUCCESS', 'file_name': file_name, 'path': current_directory}
 

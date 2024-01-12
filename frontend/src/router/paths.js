@@ -106,8 +106,20 @@ export default [
   },
   {
     path: '/briefcase',
-    name: 'briefcase',
-    component: () => import(`@/components/Briefcase`)
+    name: 'briefcaseRoot',
+    component: () => import(`@/components/briefcase/BriefcaseRoot`),
+    children: [
+      {
+        path: 'registry',
+        name: 'briefcaseRegistry',
+        component: () => import(`@/components/briefcase/BriefcaseRegistry`)
+      },
+      {
+        path: 'summary',
+        name: 'briefcaseSummary',
+        component: () => import(`@/components/briefcase/BriefcaseSummary`)
+      }
+    ]
   },
   {
     path: '/mihstrategy',

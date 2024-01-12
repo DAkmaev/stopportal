@@ -4,8 +4,10 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.dao.briefcases import BriefcaseDAO
+from backend.db.models.briefcase import RegistryOperationEnum, CurrencyEnum
 from backend.tests.utils.common import (create_test_company, create_test_briefcase_item,
-                                        create_test_briefcase)
+                                        create_test_briefcase,
+                                        create_test_briefcase_registry)
 
 
 @pytest.mark.anyio
@@ -225,4 +227,158 @@ async def test_delete_briefcase_item(
     # Check if the item was deleted from the database
     dao = BriefcaseDAO(dbsession)
     instances = await dao.get_all_briefcase_items()
+    assert len(instances) == 0
+
+
+#######################################################################
+@pytest.mark.anyio
+async def test_create_briefcase_registry_model(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """Test creating a briefcase registry model."""
+    count = 5
+    amount = 1
+    price = 100.0
+
+    company = await create_test_company(dbsession)
+    briefcase = await create_test_briefcase(dbsession)
+
+    url = fastapi_app.url_path_for("create_briefcase_registry_model",
+                                   briefcase_id=briefcase.id)
+
+    # Проверяем с передачей стратегии
+    response = await client.post(
+        url,
+        json={
+            "count": count,
+            "amount": amount,
+            "price": price,
+            "company": {"id": company.id},
+            "briefcase": {"id": briefcase.id},
+            "operation": RegistryOperationEnum.BUY.value,
+            "currency": CurrencyEnum.RUB.value,
+        },
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    dao = BriefcaseDAO(dbsession)
+    instances = await dao.get_all_briefcase_registry(briefcase.id)
+    assert instances[0].count == count
+    assert instances[0].amount == amount
+    assert instances[0].price == price
+    assert instances[0].company_id == company.id
+    assert instances[0].briefcase_id == briefcase.id
+    assert instances[0].operation == RegistryOperationEnum.BUY
+    assert instances[0].currency == CurrencyEnum.RUB
+
+
+@pytest.mark.anyio
+async def test_get_briefcase_registry(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """Test getting a briefcase registry."""
+    # Create a test registry in the database
+    test_registry = await create_test_briefcase_registry(dbsession)
+
+    # Test retrieving the created registry
+    url = fastapi_app.url_path_for("get_briefcase_registry",
+                                   item_id=test_registry.id)
+
+    response = await client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert data["id"] == test_registry.id
+
+
+@pytest.mark.anyio
+async def test_get_briefcase_registries(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """Test getting all registries in a briefcase."""
+    # Create test registry in the database
+    company = await create_test_company(dbsession)
+    briefcase = await create_test_briefcase(dbsession)
+    registry1 = await create_test_briefcase_registry(dbsession, briefcase, company)
+    registry2 = await create_test_briefcase_registry(dbsession, briefcase, company)
+
+    # Test retrieving all registries
+    url = fastapi_app.url_path_for("get_briefcase_registries",
+                                   briefcase_id=briefcase.id)
+    response = await client.get(url)
+
+    assert response.status_code == status.HTTP_200_OK
+    data = response.json()
+    assert len(data) == 2
+    assert data[0]["id"] == registry1.id
+    assert data[1]["id"] == registry2.id
+
+
+@pytest.mark.anyio
+async def test_update_briefcase_registry(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """Test updating a briefcase registry."""
+    # Create a test registry in the database
+    test_registry = await create_test_briefcase_registry(dbsession)
+
+    # Update data for the registry
+    updated_count = 10
+    updated_amount = 100.0
+    operation = RegistryOperationEnum.SELL
+    currency = CurrencyEnum.USD
+
+    # Test updating the registry
+    url = fastapi_app.url_path_for("update_briefcase_registry", item_id=test_registry.id)
+    response = await client.put(
+        url,
+        json={
+            "count": updated_count,
+            "amount": updated_amount,
+            "company": {"id": test_registry.company.id},
+            "briefcase": {"id": test_registry.briefcase.id},
+            "operation": operation.value,
+            "currency": currency.value,
+        }
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    # Check if the registry was updated in the database
+    dao = BriefcaseDAO(dbsession)
+    updated_registry = await dao.get_briefcase_registry_model(test_registry.id)
+    assert updated_registry.count == updated_count
+    assert updated_registry.amount == updated_amount
+    assert updated_registry.operation == operation
+    assert updated_registry.currency == currency
+
+
+@pytest.mark.anyio
+async def test_delete_briefcase_registry(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+) -> None:
+    """Test deleting a briefcase registry."""
+    # Create a test registry in the database
+    test_registry = await create_test_briefcase_registry(dbsession)
+
+    # Test deleting the registry
+    url = fastapi_app.url_path_for("delete_briefcase_registry", item_id=test_registry.id)
+
+    response = await client.delete(url)
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    # Check if the registry was deleted from the database
+    dao = BriefcaseDAO(dbsession)
+    instances = await dao.get_all_briefcase_registry(test_registry.briefcase_id)
     assert len(instances) == 0
