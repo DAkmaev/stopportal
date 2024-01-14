@@ -270,6 +270,9 @@ class BriefcaseDAO:
             strategy = await self.session.get(StrategyModel, strategy_id)
             registry.strategy = strategy
 
+        if not created_date:
+            registry.created_date = datetime.now()
+
         self.session.add(registry)
         return registry
 

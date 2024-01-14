@@ -260,8 +260,7 @@ async def test_create_briefcase_registry_model(
             "company": {"id": company.id},
             "briefcase": {"id": briefcase.id},
             "operation": RegistryOperationEnum.BUY.value,
-            "currency": CurrencyEnum.RUB.value,
-            "created_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "currency": CurrencyEnum.RUB.value
         },
     )
 
