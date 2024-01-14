@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from backend.db.models.briefcase import CurrencyEnum, RegistryOperationEnum
 
@@ -44,10 +44,10 @@ class BriefcaseRegistryInputDTO(BaseModel):
     price: Optional[float] = None
     currency: CurrencyEnum
     operation: RegistryOperationEnum
+    created_date: Optional[datetime] = None
 
 
 class BriefcaseRegistryDTO(BriefcaseRegistryInputDTO):
     id: int
     created_date: datetime
     briefcase: BriefcaseDTO
-

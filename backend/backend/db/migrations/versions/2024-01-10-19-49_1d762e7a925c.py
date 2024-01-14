@@ -23,7 +23,6 @@ def upgrade() -> None:
         sa.Column(
             "created_date",
             sa.TIMESTAMP(),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
             nullable=False,
         ),
         sa.Column(

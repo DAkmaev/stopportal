@@ -99,10 +99,13 @@
             dense
             :items="list"
             :headers="headers"
-            :disable-pagination="false"
-            :hide-default-footer="true"
+            :page.sync="page"
+            :items-per-page="itemsPerPage"
+            :hide-default-footer="false"
+            :footer-props="footerProps"
             show-select
             single-select
+            @page-count="pageCount = $event"
           >
             <template v-slot:item.strategy="{ item }">
               {{ item.strategy ? item.strategy.name : '' }}
@@ -117,6 +120,12 @@
               <span>{{ new Date(item.created_date).toLocaleDateString() }}</span>
             </template>
           </v-data-table>
+          <!--  <div class="text-center pt-2">-->
+          <!--    <v-pagination-->
+          <!--    v-model="page"-->
+          <!--    :length="pageCount"-->
+          <!--    />-->
+          <!--    </div>-->
         </v-col>
       </v-row>
       <v-dialog v-if="dialog" v-model="dialog" :eager="true" scrollable max-width="980px">
@@ -139,6 +148,44 @@
                       item-value="id"
                       clearable
                     />
+                  </v-col>
+                  <v-col cols="12" sm="6" md="6">
+                    <v-menu
+                      ref="menuCreatedDate"
+                      v-model="datePickerDialog"
+                      :close-on-content-click="false"
+                      :return-value.sync="temp.created_date"
+                      transition="scale-transition"
+                      offset-y
+                      min-width="290px"
+                    >
+                      <template v-slot:activator="{ on }">
+                        <v-text-field
+                          v-model="temp.created_date"
+                          label="Дата"
+                          prepend-icon="mdi-calendar"
+                          readonly
+                          v-on="on"
+                        />
+                      </template>
+                      <v-date-picker
+                        v-model="temp.created_date"
+                        no-title
+                        scrollable
+                      >
+                        <v-spacer />
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="datePickerDialog = false"
+                        >Отмена</v-btn>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="$refs.menuCreatedDate.save(temp.created_date)"
+                        >OK</v-btn>
+                      </v-date-picker>
+                    </v-menu>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -187,16 +234,16 @@
                   </v-col>
                   <v-col cols="6" sm="3" md="3">
                     <v-text-field
-                      v-model="temp.amount"
-                      label="Сумма *"
-                      :rules="rules.amountRules"
-                      required
+                      v-model="temp.price"
+                      label="Цена"
                     />
                   </v-col>
                   <v-col cols="6" sm="3" md="3">
                     <v-text-field
-                      v-model="temp.price"
-                      label="Цена"
+                      v-model="temp.amount"
+                      label="Сумма *"
+                      :rules="rules.amountRules"
+                      required
                     />
                   </v-col>
                 </v-row>
@@ -252,22 +299,22 @@ export default {
       companies: [],
       list: [],
       headers: [
-        { text: 'Компания', value: 'company.name' },
-        { text: 'Тикер', value: 'company.tiker' },
-        { text: 'Дата', value: 'company.created_date' },
-        { text: 'Стратегия', value: 'strategy' },
         { text: 'Дата', value: 'created_date' },
-        { text: 'Кол-во', value: 'count' },
-        { text: 'Сумма', value: 'amount' },
-        { text: 'Цена', value: 'price' },
+        { text: 'Тикер', value: 'company.tiker' },
+        { text: 'Компания', value: 'company.name' },
         { text: 'Операция', value: 'operation' },
-        { text: 'Валюта', value: 'currency' }
+        { text: 'Кол-во', value: 'count' },
+        { text: 'Цена', value: 'price' },
+        { text: 'Сумма', value: 'amount' },
+        { text: 'Валюта', value: 'currency' },
+        { text: 'Стратегия', value: 'strategy' }
       ],
       dialog: false,
       dateFrom: undefined,
       dateTo: undefined,
       dateFromMenu: false,
       dateToMenu: false,
+      datePickerDialog: false,
       temp: {
         company: { id: undefined },
         strategy: { id: undefined },
@@ -275,7 +322,7 @@ export default {
         count: undefined,
         price: undefined,
         created_date: undefined,
-        currency: undefined,
+        currency: 'RUB',
         operation: undefined
       },
       selected: [],
@@ -297,9 +344,16 @@ export default {
         ],
         currencyRules: [
           v => !!v || 'Валюта обязательна'
+        ],
+        createdDateRules: [
+          v => !!v || 'Дата обязательна'
         ]
       },
-      valid: false
+      valid: false,
+      page: 1,
+      pageCount: 0,
+      itemsPerPage: 200,
+      footerProps: { 'items-per-page-options': [100, 200, 500, -1] }
     }
   },
   computed: {
@@ -310,13 +364,42 @@ export default {
       return this.selectedItem !== null
     }
   },
+  watch: {
+    'temp.price': function(newVal, oldVal) {
+      if (newVal && this.temp.count) {
+        if (newVal !== oldVal) {
+          this.temp.amount = newVal * this.temp.count
+        }
+      } else {
+        if (!newVal && oldVal || newVal && !oldVal && !this.temp.count) {
+          this.temp.amount = undefined
+        }
+      }
+    },
+    'temp.count': function(newVal, oldVal) {
+      if (newVal && this.temp.price) {
+        if (newVal !== oldVal) {
+          this.temp.amount = newVal * this.temp.price
+        }
+      } else {
+        if (!newVal && oldVal || newVal && !oldVal && !this.temp.price) {
+          this.temp.amount = undefined
+        }
+      }
+    }
+  },
   created() {
     this.fetchList()
   },
   methods: {
     async fetchList() {
       const [data, strategies, companies] = await Promise.all([
-        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, { dateFrom: this.dateFrom, dateTo: this.dateTo }),
+        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, {
+          dateFrom: this.dateFrom,
+          dateTo: this.dateTo
+          // limit: this.itemsPerPage,
+          // offset: (this.page - 1) * this.itemsPerPage
+        }),
         getStrategies(),
         getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
       ])
@@ -351,6 +434,7 @@ export default {
     },
     handleAdd() {
       this.resetTemp()
+      this.temp.created_date = this.toLocalDateISOString(new Date().toISOString())
       this.dialogMode = 'add'
       this.dialog = true
     },
@@ -359,6 +443,7 @@ export default {
       temp.strategy = temp.strategy && temp.strategy.id ? temp.strategy : null
       temp.price = temp.price ? temp.price : null
       temp.count = temp.count ? temp.count : null
+      temp.created_date = this.toLocalISOString(temp.created_date)
 
       postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, temp, false)
         .then(() => {
@@ -370,9 +455,10 @@ export default {
       this.dialog = false
     },
     handleEdit(id) {
-      this.temp = this.list.find(l => l.id === id)
+      this.temp = { ...this.list.find(l => l.id === id) }
       this.temp.company = this.temp.company && this.temp.company.id ? this.temp.company : { 'id': undefined }
       this.temp.strategy = this.temp.strategy && this.temp.strategy.id ? this.temp.strategy : { 'id': undefined }
+      this.temp.created_date = this.toLocalDateISOString(this.temp.created_date)
       this.dialogMode = 'edit'
       this.dialog = true
     },
@@ -380,6 +466,7 @@ export default {
       const { id, ...data } = this.temp
       data.company = data.company && data.company.id ? data.company : null
       data.strategy = data.strategy && data.strategy.id ? data.strategy : null
+      data.created_date = this.toLocalISOString(data.created_date)
 
       putData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`, data, false)
         .then(() => {
@@ -413,9 +500,17 @@ export default {
         count: undefined,
         price: undefined,
         created_date: undefined,
-        currency: undefined,
+        currency: 'RUB',
         operation: undefined
       }
+    },
+    toLocalISOString(dateStr) {
+      const date = new Date(dateStr)
+      return date ? new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString() : undefined
+    },
+    toLocalDateISOString(dateStr) {
+      const dateTimeStr = this.toLocalISOString(dateStr)
+      return dateTimeStr ? dateTimeStr.slice(0, 10) : undefined
     }
   }
 }
