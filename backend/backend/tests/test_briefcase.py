@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from fastapi import FastAPI, status
 from httpx import AsyncClient
@@ -347,6 +349,7 @@ async def test_update_briefcase_registry(
             "briefcase": {"id": test_registry.briefcase.id},
             "operation": operation.value,
             "currency": currency.value,
+            "created_date": datetime.now().isoformat()
         }
     )
 

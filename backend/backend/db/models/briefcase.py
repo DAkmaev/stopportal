@@ -53,7 +53,7 @@ class BriefcaseRegistryModel(Base):
     __tablename__ = "briefcase_registry"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    created_date: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP, server_default=func.now())
+    created_date: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP)
     currency: Mapped[str] = mapped_column(Enum(CurrencyEnum), default=CurrencyEnum.RUB)
     operation: Mapped[str] = mapped_column(Enum(RegistryOperationEnum))
     count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

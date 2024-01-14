@@ -237,11 +237,13 @@ class BriefcaseDAO:
     async def create_briefcase_registry_model(
         self, count: int, amount: float, company_id: int, briefcase_id: int,
         operation: RegistryOperationEnum, strategy_id: int = None,
-        price: float = None, currency: CurrencyEnum = CurrencyEnum.RUB
+        price: float = None, currency: CurrencyEnum = CurrencyEnum.RUB,
+        created_date: datetime = datetime.now(),
     ) -> BriefcaseRegistryModel:
         """
         Add a single briefcase registry to the session.
 
+        :param created_date:
         :param currency:
         :param price:
         :param operation:
@@ -261,17 +263,12 @@ class BriefcaseDAO:
 
         registry = BriefcaseRegistryModel(
             count=count, amount=amount, company=company, briefcase=briefcase,
-            operation=operation, currency=currency
+            operation=operation, currency=currency, created_date=created_date,
+            price=price
         )
         if strategy_id:
             strategy = await self.session.get(StrategyModel, strategy_id)
             registry.strategy = strategy
-
-        if price:
-            registry.price = price
-
-        if price:
-            registry.price = price
 
         self.session.add(registry)
         return registry

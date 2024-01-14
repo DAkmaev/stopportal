@@ -204,7 +204,7 @@ async def get_briefcase_registry(
 async def get_briefcase_registries(
     briefcase_id: int,
     dao: BriefcaseDAO = Depends(),
-    limit: int = 100,
+    limit: int = 100000,
     offset: int = 0,
     dateFrom: str = None,
     dateTo: str = None,
@@ -251,6 +251,7 @@ async def create_briefcase_registry_model(
         briefcase_id=briefcase_id,
         operation=new_item.operation,
         strategy_id=new_item.strategy.id if new_item.strategy else None,
+        created_date=new_item.created_date if new_item.created_date else None,
         price=new_item.price,
         currency=new_item.currency,
     )
