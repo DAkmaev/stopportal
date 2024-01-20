@@ -95,7 +95,7 @@ export const endpoints = Object.freeze({
   REPORTS_VALUES: 'reports/values',
   REPORTS_VALUE: 'reports/value',
   REPORTS_UNITS: 'reports/units',
-  STOCH: 'api/stoch/',
+  TA: 'api/ta/',
   STOPS: 'api/stops/',
   STRATEGIES: 'api/strategies/',
   STRATEGIES_MIH: 'strategies/mih',

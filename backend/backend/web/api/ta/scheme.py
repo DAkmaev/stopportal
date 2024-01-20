@@ -4,33 +4,33 @@ from pydantic import BaseModel
 from enum import Enum
 
 
-class StochDecisionEnum(str, Enum):
+class TADecisionEnum(str, Enum):
     BUY = 'BUY'
     SELL = 'SELL'
     RELAX = 'RELAX'
     UNKNOWN = 'UNKNOWN'
 
 
-class StochPeriodEnum(str, Enum):
+class TAPeriodEnum(str, Enum):
     DAY = 'D'
     WEEK = 'W'
     MONTH = 'M'
     ALL = 'All'
 
 
-class StochCompanyDTO(BaseModel):
+class TACompanyDTO(BaseModel):
     id: int
     name: str
     tiker: str
 
 
-class StochDecisionDTO(BaseModel):
+class TADecisionDTO(BaseModel):
     """
-    Scheme for Stoch decision.
+    Scheme for TA decision.
 
     """
-    company: StochCompanyDTO
-    decision: StochDecisionEnum
+    company: TACompanyDTO
+    decision: TADecisionEnum
     last_price: Optional[float] = None
     k: Optional[float] = None
     d: Optional[float] = None

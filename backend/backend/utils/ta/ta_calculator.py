@@ -1,30 +1,34 @@
 import datetime
+import logging
 import time
 import concurrent.futures
 from typing import List
 from dataclasses import dataclass
 
-import btalib
 import asyncio
 import pandas as pd
 from pandas import DataFrame
+import pandas_ta as ta
 
 from backend.utils.moex.moex_reader import MoexReader
 from backend.utils.yahoo.yahoo_reader import YahooReader
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO, StochCompanyDTO
+from backend.web.api.ta.scheme import TADecisionEnum, TADecisionDTO, TACompanyDTO
 from backend.web.api.company.scheme import CompanyTypeEnum
 from backend.db.models.company import StopModel, CompanyModel
 
+pd.options.mode.chained_assignment = None
+
+logging.basicConfig(level = logging.INFO)
+logger = logging.getLogger(__name__)
 
 @dataclass
-class StochDecision:
-    decision: StochDecisionEnum
+class TADecision:
+    decision: TADecisionEnum
     df: DataFrame
 
 
-class StochCalculator:
-    def get_stoch(self,  df: DataFrame, period: str = "D"):
-        last_row = df.iloc[-1]
+class TACalculator:
+    def generate_ta_indicators(self,  df: DataFrame, period: str = "D"):
         if period == "W":
             # Функция для определения начала недели с понедельника
             def week_start(date):
@@ -53,45 +57,56 @@ class StochCalculator:
             #     df = df.iloc[:-1]
 
         #print(df)
-        if len(df.index) < 15:
+        if len(df.index) <= 15:
             return DataFrame()
 
         # return df
-        #stoch = btalib.stochastic(df)
-        stoch = self._generate_stoch_df(df)
-        return stoch
+        indicators = self._generate_ta_df(df)
+        return indicators
 
     # Вынесено в отдельный метод для тестирования
-    def _generate_stoch_df(self, df: DataFrame):
-        return btalib.stochastic(df).df
+    def _generate_ta_df(self, df: DataFrame):
+        try:
+            df.fillna(0, inplace=True)
+            df.ta.adx(append=True)
+            df.ta.stoch(append=True)
+
+            df = df[['STOCHk_14_3_3', 'STOCHd_14_3_3', 'ADX_14', 'DMP_14',
+                     'DMN_14']].rename(
+                columns={'STOCHk_14_3_3': 'k', 'STOCHd_14_3_3': 'd', 'ADX_14': 'adx',
+                         'DMP_14': 'dmp', 'DMN_14': 'dmn'})
+            return df
+        except Exception as e:
+            logger.error(e)
+            return DataFrame()
 
     def _get_period_decision(
         self,  df: DataFrame, period: str,
         skip_check_borders: bool = False,
         bottom_border: float = 25,
         top_border: float = 80,
-    ) -> StochDecision:
+    ) -> TADecision:
 
         if df.empty:
-            return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
+            return TADecision(decision=TADecisionEnum.UNKNOWN, df=None)
 
-        stoch_df = self.get_stoch(df, period)
+        stoch_df = self.generate_ta_indicators(df, period)
         if stoch_df.empty:
-            return StochDecision(decision=StochDecisionEnum.UNKNOWN, df=None)
+            return TADecision(decision=TADecisionEnum.UNKNOWN, df=None)
 
         last_row = stoch_df.iloc[-1]
         need_buy = last_row.d < last_row.k and (skip_check_borders or last_row.k < bottom_border)
         need_sell = last_row.d > last_row.k and (skip_check_borders or last_row.k > top_border)
 
         decision = (
-            StochDecisionEnum.BUY if need_buy
-            else StochDecisionEnum.SELL if need_sell
-            else StochDecisionEnum.RELAX
+            TADecisionEnum.BUY if need_buy
+            else TADecisionEnum.SELL if need_sell
+            else TADecisionEnum.RELAX
         )
-        return StochDecision(decision=decision, df=stoch_df)
+        return TADecision(decision=decision, df=stoch_df)
 
 
-    def _calculate_decision(self, company: CompanyModel, period: str, df: DataFrame, stop: StopModel | None, last_price: float):
+    def _calculate_decision(self, company: CompanyModel, period: str, df: DataFrame, last_price: float):
         # Для некоторых акций увеличиваем bottom_border
         TIKERS_HIGH_BOTTOM = ['LKOH']
         bottom_border = 40 if company.tiker in TIKERS_HIGH_BOTTOM else 25
@@ -99,11 +114,11 @@ class StochCalculator:
         # для продажи проверяем границы и разворот для всех периодов
         per_decision = self._get_period_decision(df, period, bottom_border=bottom_border)
 
-        if per_decision.decision == StochDecisionEnum.UNKNOWN:
-            return StochDecisionDTO(
+        if per_decision.decision == TADecisionEnum.UNKNOWN:
+            return TADecisionDTO(
                 decision=per_decision.decision,
                 period=period,
-                company=StochCompanyDTO(
+                company=TACompanyDTO(
                     id=company.id,
                     name=company.name,
                     tiker=company.tiker
@@ -111,27 +126,27 @@ class StochCalculator:
 
         # для покупки проверяем другие периоды, они должны сопавсть, без границ
         # месяц считается полностью по _get_period_decision, это остальные по другому
-        if period != 'M' and per_decision.decision != StochDecisionEnum.SELL:
+        if period != 'M' and per_decision.decision != TADecisionEnum.SELL:
             need_buy = False
             if period == 'W':
                 decision_month = self._get_period_decision(df, 'M', skip_check_borders=True)
                 decision_week = self._get_period_decision(df, 'W', bottom_border=40)
 
-                need_buy = decision_month.decision == decision_week.decision == StochDecisionEnum.BUY
+                need_buy = decision_month.decision == decision_week.decision == TADecisionEnum.BUY
 
             elif period == 'D':
                 decision_day = self._get_period_decision(df, 'D')
                 decision_week = self._get_period_decision(df, 'W', True)
                 decision_month = self._get_period_decision(df, 'M', True)
 
-                need_buy = decision_day.decision == decision_week.decision == decision_month.decision == StochDecisionEnum.BUY
+                need_buy = decision_day.decision == decision_week.decision == decision_month.decision == TADecisionEnum.BUY
 
-            per_decision.decision = StochDecisionEnum.BUY if need_buy else StochDecisionEnum.RELAX
+            per_decision.decision = TADecisionEnum.BUY if need_buy else TADecisionEnum.RELAX
 
 
         last_row = per_decision.df.iloc[-1]
-        return StochDecisionDTO(
-            company=StochCompanyDTO(
+        return TADecisionDTO(
+            company=TACompanyDTO(
                 id=company.id,
                 name=company.name,
                 tiker=company.tiker
@@ -151,23 +166,23 @@ class StochCalculator:
 
         return df
 
-    def get_company_stoch_decisions(
+    def get_company_ta_decisions(
             self, company: CompanyModel, period: str
-        ) -> dict[str, StochDecisionDTO]:
+        ) -> dict[str, TADecisionDTO]:
 
         df = self.get_history_data(company)
+        # df.dropna(inplace=True)
         results = dict()
-        tasks = []
 
         for cur_period in ['M', 'W', 'D']:
             if period == cur_period or period == 'ALL':
 
                 # проверяем, что вообще есть данные
                 if df.size == 0:
-                    results[cur_period] = StochDecisionDTO(
-                        decision=StochDecisionEnum.UNKNOWN,
+                    results[cur_period] = TADecisionDTO(
+                        decision=TADecisionEnum.UNKNOWN,
                         period=cur_period,
-                        company=StochCompanyDTO(
+                        company=TACompanyDTO(
                             id=company.id,
                             name=company.name,
                             tiker=company.tiker
@@ -181,31 +196,35 @@ class StochCalculator:
 
                 # Проверяем, что не пробит стоп
                 if stops_or_none and last_price <= stop.value:
-                    results[cur_period] = StochDecisionDTO(
-                        company=StochCompanyDTO(
+                    results[cur_period] = TADecisionDTO(
+                        company=TACompanyDTO(
                             id=company.id,
                             name=company.name,
                             tiker=company.tiker
                         ),
                         period=cur_period,
-                        decision=StochDecisionEnum.SELL,
+                        decision=TADecisionEnum.SELL,
                         last_price=last_price,
                         stop=stop.value
                     )
                 else:
                     results[cur_period] = self._calculate_decision(
-                            company, cur_period, df, stop, last_price
+                            company, cur_period, df, last_price
                     )
 
         return results
 
-    async def get_companies_stoch_decisions(
+    async def get_companies_ta_decisions(
         self, companies: list[CompanyModel], period: str
     ):
         decisions = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            tasks = [executor.submit(self.get_company_stoch_decisions, company, period) for company in companies]
+            tasks = [executor.submit(self.get_company_ta_decisions, company, period) for company in companies]
 
             decisions = [task.result() for task in tasks]
+
+        # for company in companies:
+        #     print(f'get_company_ta_decisions {company.tiker}: ')
+        #     decisions.append(self.get_company_ta_decisions(company, period))
 
         return decisions
