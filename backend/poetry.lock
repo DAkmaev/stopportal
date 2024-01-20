@@ -431,24 +431,6 @@ files = [
 beautifulsoup4 = "*"
 
 [[package]]
-name = "bta-lib"
-version = "1.0.0"
-description = "bta-lib technical analysis library"
-optional = false
-python-versions = ">=3.6"
-files = []
-develop = false
-
-[package.dependencies]
-pandas = "*"
-
-[package.source]
-type = "git"
-url = "https://github.com/DAkmaev/bta-lib.git"
-reference = "HEAD"
-resolved_reference = "2f35f27366ef439534e9d42cde139e4926aae6c7"
-
-[[package]]
 name = "certifi"
 version = "2023.7.22"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -1045,20 +1027,6 @@ files = [
 
 [package.dependencies]
 flake8 = "*"
-
-[[package]]
-name = "freezegun"
-version = "1.4.0"
-description = "Let your Python tests travel through time"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "freezegun-1.4.0-py3-none-any.whl", hash = "sha256:55e0fc3c84ebf0a96a5aa23ff8b53d70246479e9a68863f1fcac5a3e52f19dd6"},
-    {file = "freezegun-1.4.0.tar.gz", hash = "sha256:10939b0ba0ff5adaecf3b06a5c2f73071d9678e507c5eaedb23c761d56ac774b"},
-]
-
-[package.dependencies]
-python-dateutil = ">=2.7"
 
 [[package]]
 name = "frozenlist"
@@ -1898,6 +1866,23 @@ spss = ["pyreadstat (>=1.1.5)"]
 sql-other = ["SQLAlchemy (>=1.4.36)"]
 test = ["hypothesis (>=6.46.1)", "pytest (>=7.3.2)", "pytest-asyncio (>=0.17.0)", "pytest-xdist (>=2.2.0)"]
 xml = ["lxml (>=4.8.0)"]
+
+[[package]]
+name = "pandas-ta"
+version = "0.3.14b"
+description = "An easy to use Python 3 Pandas Extension with 130+ Technical Analysis Indicators. Can be called from a Pandas DataFrame or standalone like TA-Lib. Correlation tested with TA-Lib."
+optional = false
+python-versions = "*"
+files = [
+    {file = "pandas_ta-0.3.14b.tar.gz", hash = "sha256:0fa35aec831d2815ea30b871688a8d20a76b288a7be2d26cc00c35cd8c09a993"},
+]
+
+[package.dependencies]
+pandas = "*"
+
+[package.extras]
+dev = ["alphaVantage-api", "matplotlib", "mplfinance", "scipy", "sklearn", "statsmodels", "stochastic", "talib", "tqdm", "vectorbt", "yfinance"]
+test = ["ta-lib"]
 
 [[package]]
 name = "parse"
@@ -3306,4 +3291,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "6f6ee9cd52456b31a5b717cd44f1a35fc608af69f0c33c440bdc3b2239b83a4e"
+content-hash = "cb328afb4f9b2f1492f5e65c6640261bba66c685eeb1602c09e64fb7ffbd12df"

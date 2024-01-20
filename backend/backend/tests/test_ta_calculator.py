@@ -5,15 +5,10 @@ from pathlib import Path
 import pytest
 import pandas as pd
 from fastapi import FastAPI
-from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
-
-from backend.db.dao.companies import CompanyDAO
-from backend.services.stoch_service import StochService
 from backend.tests.utils.common import create_test_company, create_test_companies
-from backend.utils.stoch.stoch_calculator import StochCalculator
-from backend.web.api.stoch.scheme import StochDecisionEnum, StochDecisionDTO
+from backend.utils.ta.ta_calculator import TACalculator
+from backend.web.api.ta.scheme import TADecisionEnum, TADecisionDTO
 from backend.db.models.company import StopModel
 
 from unittest.mock import patch
@@ -71,19 +66,19 @@ class MockMoexReader:
 
 @pytest.mark.anyio
 async def test_get_period_decision(sample_dataframe):
-    calculator = StochCalculator()
+    calculator = TACalculator()
 
     # Test with a sample DataFrame
     decision = calculator._get_period_decision(sample_dataframe, 'D')
 
-    assert decision.decision in {StochDecisionEnum.BUY, StochDecisionEnum.SELL,
-                                 StochDecisionEnum.RELAX}
+    assert decision.decision in {TADecisionEnum.BUY, TADecisionEnum.SELL,
+                                 TADecisionEnum.RELAX}
     assert isinstance(decision.df, pd.DataFrame)
 
 
 @pytest.mark.anyio
 async def test_calculate_decision(sample_dataframe, dbsession: AsyncSession):
-    calculator = StochCalculator()
+    calculator = TACalculator()
     period = 'D'
     last_price = 130.0
     stop = StopModel(period='D', value=120.0)
@@ -94,8 +89,8 @@ async def test_calculate_decision(sample_dataframe, dbsession: AsyncSession):
     decision = calculator._calculate_decision(company, period, sample_dataframe,
                                               stop, last_price)
 
-    assert decision.decision in {StochDecisionEnum.BUY, StochDecisionEnum.SELL,
-                                 StochDecisionEnum.RELAX}
+    assert decision.decision in {TADecisionEnum.BUY, TADecisionEnum.SELL,
+                                 TADecisionEnum.RELAX}
     assert isinstance(decision.k, float)
     assert isinstance(decision.d, float)
     assert isinstance(decision.last_price, float)
@@ -104,24 +99,24 @@ async def test_calculate_decision(sample_dataframe, dbsession: AsyncSession):
 
 @pytest.mark.anyio
 async def test_get_stoch_decisions_no_data(dbsession: AsyncSession):
-    calculator = StochCalculator()
+    calculator = TACalculator()
     period = 'D'
 
     # Создаем тестовую компанию и
     company = await create_test_company(dbsession)
 
     # Simulate the case where there's no data available
-    decisions = calculator.get_company_stoch_decisions(company, period)
+    decisions = calculator.get_company_ta_decisions(company, period)
 
     assert isinstance(decisions, dict)
-    assert isinstance(decisions[period], StochDecisionDTO)
-    assert decisions[period].decision == StochDecisionEnum.UNKNOWN
+    assert isinstance(decisions[period], TADecisionDTO)
+    assert decisions[period].decision == TADecisionEnum.UNKNOWN
     assert decisions[period].company.tiker == company.tiker
 
 
 @pytest.mark.anyio
 async def test_get_stoch_decisions_with_stop(sample_dataframe, dbsession: AsyncSession):
-    calculator = StochCalculator()
+    calculator = TACalculator()
     period = 'D'
     stop = StopModel(period='D', value=120.0)
 
@@ -133,18 +128,18 @@ async def test_get_stoch_decisions_with_stop(sample_dataframe, dbsession: AsyncS
     with patch(
         'backend.utils.moex.moex_reader.MoexReader.get_company_history') as mock_method:
         mock_method.return_value = sample_dataframe
-        decisions = calculator.get_company_stoch_decisions(company, period)
+        decisions = calculator.get_company_ta_decisions(company, period)
 
         assert isinstance(decisions, dict)
-        assert isinstance(decisions[period], StochDecisionDTO)
-        assert decisions[period].decision.name == StochDecisionEnum.SELL
+        assert isinstance(decisions[period], TADecisionDTO)
+        assert decisions[period].decision.name == TADecisionEnum.SELL
         assert decisions[period].company.tiker == company.tiker
 
 
 @pytest.mark.anyio
-async def test_get_stoch_decisions(sample_dataframe, sample_stoch_dataframe,
+async def test_get_ta_decisions(sample_dataframe, sample_stoch_dataframe,
                                    dbsession: AsyncSession):
-    calculator = StochCalculator()
+    calculator = TACalculator()
     period = 'ALL'
 
     with report_time("Create companies"):
@@ -154,14 +149,14 @@ async def test_get_stoch_decisions(sample_dataframe, sample_stoch_dataframe,
         patch(
             'backend.utils.moex.moex_reader.MoexReader.get_company_history') as mock_method,
         patch(
-            'backend.utils.stoch.stoch_calculator.StochCalculator._generate_stoch_df') as mock_stoch
+            'backend.utils.ta.ta_calculator.TACalculator._generate_ta_df') as mock_ta
     ):
         #  значений назад цифры подходящие для покупки
         mock_method.return_value = sample_dataframe
-        mock_stoch.return_value = sample_stoch_dataframe
+        mock_ta.return_value = sample_stoch_dataframe
 
         with report_time("Generate decisions"):
-            decisions = await calculator.get_companies_stoch_decisions(companies,
+            decisions = await calculator.get_companies_ta_decisions(companies,
                                                                        period)
             assert len(decisions) == 10
 
@@ -172,14 +167,26 @@ async def test_get_stoch(
     dbsession: AsyncSession
 ) -> None:
 
-    calculator = StochCalculator()
-    stoch_D = calculator.get_stoch(sample_lkoh_dataframe, 'D')
-    stoch_W = calculator.get_stoch(sample_lkoh_dataframe, 'W')
-    stoch_M = calculator.get_stoch(sample_lkoh_dataframe, 'M')
+    calculator = TACalculator()
+    with report_time("Get ta"):
+        stoch_D = calculator.generate_ta_indicators(sample_lkoh_dataframe, 'D')
+        stoch_W = calculator.generate_ta_indicators(sample_lkoh_dataframe, 'W')
+        stoch_M = calculator.generate_ta_indicators(sample_lkoh_dataframe, 'M')
 
-    assert stoch_D.size != 0
-    assert stoch_W.size != 0
-    assert stoch_M.size != 0
+        assert stoch_D.size != 0
+        assert stoch_W.size != 0
+        assert stoch_M.size != 0
+
+        # Проверяем последнюю строку
+        assert stoch_D.iloc[-1]['k'] == 55.09511189663982
+        assert stoch_D.iloc[-1]['d'] == 52.04061579315603
+
+        assert stoch_W.iloc[-1]['k'] == 34.344579818736555
+        assert stoch_W.iloc[-1]['d'] == 35.58157772813333
+
+        assert stoch_M.iloc[-1]['k'] == 83.15564413051169
+        assert stoch_M.iloc[-1]['d'] == 87.04591638759291
+
 
 
 # @pytest.mark.anyio

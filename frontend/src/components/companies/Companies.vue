@@ -194,7 +194,7 @@ export default {
       this.$set(this, 'list', companies)
     },
     async fetchStochDataList() {
-      const stochs = await getData(endpoints.STOCH)
+      const stochs = await getData(endpoints.TA)
       this.stochs = stochs.reduce((acc, curr) => {
         if (!acc[curr.company.id]) {
           acc[curr.company.id] = {}
@@ -230,7 +230,7 @@ export default {
     },
     handleStoch() {
       this.checkingStoch = true
-      postData(endpoints.STOCH, {}, true, { period: 'ALL' }).then((results) => {
+      postData(endpoints.TA, {}, true, { period: 'ALL' }).then((results) => {
         this.checkingStoch = false
         this.fetchList()
         console.log(results)

@@ -17,8 +17,8 @@ class SchedulerService:
         self.session = session
         self.scheduler = None
 
-    async def check_stoch(self, period: str):
-        logger.debug('Проверка stoch')
+    async def check_ta(self, period: str):
+        logger.debug('Проверка ta')
 
         last_run = CronJobRunDao().get_cron_job_run(period)
         logger.debug(last_run)
@@ -27,13 +27,13 @@ class SchedulerService:
             logger.debug('.')
            # result = await CronJobRunDao().update_cron_job_run(period, 'CheckStoch')
            # httpx.post('http://127.0.0.1:8000/api/cron_job_run/', data={"period": "D", "name": "CheckStoch"}, timeout=30)
-            await httpx.get(f'http://127.0.0.1:8000/api/stoch/?period={period}&is_cron=1', timeout=30)
+            await httpx.get(f'http://127.0.0.1:8000/api/ta/?period={period}&is_cron=1', timeout=30)
            #await CronJobRunDao().update_cron_job_run(period, 'CheckStoch')
            # return result
         except Exception as e:
             logger.error(e)
 
-        logger.debug('Проверен stoch.')
+        logger.debug('Проверен ta.')
 
     def start(self):
         logger.info("Starting scheduler service.")

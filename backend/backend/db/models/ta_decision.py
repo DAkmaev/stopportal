@@ -5,7 +5,7 @@ from sqlalchemy.sql.sqltypes import String, Float, TIMESTAMP
 from backend.db.base import Base
 
 
-class StochDecisionModel(Base):
+class TADecisionModel(Base):
     __tablename__ = "stoch_decisions"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
