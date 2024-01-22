@@ -163,7 +163,7 @@ class TAService:
                 has_decision = True
                 result_df.loc[date, 'Sell'] = 'X'
 
-            if last_row_M.k > last_row_M.d and last_row_D.dmp > last_row_D.dmn:
+            if last_row_M.k > last_row_M.d and last_row_M.dmp > last_row_M.dmn:
                 has_decision = True
                 result_df.loc[date, 'Buy_ADX'] = 'X'
 
