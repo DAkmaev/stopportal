@@ -1,0 +1,31 @@
+version: "3.3"
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        INSTALL_DEV: false
+    ports:
+      - "8000:80"
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        FRONTEND_ENV: dev
+    ports:
+      - "8080:80"
+
+#  frontend:
+#    image: '${DOCKER_IMAGE_FRONTEND?Variable not set}:${TAG-latest}'
+#    build:
+#      context: ./frontend
+#      args:
+#        FRONTEND_ENV: ${FRONTEND_ENV-production}
+#    deploy:
+#      labels:
+#        - traefik.enable=true
+#        - traefik.constraint-label-stack=${TRAEFIK_TAG?Variable not set}
+#        - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.rule=PathPrefix(`/`)
+#        - traefik.http.services.${STACK_NAME?Variable not set}-frontend.loadbalancer.server.port=80
