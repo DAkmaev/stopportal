@@ -160,6 +160,7 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-frontend:latest
 
   send_message:
+    name: Sent notification to Telegram
     runs-on: ubuntu-latest
     needs:
       - build_backend_docker
