@@ -125,15 +125,16 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: |
-          cd frontend /
-          npm install /
-          npm ci
+        working-directory: frontend
+        run: npm install
 
-      - name: Test frontend
-        run: |
-          cd frontend /
-          npm run lint
+      - name: Install dependencies 2
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
 
   build_frontend_docker:
     name: Build and push Frontend Docker image to DockerHub
