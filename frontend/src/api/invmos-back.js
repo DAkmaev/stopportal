@@ -1,5 +1,5 @@
 function fillUrl(endpoint, params) {
-  let url = `http://localhost:8000/${endpoint}`
+  let url = `${process.env.VUE_APP_API_URL}/${endpoint}`
   if (params && Object.keys(params).length > 0) {
     url += '?'
     url += Object.keys(params)
