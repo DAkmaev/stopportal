@@ -19,6 +19,10 @@ jobs:
     - name: Install poetry
       uses: Gr1N/setup-poetry@v8
 
+    - name: Install dependencies
+      working-directory: backend
+      run: poetry install
+
     - name: Run pytest check
       working-directory: backend
       run: poetry run pytest -vv .
@@ -37,6 +41,10 @@ jobs:
       - name: Install poetry
         uses: Gr1N/setup-poetry@v8
 
+      - name: Install dependencies
+        working-directory: backend
+        run: poetry install
+
       - name: Run black check
         working-directory: backend
         run: poetry run black --check .
@@ -53,6 +61,10 @@ jobs:
       - name: Install poetry
         uses: Gr1N/setup-poetry@v8
 
+      - name: Install dependencies
+        working-directory: backend
+        run: poetry install
+
       - name: Run flake8 check
         working-directory: backend
         run: poetry run flake8 --count .
@@ -68,6 +80,10 @@ jobs:
 
       - name: Install poetry
         uses: Gr1N/setup-poetry@v8
+
+      - name: Install dependencies
+        working-directory: backend
+        run: poetry install
 
       - name: Run mypy check
         working-directory: backend
