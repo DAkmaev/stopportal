@@ -126,13 +126,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd frontend/
-          npm install/
+          cd frontend /
+          npm install /
           npm ci
 
       - name: Test frontend
         run: |
-          cd frontend/
+          cd frontend /
           npm run lint
 
   build_frontend_docker:
