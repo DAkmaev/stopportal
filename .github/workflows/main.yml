@@ -20,7 +20,8 @@ jobs:
       uses: Gr1N/setup-poetry@v8
 
     - name: Run pytest check
-      run: poetry run pytest -vv --cov="backend" .
+      working-directory: backend
+      run: poetry run pytest -vv .
       env:
         BACKEND_HOST: "0.0.0.0"
   black:
@@ -37,6 +38,7 @@ jobs:
         uses: Gr1N/setup-poetry@v8
 
       - name: Run black check
+        working-directory: backend
         run: poetry run black --check .
   flake8:
     runs-on: ubuntu-latest
@@ -52,6 +54,7 @@ jobs:
         uses: Gr1N/setup-poetry@v8
 
       - name: Run flake8 check
+        working-directory: backend
         run: poetry run flake8 --count .
   mypy:
     runs-on: ubuntu-latest
@@ -67,6 +70,7 @@ jobs:
         uses: Gr1N/setup-poetry@v8
 
       - name: Run mypy check
+        working-directory: backend
         run: poetry run mypy .
 
   build_and_push_to_docker_hub:
