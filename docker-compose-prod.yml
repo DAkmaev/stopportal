@@ -1,0 +1,34 @@
+version: "3.3"
+services:
+  backend:
+    image: dakmaev/stopportal-backend
+    ports:
+      - "8000:80"
+  frontend:
+    image: dakmaev/stopportal-frontend
+    ports:
+      - "8088:80"
+
+  traefik:
+    image: traefik:v2.7
+    container_name: traefik-reverse-proxy
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080" # Web UI Port
+    volumes:
+      # Listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./infra/traefik/traefik.yml:/traefik.yml:ro
+    networks:
+      - web
+
+
+networks:
+  web:
+#
+#  nginx:
+#    image: nginx:alpine
+#    ports:
+#      - "9000:80"
+#    volumes:
