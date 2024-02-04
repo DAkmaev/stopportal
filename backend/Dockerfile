@@ -9,7 +9,6 @@ RUN pip install poetry
 
 #COPY ./app/ /app
 COPY ./ /app
-
 ENV PYTHONPATH=/app
 
 RUN poetry install
