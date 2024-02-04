@@ -3,6 +3,10 @@ FROM python:3.11
 WORKDIR /app/
 
 RUN pip install poetry
+RUN pip install alembic
+RUN pip install pydantic-settings
+RUN pip install yarl
+RUN pip install aiosqlite
 
 ### Copy poetry.lock* in case it doesn't exist in the repo
 #COPY ./pyproject.toml ./poetry.lock /app

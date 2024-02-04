@@ -1,18 +1,18 @@
 version: "3.3"
 services:
   backend:
-    image: dakmaev/stopportal-backend
+    image: dakmaev/stopportal-backend:latest
     networks:
       - app-network
 
   frontend:
-    image: dakmaev/stopportal-frontend
+    image: dakmaev/stopportal-frontend:latest
     command: [ "cp", "-r", "/app/dist/.", "/staticfiles/" ]
     volumes:
       - static:/staticfiles
 
   gateway:
-    image: dakmaev/stopportal-gateway
+    image: dakmaev/stopportal-gateway:latest
     links:
       - backend
     ports:

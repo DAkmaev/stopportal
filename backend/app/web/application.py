@@ -6,6 +6,9 @@ from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from alembic.config import Config
+from alembic import command
+from contextlib import asynccontextmanager
 
 from app.web.api.router import api_router
 from app.web.lifetime import register_shutdown_event, register_startup_event
