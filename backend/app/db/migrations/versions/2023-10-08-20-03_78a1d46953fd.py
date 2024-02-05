@@ -38,8 +38,8 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.drop_index("ix_stock_tiker", table_name="stock")
-    op.drop_table("stock")
     op.drop_table("stock_stop")
+    op.drop_table("stock")
     # ### end Alembic commands ###
 
 

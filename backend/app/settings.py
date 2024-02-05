@@ -1,12 +1,9 @@
 import enum
-import secrets
+import os
 from pathlib import Path
-# from tempfile import gettempdir
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
-
-# TEMP_DIR = Path(gettempdir())
 
 
 class LogLevel(str, enum.Enum):  # noqa: WPS600
@@ -43,14 +40,18 @@ class Settings(BaseSettings):
     # Variables for the database
     db_file: Path = "./db.sqlite3"
     db_echo: bool = False
+    postgres_server: str = "localhost"
+    postgres_user: str = "stopportal_user"
+    postgres_password: str = "stopportal_password"
+    postgres_db: str = "stopportal"
 
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    API_V1_STR: str = "/api"
-    ALGORITHM: str = "HS256"
-    SECRET_KEY: str = "sdsdsdw34fdfwr2efdfwe2" #secrets.token_urlsafe(32)
+    access_token_expire_minutes: int = 60 * 24 * 8
+    api_v1_str: str = "/api"
+    algorithm: str = "HS256"
+    secret_key: str = "sdsdsdw34fdfwr2efdfwe2" #secrets.token_urlsafe(32)
 
-    FIRST_SUPERUSER: str = "admin"
-    FIRST_SUPERUSER_PASSWORD: str = "changethis"
+    first_superuser: str = "admin"
+    first_superuser_password: str = "changethis"
 
     @property
     def db_url(self) -> URL:
@@ -59,9 +60,15 @@ class Settings(BaseSettings):
 
         :return: database URL.
         """
+        if self.environment == "dev":
+            return URL.build(
+                scheme="sqlite+aiosqlite",
+                path=f"///{self.db_file}",
+            )
+
         return URL.build(
-            scheme="sqlite+aiosqlite",
-            path=f"///{self.db_file}",
+            scheme="postgresql+psycopg",
+            path=f"//{self.postgres_user}:{self.postgres_password}@{self.postgres_server}/{self.postgres_db}",
         )
 
     model_config = SettingsConfigDict(

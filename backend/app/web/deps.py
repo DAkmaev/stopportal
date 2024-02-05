@@ -12,7 +12,7 @@ from app.settings import settings
 from app.web.api.login.schema import TokenPayload
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+    tokenUrl=f"{settings.api_v1_str}/login/access-token"
 )
 
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
@@ -21,7 +21,7 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 async def get_current_user(session: AsyncSession = Depends(get_db_session), token: str = Depends(reusable_oauth2)) -> UserModel:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.secret_key, algorithms=[settings.algorithm]
         )
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):

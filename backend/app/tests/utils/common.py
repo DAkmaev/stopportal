@@ -180,9 +180,9 @@ async def _get_test_user_headers(
     email: str = None,
     password: str = None
 ) -> dict[str, str]:
-    name = settings.FIRST_SUPERUSER if is_superuser and not name else random_lower_string()
+    name = settings.first_superuser if is_superuser and not name else random_lower_string()
     email = email if email else random_email()
-    password = settings.FIRST_SUPERUSER_PASSWORD if is_superuser and not password else random_lower_string()
+    password = settings.first_superuser_password if is_superuser and not password else random_lower_string()
     await create_test_user(
         dbsession, is_superuser=is_superuser,
         name=name,
