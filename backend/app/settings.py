@@ -60,7 +60,7 @@ class Settings(BaseSettings):
 
         :return: database URL.
         """
-        if self.environment == "dev":
+        if self.environment in ["dev", "pytest"]:
             return URL.build(
                 scheme="sqlite+aiosqlite",
                 path=f"///{self.db_file}",

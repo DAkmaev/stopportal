@@ -203,7 +203,7 @@ jobs:
 #          host: ${{ secrets.HOST }}
 #          username: ${{ secrets.USER }}
 #          key: ${{ secrets.SSH_KEY }}
-#          source: "docker-compose-prod.yml"
+#          source: "docker-compose.yml"
 #          target: "stopportal"
 #      - name: Executing remote ssh commands to deploy
 #        uses: appleboy/ssh-action@master
@@ -213,14 +213,14 @@ jobs:
 #          key: ${{ secrets.SSH_KEY }}
 #          script: |
 #            cd stopportal
-#            sudo docker compose -f docker-compose-prod.yml pull
-#            sudo docker compose -f docker-compose-prod.yml down
-#            sudo docker compose -f docker-compose-prod.yml up -d
+#            sudo docker compose -f docker-compose.yml pull
+#            sudo docker compose -f docker-compose.yml down
+#            sudo docker compose -f docker-compose.yml up -d
 #            # Выполняет миграции и сбор статики
-#            sudo docker compose -f docker-compose-prod.yml exec backend alembic upgrade "head"
-#            # sudo docker compose -f docker-compose-prod.yml exec backend python manage.py migrate
-#            # sudo docker compose -f docker-compose-prod.yml exec backend python manage.py collectstatic
-#            # sudo docker compose -f docker-compose-prod.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+#            sudo docker compose -f docker-compose.yml exec backend alembic upgrade "head"
+#            # sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+#            # sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+#            # sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /backend_static/static/
 
   send_message:
     name: Sent notification to Telegram

@@ -2,7 +2,7 @@ version: "3.9"
 services:
   backend:
     build:
-      context: ./backend
+      context: ../backend
     container_name: stopportal-backend
     image: stopportal-backend:latest
     restart: always
@@ -25,7 +25,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend/
+      context: ../frontend
       args:
         FRONTEND_ENV: dev
         API_BASE_URL: ${VUE_APP_API_URL}
@@ -36,7 +36,7 @@ services:
 
   gateway:
     build:
-      context: ./infra/nginx
+      context: ../infra/nginx
     container_name: stopportal-gateway
     links:
       - backend
