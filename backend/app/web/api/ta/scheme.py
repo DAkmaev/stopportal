@@ -31,7 +31,7 @@ class TADecisionDTO(BaseModel):
     """
     company: TACompanyDTO
     decision: TADecisionEnum
-    last_price: Optional[float] = None
+    # last_price: Optional[float] = None
     k: Optional[float] = None
     d: Optional[float] = None
     period: str
