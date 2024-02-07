@@ -1,7 +1,6 @@
-import math
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from enum import Enum
 
 
@@ -38,9 +37,3 @@ class TADecisionDTO(BaseModel):
     period: str
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None
-
-    @validator('last_price', pre=True)
-    def none_to_nan(cls, v):
-        if math.isnan(v):
-            return None
-        return v
