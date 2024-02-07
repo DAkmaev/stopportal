@@ -39,8 +39,8 @@ class TAService:
             period=period,
             decision=decision.decision.name,
             k=decision.k,
-            d=decision.d,
-            last_price=decision.last_price
+            d=decision.d
+            #last_price=decision.last_price
         )
         return ta_decision
 

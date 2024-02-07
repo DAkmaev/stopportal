@@ -94,7 +94,7 @@ async def test_calculate_decision(sample_dataframe, dbsession: AsyncSession):
                                  TADecisionEnum.RELAX}
     assert isinstance(decision.k, float)
     assert isinstance(decision.d, float)
-    assert isinstance(decision.last_price, float)
+    # assert isinstance(decision.last_price, float)
     assert decision.company.tiker == company.tiker
 
 
