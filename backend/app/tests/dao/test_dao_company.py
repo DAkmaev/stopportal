@@ -1,9 +1,9 @@
 import pytest
-from fastapi import FastAPI, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
 from app.db.dao.strategies import StrategiesDAO
+from fastapi import FastAPI, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.anyio

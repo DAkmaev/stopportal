@@ -1,13 +1,12 @@
 import logging
-import os.path
-from typing import List, Dict
-from starlette.responses import FileResponse
-
-from fastapi import APIRouter, Depends
+import os
+from typing import Dict, List
 
 from app.db.dao.ta_decisions import TADecisionDAO
-from app.web.api.ta.scheme import TADecisionDTO
 from app.services.ta_service import TAService
+from app.web.api.ta.scheme import TADecisionDTO
+from fastapi import APIRouter, Depends
+from starlette.responses import FileResponse
 
 router = APIRouter()
 logging.basicConfig(level=logging.INFO)
@@ -25,10 +24,9 @@ async def generate_ta_decisions(
     # todo заменить на получение портфеля для user
     briefcase_id = 1
 
-    stochs = await ta_service.generate_ta_decisions(
-        briefcase_id, period, is_cron, send_messages, send_test
+    return await ta_service.generate_ta_decisions(
+        briefcase_id, period, is_cron, send_messages, send_test,
     )
-    return stochs
 
 
 @router.post("/{tiker}")
@@ -39,14 +37,13 @@ async def generate_ta_decision(
     ta_service: TAService = Depends(),
 ) -> Dict[str, TADecisionDTO]:
     return await ta_service.generate_ta_decision(
-        tiker=tiker, period=period, send_messages=send_messages
+        tiker=tiker, period=period, send_messages=send_messages,
     )
 
 
 @router.get("/")
 async def get_stochs(stoch_dao: TADecisionDAO = Depends()) -> List[TADecisionDTO]:
-    stochs = await stoch_dao.get_ta_decision_models()
-    return stochs
+    return await stoch_dao.get_ta_decision_models()
 
 
 @router.get("/history/{tiker}")

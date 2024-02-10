@@ -1,9 +1,8 @@
+from app.db.dependencies import get_db_session
+from app.db.models.company import CompanyModel, StopModel
+from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dependencies import get_db_session
-from fastapi import Depends, HTTPException
-
-from app.db.models.company import CompanyModel, StopModel
 
 
 class StopsDAO:

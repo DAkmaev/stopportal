@@ -1,12 +1,11 @@
 import enum
-from typing import Optional, List
-
-from sqlalchemy import ForeignKey, func, Enum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql.sqltypes import DECIMAL, Integer, TIMESTAMP
+from typing import List, Optional
 
 from app.db.base import Base
 from app.db.models.company import CompanyModel, StrategyModel
+from sqlalchemy import Enum, ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql.sqltypes import DECIMAL, TIMESTAMP, Integer
 
 
 class CurrencyEnum(enum.Enum):

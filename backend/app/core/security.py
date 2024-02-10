@@ -3,10 +3,9 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any
 
+from app.settings import settings
 from jose import jwt
 from passlib.context import CryptContext
-
-from app.settings import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

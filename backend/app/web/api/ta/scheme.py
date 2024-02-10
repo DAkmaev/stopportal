@@ -1,17 +1,17 @@
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
-from enum import Enum
 
 
-class TADecisionEnum(str, Enum):
+class TADecisionEnum(str, Enum):    # noqa: WPS600
     BUY = "BUY"
     SELL = "SELL"
     RELAX = "RELAX"
     UNKNOWN = "UNKNOWN"
 
 
-class TAPeriodEnum(str, Enum):
+class TAPeriodEnum(str, Enum):  # noqa: WPS600
     DAY = "D"
     WEEK = "W"
     MONTH = "M"
@@ -25,16 +25,11 @@ class TACompanyDTO(BaseModel):
 
 
 class TADecisionDTO(BaseModel):
-    """
-    Scheme for TA decision.
-
-    """
-
     company: TACompanyDTO
     decision: TADecisionEnum
     # last_price: Optional[float] = None
-    k: Optional[float] = None
-    d: Optional[float] = None
+    k: Optional[float] = None   # noqa: WPS111
+    d: Optional[float] = None   # noqa: WPS111
     period: str
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None

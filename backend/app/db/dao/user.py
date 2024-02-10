@@ -1,12 +1,11 @@
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, List, Optional
 
 from app.core.security import get_password_hash, verify_password
 from app.db.dependencies import get_db_session
-from fastapi import Depends, HTTPException
-from typing import List, Optional, Any
-
 from app.db.models.user import UserModel
+from fastapi import Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserDAO:

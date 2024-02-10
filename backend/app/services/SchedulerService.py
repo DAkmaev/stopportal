@@ -1,12 +1,11 @@
 import logging
-import httpx
 
+import httpx
+from app.db.dao.cron_job import CronJobRunDao
+from app.db.dependencies import get_db_session
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.dao.cron_job import CronJobRunDao
-from app.db.dependencies import get_db_session
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

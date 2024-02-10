@@ -1,16 +1,14 @@
 import uuid
 
 import pytest
+from app.db.dao.companies import CompanyDAO
+from app.db.dao.stops import StopsDAO
+from app.db.models.company import CompanyModel, StopModel
+from app.tests.utils.common import create_test_company
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.db.dao.companies import CompanyDAO
-from app.db.dao.stops import StopsDAO
-from app.db.models.company import CompanyModel, StopModel
-
-from app.tests.utils.common import create_test_company
 
 
 @pytest.mark.anyio
@@ -45,7 +43,7 @@ async def test_get_company_by_id(
     company = await create_test_company(dbsession, True, True)
 
     # Формируем URL для запроса к API с учетом идентификатора созданной компании
-    url = fastapi_app.url_path_for("get_company_models", company_id=company.id)
+    url = fastapi_app.url_path_for("get_company_model", company_id=company.id)
 
     # Отправляем GET-запрос
     response = await client.get(url)

@@ -1,18 +1,17 @@
 from datetime import datetime
 
 import pytest
+from app.db.dao.briefcases import BriefcaseDAO
+from app.db.models.briefcase import CurrencyEnum, RegistryOperationEnum
+from app.tests.utils.common import (
+    create_test_briefcase,
+    create_test_briefcase_item,
+    create_test_briefcase_registry,
+    create_test_company,
+)
 from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.dao.briefcases import BriefcaseDAO
-from app.db.models.briefcase import RegistryOperationEnum, CurrencyEnum
-from app.tests.utils.common import (
-    create_test_company,
-    create_test_briefcase_item,
-    create_test_briefcase,
-    create_test_briefcase_registry,
-)
 
 
 @pytest.mark.anyio

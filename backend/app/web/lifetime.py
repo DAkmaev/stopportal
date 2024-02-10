@@ -1,12 +1,8 @@
 from typing import Awaitable, Callable
 
-from alembic import command
-from alembic.config import Config
+from app.settings import settings
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-
-from app.services.SchedulerService import SchedulerService
-from app.settings import settings
 
 
 def _setup_db(app: FastAPI) -> None:  # pragma: no cover
@@ -46,12 +42,6 @@ def register_startup_event(
         app.middleware_stack = None
         _setup_db(app)
         app.middleware_stack = app.build_middleware_stack()
-
-        # alembic_cfg = Config("alembic.ini")
-        # command.upgrade(alembic_cfg, "head")
-
-        # sch_srv = SchedulerService()
-        # sch_srv.start()
         pass  # noqa: WPS420
 
     return _startup

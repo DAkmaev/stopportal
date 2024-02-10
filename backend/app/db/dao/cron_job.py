@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-from _datetime import datetime
 from typing import List, Type
 
-from fastapi import HTTPException
+from _datetime import datetime
+from app.db.dependencies import get_db_session
+from app.db.models.cron_job_run import CronJobRunModel
+from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.models.cron_job_run import CronJobRunModel
-
-from fastapi import Depends
-from app.db.dependencies import get_db_session
 
 
 class CronJobRunDao:

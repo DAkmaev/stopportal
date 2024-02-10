@@ -1,19 +1,18 @@
 import asyncio
-import uuid
 import time
+import uuid
 
 import pytest
-from fastapi import FastAPI, Depends
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
-
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.cron_job import CronJobRunDao
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.services.ta_service import TAService
 from app.tests.utils.common import create_test_company
+from fastapi import Depends, FastAPI
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 
 @pytest.mark.anyio

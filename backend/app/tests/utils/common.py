@@ -4,10 +4,6 @@ import string
 import uuid
 
 import pytest
-from fastapi import FastAPI, Depends
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.user import UserDAO
@@ -20,6 +16,9 @@ from app.db.models.briefcase import (
 from app.db.models.company import CompanyModel, StopModel, StrategyModel
 from app.db.models.user import UserModel
 from app.settings import settings
+from fastapi import Depends, FastAPI
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def create_test_company(

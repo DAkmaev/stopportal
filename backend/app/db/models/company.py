@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import ForeignKey, Column, Table
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql.sqltypes import String, Float
-
 from app.db.base import Base
+from sqlalchemy import Column, ForeignKey, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql.sqltypes import Float, String
 
 if TYPE_CHECKING:
     from .item import Item  # noqa: F401

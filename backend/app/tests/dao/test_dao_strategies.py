@@ -1,7 +1,7 @@
 import pytest
+from app.db.dao.strategies import StrategiesDAO
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dao.strategies import StrategiesDAO
 
 
 @pytest.mark.anyio

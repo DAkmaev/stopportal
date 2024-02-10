@@ -1,12 +1,11 @@
 import pytest
+from app.db.dao.companies import CompanyDAO
+from app.db.dao.stops import StopsDAO
+from app.tests.utils.common import create_test_company
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.db.dao.companies import CompanyDAO
-from app.db.dao.stops import StopsDAO
-from app.tests.utils.common import create_test_company
 
 
 @pytest.mark.anyio

@@ -1,12 +1,11 @@
-from typing import Optional, List
-
-from pydantic import BaseModel
 from enum import Enum
+from typing import List, Optional
 
-from app.web.api.stop.scheme import StopInputDTO, StopDTO
+from app.web.api.stop.scheme import StopDTO
+from pydantic import BaseModel
 
 
-class CompanyTypeEnum(str, Enum):
+class CompanyTypeEnum(str, Enum):  # noqa: WPS600
     MOEX = "MOEX"
     YAHOO = "YAHOO"
 
@@ -20,10 +19,6 @@ class StrategiesDTO(StrategiesInputDTO):
 
 
 class CompanyModelDTO(BaseModel):
-    """
-    Scheme for company.
-    """
-
     id: int
     tiker: str
     name: Optional[str] = None
@@ -33,8 +28,6 @@ class CompanyModelDTO(BaseModel):
 
 
 class CompanyModelInputDTO(BaseModel):
-    """DTO for creating new company model."""
-
     tiker: str
     name: Optional[str] = None
     type: Optional[CompanyTypeEnum] = CompanyTypeEnum.MOEX
@@ -42,8 +35,6 @@ class CompanyModelInputDTO(BaseModel):
 
 
 class CompanyModelPatchDTO(CompanyModelInputDTO):
-    """DTO for updating company model."""
-
     tiker: Optional[str] = None
     type: Optional[CompanyTypeEnum] = None
     strategies: Optional[List[StrategiesInputDTO]] = []

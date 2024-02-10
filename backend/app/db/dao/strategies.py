@@ -1,11 +1,10 @@
 from typing import List
 
+from app.db.dependencies import get_db_session
+from app.db.models.company import StrategyModel
+from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dependencies import get_db_session
-from fastapi import Depends, HTTPException
-
-from app.db.models.company import StrategyModel
 
 
 class StrategiesDAO:

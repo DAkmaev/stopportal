@@ -1,21 +1,19 @@
 from datetime import datetime
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
 from app.db.dao.common import update_registry_field
 from app.db.dependencies import get_db_session
-from fastapi import Depends, HTTPException
-from typing import List
-
 from app.db.models.briefcase import (
-    BriefcaseModel,
     BriefcaseItemModel,
+    BriefcaseModel,
     BriefcaseRegistryModel,
     CurrencyEnum,
     RegistryOperationEnum,
 )
 from app.db.models.company import CompanyModel, StrategyModel
+from fastapi import Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BriefcaseDAO:

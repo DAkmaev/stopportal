@@ -1,11 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter
-from fastapi.param_functions import Depends
-
 from app.db.dao.dummy_dao import DummyDAO
 from app.db.models.dummy_model import DummyModel
 from app.web.api.dummy.schema import DummyModelDTO, DummyModelInputDTO
+from fastapi import APIRouter
+from fastapi.param_functions import Depends
 
 router = APIRouter()
 

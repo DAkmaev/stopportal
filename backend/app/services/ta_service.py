@@ -2,8 +2,6 @@ import asyncio
 import os
 
 import pandas as pd
-from fastapi import Depends
-
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.cron_job import CronJobRunDao
@@ -12,6 +10,7 @@ from app.db.models.company import CompanyModel
 from app.utils.ta.ta_calculator import TACalculator, TADecision
 from app.utils.telegram.telegramm_client import send_tg_message
 from app.web.api.ta.scheme import TADecisionDTO, TADecisionEnum
+from fastapi import Depends
 
 PERIOD_NAMES = {"M": "месяц", "D": "день", "W": "неделя"}
 

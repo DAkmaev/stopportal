@@ -1,10 +1,9 @@
 import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql.sqltypes import String, DateTime
-
 from app.db.base import Base
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql.sqltypes import DateTime, String
 
 if TYPE_CHECKING:
     from .item import Item  # noqa: F401

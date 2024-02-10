@@ -1,17 +1,16 @@
 import pytest
+from app.db.dao.user import UserDAO
+from app.db.models.user import UserModel
+from app.tests.utils.common import (
+    create_test_user,
+    get_headers,
+    random_email,
+    random_lower_string,
+)
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.db.dao.user import UserDAO
-from app.db.models.user import UserModel
-from app.tests.utils.common import (
-    random_lower_string,
-    create_test_user,
-    get_headers,
-    random_email,
-)
 
 
 @pytest.mark.anyio

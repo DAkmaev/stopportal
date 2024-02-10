@@ -1,12 +1,11 @@
-from sqlalchemy import select
 from typing import List
-
-from fastapi import Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.dependencies import get_db_session
 from app.db.models.company import CompanyModel
 from app.db.models.ta_decision import TADecisionModel
+from fastapi import Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class TADecisionDAO:

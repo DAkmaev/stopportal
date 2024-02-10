@@ -1,17 +1,16 @@
 import contextlib
 import time
 from pathlib import Path
+from unittest.mock import patch
 
-import pytest
 import pandas as pd
+import pytest
+from app.db.models.company import StopModel
+from app.tests.utils.common import create_test_companies, create_test_company
+from app.utils.ta.ta_calculator import TACalculator
+from app.web.api.ta.scheme import TADecisionDTO, TADecisionEnum
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.tests.utils.common import create_test_company, create_test_companies
-from app.utils.ta.ta_calculator import TACalculator
-from app.web.api.ta.scheme import TADecisionEnum, TADecisionDTO
-from app.db.models.company import StopModel
-
-from unittest.mock import patch
 
 
 @pytest.fixture

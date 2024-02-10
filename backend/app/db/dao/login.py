@@ -1,12 +1,12 @@
 from datetime import timedelta
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import security
 from app.db.dao.user import UserDAO
 from app.db.dependencies import get_db_session
-from fastapi import Depends, HTTPException
 from app.settings import settings
 from app.web.api.login.schema import Token
+from fastapi import Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class LoginDAO:

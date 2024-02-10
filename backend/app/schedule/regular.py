@@ -1,6 +1,5 @@
-from fastapi_restful.tasks import repeat_every
-
 from app.web.application import get_app
+from fastapi_restful.tasks import repeat_every
 
 app = get_app()
 

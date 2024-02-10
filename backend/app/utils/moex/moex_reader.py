@@ -1,13 +1,13 @@
 import asyncio
-import datetime
 import concurrent
+import datetime
 from typing import Optional, Tuple
 
 import apimoex
 import pandas as pd
 import requests
-from pandas import DataFrame
 from aiohttp import ClientSession
+from pandas import DataFrame
 
 
 class MoexReader:

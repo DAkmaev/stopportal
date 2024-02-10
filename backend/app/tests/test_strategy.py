@@ -1,13 +1,12 @@
 import uuid
 
 import pytest
+from app.db.dao.companies import CompanyDAO
+from app.db.dao.strategies import StrategiesDAO
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.db.dao.companies import CompanyDAO
-from app.db.dao.strategies import StrategiesDAO
 
 
 @pytest.mark.anyio
@@ -125,7 +124,7 @@ async def test_update_strategy_model(
     assert strategy is not None
 
     # Отправляем PUT-запрос для обновления стратегии
-    url = fastapi_app.url_path_for("update_strategy_model", id=original_strategy.id)
+    url = fastapi_app.url_path_for("update_strategy_model", strategy_id=original_strategy.id)
     response = await client.put(
         url,
         json={
@@ -166,7 +165,7 @@ async def test_delete_strategy_model(
     assert strategy is not None
 
     # Отправляем DELETE-запрос для удаления стратегии
-    url = fastapi_app.url_path_for("delete_strategy_model", id=strategy.id)
+    url = fastapi_app.url_path_for("delete_strategy_model", strategy_id=strategy.id)
     response = await client.delete(url)
 
     # Проверяем успешный ответ и отсутствие удаленной стратегии в базе данных
