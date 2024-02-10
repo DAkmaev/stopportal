@@ -8,4 +8,4 @@ app = get_app()
 @app.on_event("startup")
 @repeat_every(seconds=10)
 def test_task() -> None:
-    print('#######')
+    print("#######")

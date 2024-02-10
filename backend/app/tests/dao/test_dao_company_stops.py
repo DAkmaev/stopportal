@@ -266,7 +266,7 @@ async def test_update_stop_model_prevent_duplicate(
         "company_id": company.id,
         "value": 200.0,
         "id": stop_models[0].id,
-        "period": stop_models[1].period
+        "period": stop_models[1].period,
     }
     with pytest.raises(HTTPException) as exc_info:
         await company_stops_dao.update_stop_model(updated_stop_fields)
@@ -276,4 +276,3 @@ async def test_update_stop_model_prevent_duplicate(
 
     # Clean up - delete the test company
     await company_dao.delete_company_model(company.id)
-

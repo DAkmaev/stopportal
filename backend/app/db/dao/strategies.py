@@ -68,10 +68,11 @@ class StrategiesDAO:
         if not strategy:
             raise HTTPException(status_code=404, detail="Стратегия не найдена")
 
-
         await self.session.delete(strategy)
 
-    async def update_strategy_model(self, strategy_id: int, name: str, description: str) -> StrategyModel:
+    async def update_strategy_model(
+        self, strategy_id: int, name: str, description: str
+    ) -> StrategyModel:
         """
         Update strategy model by ID.
 

@@ -29,6 +29,7 @@ async def test_create_user(
     assert user.name == name
     assert hasattr(user, "hashed_password")
 
+
 @pytest.mark.anyio
 async def test_authenticate_user(
     fastapi_app: FastAPI,
@@ -49,7 +50,7 @@ async def test_authenticate_user(
     assert user.email == authenticated_user.email
 
     # Указываем не правильный пароль
-    authenticated_user = await dao.authenticate(name, 'wrong')
+    authenticated_user = await dao.authenticate(name, "wrong")
     assert not authenticated_user
 
 
@@ -66,6 +67,7 @@ async def test_not_authenticate_user(
     authenticated_user = await dao.authenticate(name, password)
     assert authenticated_user is None
 
+
 @pytest.mark.anyio
 async def test_update_user(
     fastapi_app: FastAPI,
@@ -81,7 +83,6 @@ async def test_update_user(
     await dao.create_user_model(name, email, password)
     user = await dao.get_user_by_name(name)
 
-
     # Change pwassword and email
     new_password = random_lower_string()
     new_email = random_email()
@@ -94,4 +95,3 @@ async def test_update_user(
     assert user_updated
     assert user.email == user_updated.email
     assert verify_password(new_password, user_updated.hashed_password)
-

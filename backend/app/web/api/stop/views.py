@@ -47,4 +47,3 @@ async def update_stop_model(
     """
 
     await dao.update_stop_model(updated_stop.model_dump())
-

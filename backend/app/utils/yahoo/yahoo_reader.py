@@ -8,4 +8,3 @@ class YahooReader:
         data = si.get_data(tiker, start_date=start)
 
         return data
-

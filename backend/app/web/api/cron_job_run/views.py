@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from app.db.dao.cron_job import CronJobRunDao
 from app.db.models.cron_job_run import CronJobRunModel
-from app.web.api.cron_job_run.scheme import (CronJobRunDTO, CronJobRunInputDTO)
+from app.web.api.cron_job_run.scheme import CronJobRunDTO, CronJobRunInputDTO
 
 router = APIRouter()
 
@@ -52,8 +52,7 @@ async def update_cron_job_run_model(
     :param cron_job_run_dao: DAO for cron_job_run models.
     """
     await cron_job_run_dao.update_cron_job_run(
-        period=new_cron_job_run_object.period,
-        name=new_cron_job_run_object.name
+        period=new_cron_job_run_object.period, name=new_cron_job_run_object.name
     )
 
 

@@ -19,8 +19,9 @@ class CronJobRunDao:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def get_all_cron_job_runs(self, limit: int,
-                                    offset: int) -> List[CronJobRunModel]:
+    async def get_all_cron_job_runs(
+        self, limit: int, offset: int
+    ) -> List[CronJobRunModel]:
         """
         Get all cron_job_run models with limit/offset pagination.
 
@@ -48,7 +49,9 @@ class CronJobRunDao:
 
         return cron_job_run
 
-    async def get_cron_job_run_by_params(self, period: str, name: str) -> Type[CronJobRunModel]:
+    async def get_cron_job_run_by_params(
+        self, period: str, name: str
+    ) -> Type[CronJobRunModel]:
         """
         Get cron_job_run models by name and period.
 
@@ -68,8 +71,7 @@ class CronJobRunDao:
 
         return cron_job_run
 
-    async def update_cron_job_run(self, period: str,
-                                  name: str):
+    async def update_cron_job_run(self, period: str, name: str):
         """
         Update last run date
 
@@ -83,9 +85,7 @@ class CronJobRunDao:
 
         if exist_run_job is None:
             new_run = CronJobRunModel(
-                period=period,
-                name=name,
-                last_run_date=last_run_date
+                period=period, name=name, last_run_date=last_run_date
             )
             self.session.add(new_run)
             return new_run
@@ -101,6 +101,8 @@ class CronJobRunDao:
         """
         cron_job_run = await self.session.get(CronJobRunModel, cron_job_run_id)
         if not cron_job_run:
-            raise HTTPException(status_code=404, detail="Информация о запуске джобы не найдена")
+            raise HTTPException(
+                status_code=404, detail="Информация о запуске джобы не найдена"
+            )
 
         await self.session.delete(cron_job_run)

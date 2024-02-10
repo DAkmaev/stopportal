@@ -47,8 +47,8 @@ def register_startup_event(
         _setup_db(app)
         app.middleware_stack = app.build_middleware_stack()
 
-        #alembic_cfg = Config("alembic.ini")
-        #command.upgrade(alembic_cfg, "head")
+        # alembic_cfg = Config("alembic.ini")
+        # command.upgrade(alembic_cfg, "head")
 
         # sch_srv = SchedulerService()
         # sch_srv.start()

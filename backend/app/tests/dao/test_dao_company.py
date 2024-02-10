@@ -48,7 +48,6 @@ async def test_update_company_model(
     STRATEGY_NAME2 = "Strategy2"
     STRATEGY_DESCRIPTION2 = "Strategy Description 2"
 
-
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
     strategies_dao = StrategiesDAO(dbsession)
@@ -74,10 +73,7 @@ async def test_update_company_model(
     # Update the company
     updated_fields = {
         "name": NEW_NAME,
-        "strategies": [
-            {"id": strategies[0].id},
-            {"id": strategies[1].id}
-        ]
+        "strategies": [{"id": strategies[0].id}, {"id": strategies[1].id}],
     }
     await company_dao.update_company_model(company.id, updated_fields, partial=True)
 
@@ -109,6 +105,7 @@ async def test_update_company_model_not_found(
         await company_dao.update_company_model(non_existent_company_id, updated_fields)
 
     assert exc_info.value.status_code == 404
+
 
 @pytest.mark.anyio
 async def test_delete_company_model(
@@ -181,7 +178,6 @@ async def test_get_company_model(
 
     # Clean up - delete the test company
     await company_dao.delete_company_model(company.id)
-
 
 
 @pytest.mark.anyio

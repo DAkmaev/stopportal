@@ -17,7 +17,9 @@ class CompanyDAO:
         self.stop_dao = StopsDAO(session)
         self.strategy_dao = StrategiesDAO(session)
 
-    async def create_company_model(self, tiker: str, name: str, type: str, strategies: list[int] = None) -> CompanyModel:
+    async def create_company_model(
+        self, tiker: str, name: str, type: str, strategies: list[int] = None
+    ) -> CompanyModel:
         """
         Add single company to session.
 
@@ -31,15 +33,15 @@ class CompanyDAO:
         exist_company: CompanyModel = raw_company.scalars().one_or_none()
 
         if exist_company:
-            raise HTTPException(status_code=400,
-                                detail=f"Компания {exist_company.tiker} уже существует")
+            raise HTTPException(
+                status_code=400, detail=f"Компания {exist_company.tiker} уже существует"
+            )
 
         company = CompanyModel(tiker=tiker, name=name, type=type)
         self.session.add(company)
         return company
 
-    async def create_companies_models(
-        self, items: List[CompanyModel]) -> None:
+    async def create_companies_models(self, items: List[CompanyModel]) -> None:
         """
         Add multiple companies to session.
 
@@ -54,8 +56,10 @@ class CompanyDAO:
 
         if len(exist_companies) > 0:
             exist_companies_tikers = map(lambda i: i.tiker, exist_companies)
-            raise HTTPException(status_code=400,
-                                detail=f"В базе уже есть тикеры {','.join(exist_companies_tikers)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"В базе уже есть тикеры {','.join(exist_companies_tikers)}",
+            )
 
         self.session.add_all(items)
 
@@ -73,8 +77,7 @@ class CompanyDAO:
         # Extract Strategies data if present and handle updates
         strategies_data = updated_fields.pop("strategies", None)
         if strategies_data is not None:
-            updated_strategies_ids = {strategy['id'] for strategy in
-                                      strategies_data}
+            updated_strategies_ids = {strategy["id"] for strategy in strategies_data}
             company.strategies = [
                 await self.strategy_dao.get_strategy_model(strategy_id)
                 for strategy_id in updated_strategies_ids
@@ -98,8 +101,9 @@ class CompanyDAO:
 
         await self.session.delete(company)
 
-    async def get_all_companies(self, limit: int = 10000,
-                                offset: int = 0) -> List[CompanyModel]:
+    async def get_all_companies(
+        self, limit: int = 10000, offset: int = 0
+    ) -> List[CompanyModel]:
         """
         Get all companies models with limit/offset pagination.
 

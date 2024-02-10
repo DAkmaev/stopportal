@@ -17,9 +17,7 @@ class LoginDAO:
 
     async def authenticate(self, username: str, password: str) -> Token:
         user_dao = UserDAO(self.session)
-        user = await user_dao.authenticate(
-            username, password
-        )
+        user = await user_dao.authenticate(username, password)
         if not user:
             raise HTTPException(status_code=400, detail="Incorrect email or password")
         elif not user.is_active:

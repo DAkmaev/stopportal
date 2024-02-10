@@ -11,8 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.user import UserDAO
-from app.db.models.briefcase import (BriefcaseItemModel, BriefcaseModel,
-                                     BriefcaseRegistryModel, RegistryOperationEnum)
+from app.db.models.briefcase import (
+    BriefcaseItemModel,
+    BriefcaseModel,
+    BriefcaseRegistryModel,
+    RegistryOperationEnum,
+)
 from app.db.models.company import CompanyModel, StopModel, StrategyModel
 from app.db.models.user import UserModel
 from app.settings import settings
@@ -23,7 +27,7 @@ async def create_test_company(
     need_add_stop: bool = False,
     need_add_strategy: bool = False,
     tiker_name: str = None,
-    name: str = None
+    name: str = None,
 ) -> CompanyModel:
     tiker_name = tiker_name if tiker_name else uuid.uuid4().hex
     name = name if name else uuid.uuid4().hex
@@ -31,12 +35,16 @@ async def create_test_company(
     company = await dao.create_company_model(tiker_name, name, "MOEX")
 
     if need_add_stop:
-        company.stops.append(StopModel(company_id=company.id, period='D', value=100))
-        company.stops.append(StopModel(company_id=company.id, period='M', value=200))
+        company.stops.append(StopModel(company_id=company.id, period="D", value=100))
+        company.stops.append(StopModel(company_id=company.id, period="M", value=200))
 
     if need_add_strategy:
-        company.strategies.append(StrategyModel(name="TEST1", description="Description1"))
-        company.strategies.append(StrategyModel(name="TEST2", description="Description2"))
+        company.strategies.append(
+            StrategyModel(name="TEST1", description="Description1")
+        )
+        company.strategies.append(
+            StrategyModel(name="TEST2", description="Description2")
+        )
 
     companies = await dao.filter(tiker=tiker_name)
     return companies[0]
@@ -97,8 +105,11 @@ async def create_test_briefcase_registry(
 
     # Создаем новую запись briefcase_registry
     await briefcase_dao.create_briefcase_registry_model(
-        count=10, amount=100.0, company_id=company.id, briefcase_id=briefcase.id,
-        operation=RegistryOperationEnum.BUY
+        count=10,
+        amount=100.0,
+        company_id=company.id,
+        briefcase_id=briefcase.id,
+        operation=RegistryOperationEnum.BUY,
     )
 
     registry_items = await briefcase_dao.get_all_briefcase_registry(briefcase.id)
@@ -143,14 +154,16 @@ async def get_superuser_token_headers(
     dbsession: AsyncSession,
     name: str = None,
     email: str = None,
-    password: str = None
+    password: str = None,
 ) -> dict[str, str]:
     return await _get_test_user_headers(
-        client, fastapi_app, dbsession,
+        client,
+        fastapi_app,
+        dbsession,
         is_superuser=True,
         name=name,
         email=email,
-        password=password
+        password=password,
     )
 
 
@@ -160,14 +173,16 @@ async def get_user_token_headers(
     dbsession: AsyncSession,
     name: str = None,
     email: str = None,
-    password: str = None
+    password: str = None,
 ) -> dict[str, str]:
     return await _get_test_user_headers(
-        client, fastapi_app, dbsession,
+        client,
+        fastapi_app,
+        dbsession,
         is_superuser=False,
         name=name,
         email=email,
-        password=password
+        password=password,
     )
 
 
@@ -178,13 +193,20 @@ async def _get_test_user_headers(
     is_superuser: bool,
     name: str = None,
     email: str = None,
-    password: str = None
+    password: str = None,
 ) -> dict[str, str]:
-    name = settings.first_superuser if is_superuser and not name else random_lower_string()
+    name = (
+        settings.first_superuser if is_superuser and not name else random_lower_string()
+    )
     email = email if email else random_email()
-    password = settings.first_superuser_password if is_superuser and not password else random_lower_string()
+    password = (
+        settings.first_superuser_password
+        if is_superuser and not password
+        else random_lower_string()
+    )
     await create_test_user(
-        dbsession, is_superuser=is_superuser,
+        dbsession,
+        is_superuser=is_superuser,
         name=name,
         email=email,
         password=password,
@@ -194,10 +216,7 @@ async def _get_test_user_headers(
 
 
 async def get_headers(
-    client: AsyncClient,
-    fastapi_app: FastAPI,
-    name: str,
-    password: str
+    client: AsyncClient, fastapi_app: FastAPI, name: str, password: str
 ) -> dict[str, str]:
     login_data = {
         "username": name,

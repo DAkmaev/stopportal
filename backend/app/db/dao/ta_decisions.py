@@ -37,7 +37,9 @@ class TADecisionDAO:
 
         return ta_decision
 
-    async def get_ta_decision_models_by_company_id(self, company_id: int) -> List[TADecisionModel]:
+    async def get_ta_decision_models_by_company_id(
+        self, company_id: int
+    ) -> List[TADecisionModel]:
         """
         Get ta_decision models by company.
 
@@ -49,26 +51,32 @@ class TADecisionDAO:
 
         return ta_decisions.scalars().fetchall()
 
-    async def get_ta_decision_model_by_company_period(self, company_id: int, period: str) -> TADecisionModel:
+    async def get_ta_decision_model_by_company_period(
+        self, company_id: int, period: str
+    ) -> TADecisionModel:
         """
         Get ta_decision models by company and period.
 
         """
 
         ta_decisions = await self.session.execute(
-            select(TADecisionModel).where(TADecisionModel.company_id == company_id, TADecisionModel.period == period)
+            select(TADecisionModel).where(
+                TADecisionModel.company_id == company_id,
+                TADecisionModel.period == period,
+            )
         )
 
         return ta_decisions.scalars().one_or_none()
 
     async def update_or_create_ta_decision_model(
-        self, id,
+        self,
+        id,
         company: CompanyModel,
         period: str,
         decision: str,
         k: float = None,
         d: float = None,
-        last_price: float = None
+        last_price: float = None,
     ) -> TADecisionModel:
         """
         Update orcompany model in the session.
@@ -81,7 +89,7 @@ class TADecisionDAO:
                 k=k,
                 d=d,
                 last_price=last_price,
-                company_id=company.id
+                company_id=company.id,
             )
             self.session.add(ta_decision)
 

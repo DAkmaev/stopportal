@@ -6,6 +6,7 @@ from app.db.dao.user import UserDAO
 from app.db.models.user import UserModel
 from app.web.api.auth.schema import UserModelInputDTO, UserModelDTO
 from app.web.deps import CurrentUser
+
 router = APIRouter()
 
 
@@ -57,7 +58,7 @@ async def create_user_model(
         email=new_user_object.email,
         password=new_user_object.password,
         is_superuser=new_user_object.is_superuser,
-        is_active=new_user_object.is_active
+        is_active=new_user_object.is_active,
     )
 
 

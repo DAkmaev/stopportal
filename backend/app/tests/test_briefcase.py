@@ -7,9 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.models.briefcase import RegistryOperationEnum, CurrencyEnum
-from app.tests.utils.common import (create_test_company, create_test_briefcase_item,
-                                    create_test_briefcase,
-                                    create_test_briefcase_registry)
+from app.tests.utils.common import (
+    create_test_company,
+    create_test_briefcase_item,
+    create_test_briefcase,
+    create_test_briefcase_registry,
+)
 
 
 @pytest.mark.anyio
@@ -43,7 +46,9 @@ async def test_create_briefcase_item_model(
     count = 5
     dividends = 50.0
     briefcase_id = 1
-    url = fastapi_app.url_path_for("create_briefcase_item_model", briefcase_id=briefcase_id)
+    url = fastapi_app.url_path_for(
+        "create_briefcase_item_model", briefcase_id=briefcase_id
+    )
 
     company = await create_test_company(dbsession)
     briefcase = await create_test_briefcase(dbsession)
@@ -56,7 +61,7 @@ async def test_create_briefcase_item_model(
             "dividends": dividends,
             "company": {"id": company.id},
             "strategy": {"id": 1},
-            "briefcase_id": briefcase.id
+            "briefcase_id": briefcase.id,
         },
     )
 
@@ -81,8 +86,9 @@ async def test_create_briefcase_item_model_no_strategy(
     company = await create_test_company(dbsession, False, True)
     briefcase = await create_test_briefcase(dbsession)
 
-    url = fastapi_app.url_path_for("create_briefcase_item_model",
-                                   briefcase_id=briefcase.id)
+    url = fastapi_app.url_path_for(
+        "create_briefcase_item_model", briefcase_id=briefcase.id
+    )
 
     # Проверяем с пустой стратегией
     response = await client.post(
@@ -91,7 +97,7 @@ async def test_create_briefcase_item_model_no_strategy(
             "count": count,
             "dividends": dividends,
             "company": {"id": company.id},
-            "briefcase_id": briefcase.id
+            "briefcase_id": briefcase.id,
         },
     )
     assert response.status_code == status.HTTP_200_OK
@@ -111,7 +117,9 @@ async def test_create_briefcase_item_model_wrong_company(
     count = 5
     dividends = 50.0
     briefcase_id = 1
-    url = fastapi_app.url_path_for("create_briefcase_item_model", briefcase_id=briefcase_id)
+    url = fastapi_app.url_path_for(
+        "create_briefcase_item_model", briefcase_id=briefcase_id
+    )
 
     briefcase = await create_test_briefcase(dbsession)
 
@@ -122,7 +130,7 @@ async def test_create_briefcase_item_model_wrong_company(
             "count": count,
             "dividends": dividends,
             "company": {"id": 1000},
-            "briefcase_id": briefcase.id
+            "briefcase_id": briefcase.id,
         },
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -142,8 +150,7 @@ async def test_get_briefcase_item(
     test_item = await create_test_briefcase_item(dbsession)
 
     # Test retrieving the created item
-    url = fastapi_app.url_path_for("get_briefcase_item",
-                                   item_id=test_item.id)
+    url = fastapi_app.url_path_for("get_briefcase_item", item_id=test_item.id)
 
     response = await client.get(url)
     print(response)
@@ -165,8 +172,7 @@ async def test_get_briefcase_items(
 
     # Test retrieving all items
     briefcase_id = 1  # Assuming a specific briefcase ID
-    url = fastapi_app.url_path_for("get_briefcase_items",
-                                   briefcase_id=briefcase_id)
+    url = fastapi_app.url_path_for("get_briefcase_items", briefcase_id=briefcase_id)
     response = await client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
@@ -196,7 +202,7 @@ async def test_update_briefcase_item(
             "count": updated_count,
             "dividends": updated_dividends,
             "company": {"id": test_item.company_id},
-            "briefcase_id": test_item.briefcase_id
+            "briefcase_id": test_item.briefcase_id,
         },
     )
 
@@ -247,8 +253,9 @@ async def test_create_briefcase_registry_model(
     company = await create_test_company(dbsession)
     briefcase = await create_test_briefcase(dbsession)
 
-    url = fastapi_app.url_path_for("create_briefcase_registry_model",
-                                   briefcase_id=briefcase.id)
+    url = fastapi_app.url_path_for(
+        "create_briefcase_registry_model", briefcase_id=briefcase.id
+    )
 
     # Проверяем с передачей стратегии
     response = await client.post(
@@ -260,7 +267,7 @@ async def test_create_briefcase_registry_model(
             "company": {"id": company.id},
             "briefcase": {"id": briefcase.id},
             "operation": RegistryOperationEnum.BUY.value,
-            "currency": CurrencyEnum.RUB.value
+            "currency": CurrencyEnum.RUB.value,
         },
     )
 
@@ -287,8 +294,7 @@ async def test_get_briefcase_registry(
     test_registry = await create_test_briefcase_registry(dbsession)
 
     # Test retrieving the created registry
-    url = fastapi_app.url_path_for("get_briefcase_registry",
-                                   item_id=test_registry.id)
+    url = fastapi_app.url_path_for("get_briefcase_registry", item_id=test_registry.id)
 
     response = await client.get(url)
 
@@ -311,8 +317,9 @@ async def test_get_briefcase_registries(
     registry2 = await create_test_briefcase_registry(dbsession, briefcase, company)
 
     # Test retrieving all registries
-    url = fastapi_app.url_path_for("get_briefcase_registries",
-                                   briefcase_id=briefcase.id)
+    url = fastapi_app.url_path_for(
+        "get_briefcase_registries", briefcase_id=briefcase.id
+    )
     response = await client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
@@ -339,7 +346,9 @@ async def test_update_briefcase_registry(
     currency = CurrencyEnum.USD
 
     # Test updating the registry
-    url = fastapi_app.url_path_for("update_briefcase_registry", item_id=test_registry.id)
+    url = fastapi_app.url_path_for(
+        "update_briefcase_registry", item_id=test_registry.id
+    )
     response = await client.put(
         url,
         json={
@@ -349,8 +358,8 @@ async def test_update_briefcase_registry(
             "briefcase": {"id": test_registry.briefcase.id},
             "operation": operation.value,
             "currency": currency.value,
-            "created_date": datetime.now().isoformat()
-        }
+            "created_date": datetime.now().isoformat(),
+        },
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -375,7 +384,9 @@ async def test_delete_briefcase_registry(
     test_registry = await create_test_briefcase_registry(dbsession)
 
     # Test deleting the registry
-    url = fastapi_app.url_path_for("delete_briefcase_registry", item_id=test_registry.id)
+    url = fastapi_app.url_path_for(
+        "delete_briefcase_registry", item_id=test_registry.id
+    )
 
     response = await client.delete(url)
 

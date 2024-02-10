@@ -8,7 +8,7 @@ from app.db.models.company import CompanyModel
 from app.web.api.company.scheme import (
     CompanyModelDTO,
     CompanyModelInputDTO,
-    CompanyModelPatchDTO
+    CompanyModelPatchDTO,
 )
 
 router = APIRouter()
@@ -60,9 +60,13 @@ async def create_company_model(
     """
     await company_dao.create_company_model(
         tiker=new_company_object.tiker,
-        name=new_company_object.name if new_company_object.name else new_company_object.tiker,
+        name=new_company_object.name
+        if new_company_object.name
+        else new_company_object.tiker,
         type=new_company_object.type,
-        strategies=map(lambda i: i.id, new_company_object.strategies) if new_company_object.strategies else None
+        strategies=map(lambda i: i.id, new_company_object.strategies)
+        if new_company_object.strategies
+        else None,
     )
 
 
@@ -79,11 +83,14 @@ async def create_company_batch_models(
     """
 
     await company_dao.create_companies_models(
-        list(map(lambda s: CompanyModel(
-            tiker=s.tiker,
-            name=s.name if s.name else s.tiker,
-            type=s.type
-        ), new_company_list))
+        list(
+            map(
+                lambda s: CompanyModel(
+                    tiker=s.tiker, name=s.name if s.name else s.tiker, type=s.type
+                ),
+                new_company_list,
+            )
+        )
     )
 
 
@@ -120,9 +127,7 @@ async def update_company_model(
     :param updated_company: Updated company model item.
     :param company_dao: DAO for company models.
     """
-    await company_dao.update_company_model(
-        company_id, updated_company.model_dump()
-    )
+    await company_dao.update_company_model(company_id, updated_company.model_dump())
 
 
 @router.delete("/{company_id}", status_code=204)

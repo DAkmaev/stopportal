@@ -14,8 +14,7 @@ router = APIRouter()
 
 @router.post("/access-token")
 async def login_access_token(
-    dao: LoginDAO = Depends(),
-    form_data: OAuth2PasswordRequestForm = Depends()
+    dao: LoginDAO = Depends(), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Token:
     """
     OAuth2 compatible token login, get an access token for future requests
@@ -33,6 +32,7 @@ async def test_token(current_user: CurrentUser) -> Any:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     return current_user
+
 
 # @router.post("/password-recovery/{email}")
 # def recover_password(email: str, session: SessionDep) -> Message:

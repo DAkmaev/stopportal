@@ -4,12 +4,19 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from app.db.dao.briefcases import BriefcaseDAO
-from app.db.models.briefcase import (BriefcaseModel, BriefcaseItemModel,
-                                     BriefcaseRegistryModel)
-from app.web.api.briefcase.scheme import (BriefcaseDTO, BriefcaseInputDTO,
-                                          BriefcaseItemInputDTO, BriefcaseItemDTO,
-                                          BriefcaseRegistryDTO,
-                                          BriefcaseRegistryInputDTO)
+from app.db.models.briefcase import (
+    BriefcaseModel,
+    BriefcaseItemModel,
+    BriefcaseRegistryModel,
+)
+from app.web.api.briefcase.scheme import (
+    BriefcaseDTO,
+    BriefcaseInputDTO,
+    BriefcaseItemInputDTO,
+    BriefcaseItemDTO,
+    BriefcaseRegistryDTO,
+    BriefcaseRegistryInputDTO,
+)
 
 router = APIRouter()
 
@@ -56,9 +63,7 @@ async def create_briefcase_model(
     :param new_briefcase_object: new briefcase model item.
     :param dao: DAO for briefcase models.
     """
-    await dao.create_briefcase_model(
-        fill_up=new_briefcase_object.fill_up
-    )
+    await dao.create_briefcase_model(fill_up=new_briefcase_object.fill_up)
 
 
 @router.put("/{briefcase_id}")
@@ -74,9 +79,7 @@ async def update_briefcase_model(
     :param updated_briefcase: Updated briefcase model item.
     :param briefcase_dao: DAO for briefcase models.
     """
-    await briefcase_dao.update_briefcase_model(
-        briefcase_id, updated_briefcase.fill_up
-    )
+    await briefcase_dao.update_briefcase_model(briefcase_id, updated_briefcase.fill_up)
 
 
 @router.delete("/{briefcase_id}", status_code=204)
@@ -140,7 +143,7 @@ async def create_briefcase_item_model(
         dividends=new_item.dividends,
         company_id=new_item.company.id,
         strategy_id=new_item.strategy.id if new_item.strategy else None,
-        briefcase_id=briefcase_id
+        briefcase_id=briefcase_id,
     )
 
 
@@ -225,8 +228,8 @@ async def get_briefcase_registries(
         briefcase_id=briefcase_id,
         limit=limit,
         offset=offset,
-        date_from=datetime.strptime(dateFrom, '%Y-%m-%d') if dateFrom else None,
-        date_to=datetime.strptime(dateTo, '%Y-%m-%d') if dateTo else None
+        date_from=datetime.strptime(dateFrom, "%Y-%m-%d") if dateFrom else None,
+        date_to=datetime.strptime(dateTo, "%Y-%m-%d") if dateTo else None,
     )
     return result
 
@@ -271,8 +274,7 @@ async def update_briefcase_registry(
     :param dao: DAO for Briefcase models.
     """
     await dao.update_briefcase_registry_model(
-        registry_id=item_id,
-        updated_fields=updated_item.model_dump()
+        registry_id=item_id, updated_fields=updated_item.model_dump()
     )
 
 

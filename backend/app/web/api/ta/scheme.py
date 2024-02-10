@@ -5,17 +5,17 @@ from enum import Enum
 
 
 class TADecisionEnum(str, Enum):
-    BUY = 'BUY'
-    SELL = 'SELL'
-    RELAX = 'RELAX'
-    UNKNOWN = 'UNKNOWN'
+    BUY = "BUY"
+    SELL = "SELL"
+    RELAX = "RELAX"
+    UNKNOWN = "UNKNOWN"
 
 
 class TAPeriodEnum(str, Enum):
-    DAY = 'D'
-    WEEK = 'W'
-    MONTH = 'M'
-    ALL = 'All'
+    DAY = "D"
+    WEEK = "W"
+    MONTH = "M"
+    ALL = "All"
 
 
 class TACompanyDTO(BaseModel):
@@ -29,6 +29,7 @@ class TADecisionDTO(BaseModel):
     Scheme for TA decision.
 
     """
+
     company: TACompanyDTO
     decision: TADecisionEnum
     # last_price: Optional[float] = None

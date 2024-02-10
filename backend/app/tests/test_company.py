@@ -13,7 +13,6 @@ from app.db.models.company import CompanyModel, StopModel
 from app.tests.utils.common import create_test_company
 
 
-
 @pytest.mark.anyio
 async def test_creation(
     fastapi_app: FastAPI,
@@ -101,7 +100,7 @@ async def test_updating(
             "tiker": "LKOH",
             "name": "Лукойл",
             "type": "MOEX",
-            "strategies": [{"id": 1}]
+            "strategies": [{"id": 1}],
         },
     )
 

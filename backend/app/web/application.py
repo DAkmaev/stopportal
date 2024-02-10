@@ -16,7 +16,7 @@ from app.web.lifetime import register_shutdown_event, register_startup_event
 APP_ROOT = Path(__file__).parent.parent
 
 # logging.basicConfig(level = logging.DEBUG, )
-logger = logging.getLogger('stopportal')
+logger = logging.getLogger("stopportal")
 
 
 def get_app() -> FastAPI:

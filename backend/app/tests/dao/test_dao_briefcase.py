@@ -5,8 +5,11 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.models.briefcase import RegistryOperationEnum
-from app.tests.utils.common import (create_test_company, create_test_briefcase,
-                                    create_test_briefcase_registry)
+from app.tests.utils.common import (
+    create_test_company,
+    create_test_briefcase,
+    create_test_briefcase_registry,
+)
 
 
 @pytest.mark.anyio
@@ -29,7 +32,7 @@ async def test_create_and_update_briefcase_item_model(
         dividends=DIVIDENDS,
         briefcase_id=briefcase.id,
         company_id=company.id,
-        strategy_id=company.strategies[0].id
+        strategy_id=company.strategies[0].id,
     )
     briefcase_items = await briefcase_dao.get_all_briefcase_items()
     assert len(briefcase_items) == 1
@@ -103,9 +106,12 @@ async def test_get_briefcase_item_model(
     assert len(briefcase_items) == 1
 
     # Get a briefcase model by ID
-    existing_briefcase_item = await briefcase_dao.get_briefcase_item_model(briefcase_items[0].id)
+    existing_briefcase_item = await briefcase_dao.get_briefcase_item_model(
+        briefcase_items[0].id
+    )
     assert existing_briefcase_item is not None
     assert existing_briefcase_item.id is briefcase_items[0].id
+
 
 @pytest.mark.anyio
 async def test_get_briefcase_items_by_company(
@@ -125,7 +131,9 @@ async def test_get_briefcase_items_by_company(
     )
 
     # Get briefcase items for the company
-    company_briefcase_items = await briefcase_dao.get_briefcase_items_by_company(company.id)
+    company_briefcase_items = await briefcase_dao.get_briefcase_items_by_company(
+        company.id
+    )
     assert len(company_briefcase_items) == 2
 
     # Make sure the retrieved items belong to the correct company
@@ -160,9 +168,7 @@ async def test_get_briefcase_items_by_briefcase(
 
 
 @pytest.mark.anyio
-async def test_get_all_briefcase_registry(
-    dbsession: AsyncSession
-) -> None:
+async def test_get_all_briefcase_registry(dbsession: AsyncSession) -> None:
     briefcase_dao = BriefcaseDAO(dbsession)
     company1 = await create_test_company(dbsession)
     company2 = await create_test_company(dbsession)
@@ -170,16 +176,24 @@ async def test_get_all_briefcase_registry(
 
     # Создаем несколько записей briefcase_registry
     registry1 = await briefcase_dao.create_briefcase_registry_model(
-        count=10, amount=100.0, company_id=company1.id,
-        briefcase_id=briefcase.id, operation=RegistryOperationEnum.SELL
+        count=10,
+        amount=100.0,
+        company_id=company1.id,
+        briefcase_id=briefcase.id,
+        operation=RegistryOperationEnum.SELL,
     )
     registry2 = await briefcase_dao.create_briefcase_registry_model(
-        count=20, amount=200.0, company_id=company2.id,
-        briefcase_id=briefcase.id, operation=RegistryOperationEnum.SELL
+        count=20,
+        amount=200.0,
+        company_id=company2.id,
+        briefcase_id=briefcase.id,
+        operation=RegistryOperationEnum.SELL,
     )
 
     # Получаем все записи briefcase_registry
-    briefcase_registry_items = await briefcase_dao.get_all_briefcase_registry(briefcase.id)
+    briefcase_registry_items = await briefcase_dao.get_all_briefcase_registry(
+        briefcase.id
+    )
 
     # Проверяем, что количество записей соответствует ожидаемому
     assert len(briefcase_registry_items) == 2
@@ -191,17 +205,18 @@ async def test_get_all_briefcase_registry(
 
 
 @pytest.mark.anyio
-async def test_get_briefcase_registry_by_date_range(
-    dbsession: AsyncSession
-) -> None:
+async def test_get_briefcase_registry_by_date_range(dbsession: AsyncSession) -> None:
     briefcase_dao = BriefcaseDAO(dbsession)
     briefcase = await create_test_briefcase(dbsession)
     company = await create_test_company(dbsession)
 
     # Создаем запись briefcase_registry с текущей датой
     registry = await briefcase_dao.create_briefcase_registry_model(
-        count=10, amount=100.0, company_id=company.id, briefcase_id=briefcase.id,
-        operation=RegistryOperationEnum.SELL
+        count=10,
+        amount=100.0,
+        company_id=company.id,
+        briefcase_id=briefcase.id,
+        operation=RegistryOperationEnum.SELL,
     )
 
     # фиксируем транзакцию
@@ -240,9 +255,7 @@ async def test_get_briefcase_registry_by_date_range(
 
 
 @pytest.mark.anyio
-async def test_get_briefcase_registry_model(
-    dbsession: AsyncSession
-) -> None:
+async def test_get_briefcase_registry_model(dbsession: AsyncSession) -> None:
     briefcase_dao = BriefcaseDAO(dbsession)
     registry = await create_test_briefcase_registry(dbsession)
 
@@ -258,15 +271,15 @@ async def test_get_briefcase_registry_model(
 
 
 @pytest.mark.anyio
-async def test_update_briefcase_registry_model(
-    dbsession: AsyncSession
-) -> None:
+async def test_update_briefcase_registry_model(dbsession: AsyncSession) -> None:
     briefcase_dao = BriefcaseDAO(dbsession)
     registry = await create_test_briefcase_registry(dbsession)
 
     # Обновляем запись briefcase_registry
     updated_fields = {"count": 15, "amount": 150.0}
-    updated_registry = await briefcase_dao.update_briefcase_registry_model(registry.id, updated_fields)
+    updated_registry = await briefcase_dao.update_briefcase_registry_model(
+        registry.id, updated_fields
+    )
 
     # Проверяем, что поля были обновлены
     assert updated_registry.count == updated_fields["count"]
@@ -277,9 +290,7 @@ async def test_update_briefcase_registry_model(
 
 
 @pytest.mark.anyio
-async def test_delete_briefcase_registry_model(
-    dbsession: AsyncSession
-) -> None:
+async def test_delete_briefcase_registry_model(dbsession: AsyncSession) -> None:
     briefcase_dao = BriefcaseDAO(dbsession)
     registry = await create_test_briefcase_registry(dbsession)
 

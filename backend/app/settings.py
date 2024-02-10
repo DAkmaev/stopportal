@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60 * 24 * 8
     api_v1_str: str = "/api"
     algorithm: str = "HS256"
-    secret_key: str = "sdsdsdw34fdfwr2efdfwe2" #secrets.token_urlsafe(32)
+    secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
 
     first_superuser: str = "admin"
     first_superuser_password: str = "changethis"

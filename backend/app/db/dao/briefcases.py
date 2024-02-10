@@ -8,9 +8,13 @@ from app.db.dependencies import get_db_session
 from fastapi import Depends, HTTPException
 from typing import List
 
-from app.db.models.briefcase import (BriefcaseModel, BriefcaseItemModel,
-                                     BriefcaseRegistryModel, CurrencyEnum,
-                                     RegistryOperationEnum)
+from app.db.models.briefcase import (
+    BriefcaseModel,
+    BriefcaseItemModel,
+    BriefcaseRegistryModel,
+    CurrencyEnum,
+    RegistryOperationEnum,
+)
 from app.db.models.company import CompanyModel, StrategyModel
 
 
@@ -31,7 +35,11 @@ class BriefcaseDAO:
         return briefcase
 
     async def create_briefcase_item_model(
-        self, count: int, briefcase_id: int, company_id: int, strategy_id: int = None,
+        self,
+        count: int,
+        briefcase_id: int,
+        company_id: int,
+        strategy_id: int = None,
         dividends: float = None,
     ) -> BriefcaseItemModel:
         """
@@ -96,13 +104,12 @@ class BriefcaseDAO:
 
         :return: List of briefcase item models.
         """
-        raw_briefcase_items = await self.session.execute(
-            select(BriefcaseItemModel)
-        )
+        raw_briefcase_items = await self.session.execute(select(BriefcaseItemModel))
         return list(raw_briefcase_items.scalars().fetchall())
 
-    async def get_briefcase_item_model(self,
-                                       briefcase_item_id: int) -> BriefcaseItemModel:
+    async def get_briefcase_item_model(
+        self, briefcase_item_id: int
+    ) -> BriefcaseItemModel:
         """
         Get briefcase item model by ID.
 
@@ -144,8 +151,9 @@ class BriefcaseDAO:
         )
         return list(raw_briefcase_items.scalars().fetchall())
 
-    async def update_briefcase_model(self, briefcase_id: int,
-                                     fill_up: float) -> BriefcaseModel:
+    async def update_briefcase_model(
+        self, briefcase_id: int, fill_up: float
+    ) -> BriefcaseModel:
         """
         Update briefcase model in the session.
 
@@ -192,8 +200,12 @@ class BriefcaseDAO:
         await self.session.delete(briefcase_item)
 
     async def get_all_briefcase_registry(
-        self, briefcase_id: int, limit: int = 100, offset: int = 0,
-        date_from: datetime = None, date_to: datetime = None
+        self,
+        briefcase_id: int,
+        limit: int = 100,
+        offset: int = 0,
+        date_from: datetime = None,
+        date_to: datetime = None,
     ) -> List[BriefcaseRegistryModel]:
         """
         Get all briefcase registry models with limit/offset pagination.
@@ -214,7 +226,9 @@ class BriefcaseDAO:
             query = query.where(BriefcaseRegistryModel.created_date < date_to)
 
         raw_briefcase_registry = await self.session.execute(
-            query.limit(limit).offset(offset).order_by(BriefcaseRegistryModel.created_date.desc())
+            query.limit(limit)
+            .offset(offset)
+            .order_by(BriefcaseRegistryModel.created_date.desc())
         )
         return list(raw_briefcase_registry.scalars().fetchall())
 
@@ -235,9 +249,15 @@ class BriefcaseDAO:
         return registry_item
 
     async def create_briefcase_registry_model(
-        self, count: int, amount: float, company_id: int, briefcase_id: int,
-        operation: RegistryOperationEnum, strategy_id: int = None,
-        price: float = None, currency: CurrencyEnum = CurrencyEnum.RUB,
+        self,
+        count: int,
+        amount: float,
+        company_id: int,
+        briefcase_id: int,
+        operation: RegistryOperationEnum,
+        strategy_id: int = None,
+        price: float = None,
+        currency: CurrencyEnum = CurrencyEnum.RUB,
         created_date: datetime = datetime.now(),
     ) -> BriefcaseRegistryModel:
         """
@@ -262,9 +282,14 @@ class BriefcaseDAO:
             raise HTTPException(status_code=404, detail="Компания не найдена")
 
         registry = BriefcaseRegistryModel(
-            count=count, amount=amount, company=company, briefcase=briefcase,
-            operation=operation, currency=currency, created_date=created_date,
-            price=price
+            count=count,
+            amount=amount,
+            company=company,
+            briefcase=briefcase,
+            operation=operation,
+            currency=currency,
+            created_date=created_date,
+            price=price,
         )
         if strategy_id:
             strategy = await self.session.get(StrategyModel, strategy_id)
@@ -291,12 +316,20 @@ class BriefcaseDAO:
             raise HTTPException(status_code=404, detail="Запись не найдена")
 
         await update_registry_field(
-            self.session, CompanyModel,
-            "company", updated_fields, registry_item, "Компания не найдена"
+            self.session,
+            CompanyModel,
+            "company",
+            updated_fields,
+            registry_item,
+            "Компания не найдена",
         )
         await update_registry_field(
-            self.session, StrategyModel,
-            "strategy", updated_fields, registry_item, "Стратегия не найдена"
+            self.session,
+            StrategyModel,
+            "strategy",
+            updated_fields,
+            registry_item,
+            "Стратегия не найдена",
         )
 
         # Update other fields if specified and allowed

@@ -15,7 +15,14 @@ class UserDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_user_model(self, name: str, email: str, password: str, is_superuser: bool = False, is_active: bool = True) -> UserModel:
+    async def create_user_model(
+        self,
+        name: str,
+        email: str,
+        password: str,
+        is_superuser: bool = False,
+        is_active: bool = True,
+    ) -> UserModel:
         """
         Add single user to session.
 
@@ -28,7 +35,7 @@ class UserDAO:
             email=email,
             hashed_password=get_password_hash(password),
             is_superuser=is_superuser,
-            is_active=is_active
+            is_active=is_active,
         )
 
         self.session.add(user)
@@ -101,9 +108,7 @@ class UserDAO:
 
         return user
 
-    async def update(
-        self, user_id: int, updated_fields: dict
-    ) -> UserModel:
+    async def update(self, user_id: int, updated_fields: dict) -> UserModel:
         user = await self.get_user(user_id)
 
         if not user:

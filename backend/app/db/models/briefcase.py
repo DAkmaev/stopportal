@@ -10,15 +10,15 @@ from app.db.models.company import CompanyModel, StrategyModel
 
 
 class CurrencyEnum(enum.Enum):
-    RUB = 'RUB'
-    USD = 'USD'
-    EUR = 'EUR'
+    RUB = "RUB"
+    USD = "USD"
+    EUR = "EUR"
 
 
 class RegistryOperationEnum(enum.Enum):
-    BUY = 'BUY'
-    SELL = 'SELL'
-    DIVIDENDS = 'DIVIDENDS'
+    BUY = "BUY"
+    SELL = "SELL"
+    DIVIDENDS = "DIVIDENDS"
 
 
 class BriefcaseModel(Base):
@@ -28,8 +28,9 @@ class BriefcaseModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
-    items: Mapped[List["BriefcaseItemModel"]] = relationship(lazy="selectin",
-                                   cascade="all,delete")
+    items: Mapped[List["BriefcaseItemModel"]] = relationship(
+        lazy="selectin", cascade="all,delete"
+    )
 
 
 class BriefcaseItemModel(Base):
@@ -42,8 +43,8 @@ class BriefcaseItemModel(Base):
     dividends: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
     strategy_id: Mapped[int] = mapped_column(ForeignKey("strategies.id"), nullable=True)
-    company: Mapped['CompanyModel'] = relationship(lazy="selectin")
-    strategy: Mapped[Optional['StrategyModel']] = relationship()
+    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
+    strategy: Mapped[Optional["StrategyModel"]] = relationship()
     briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
 
 
@@ -61,11 +62,10 @@ class BriefcaseRegistryModel(Base):
     price: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
 
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
-    company: Mapped['CompanyModel'] = relationship(lazy="selectin")
+    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
 
     strategy_id: Mapped[int] = mapped_column(ForeignKey("strategies.id"), nullable=True)
-    strategy: Mapped[Optional['StrategyModel']] = relationship(lazy="selectin")
+    strategy: Mapped[Optional["StrategyModel"]] = relationship(lazy="selectin")
 
     briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
-    briefcase: Mapped['BriefcaseModel'] = relationship(lazy="selectin")
-
+    briefcase: Mapped["BriefcaseModel"] = relationship(lazy="selectin")

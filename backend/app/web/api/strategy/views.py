@@ -47,8 +47,7 @@ async def create_strategy_model(
     :param dao: DAO for strategy models.
     """
     strategy = await dao.create_strategy_model(
-        name=new_strategy_object.name,
-        description=new_strategy_object.description
+        name=new_strategy_object.name, description=new_strategy_object.description
     )
     return strategy
 

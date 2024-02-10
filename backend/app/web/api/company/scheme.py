@@ -7,8 +7,8 @@ from app.web.api.stop.scheme import StopInputDTO, StopDTO
 
 
 class CompanyTypeEnum(str, Enum):
-    MOEX = 'MOEX'
-    YAHOO = 'YAHOO'
+    MOEX = "MOEX"
+    YAHOO = "YAHOO"
 
 
 class StrategiesInputDTO(BaseModel):
@@ -23,6 +23,7 @@ class CompanyModelDTO(BaseModel):
     """
     Scheme for company.
     """
+
     id: int
     tiker: str
     name: Optional[str] = None
@@ -46,5 +47,3 @@ class CompanyModelPatchDTO(CompanyModelInputDTO):
     tiker: Optional[str] = None
     type: Optional[CompanyTypeEnum] = None
     strategies: Optional[List[StrategiesInputDTO]] = []
-
-

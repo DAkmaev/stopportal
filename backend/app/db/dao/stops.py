@@ -25,8 +25,9 @@ class StopsDAO:
 
         return company.scalars().one_or_none()
 
-    async def add_stop_model(self, company_id: int, period: str,
-                             value: float) -> StopModel:
+    async def add_stop_model(
+        self, company_id: int, period: str, value: float
+    ) -> StopModel:
         """
         Add stop to company.
 
@@ -35,14 +36,17 @@ class StopsDAO:
         :param company_id:
         """
         raw_stop = await self.session.execute(
-            select(StopModel).where(StopModel.company_id == company_id,
-                                    StopModel.period == period)
+            select(StopModel).where(
+                StopModel.company_id == company_id, StopModel.period == period
+            )
         )
         existing_stop: StopModel = raw_stop.scalars().one_or_none()
 
         if existing_stop:
-            raise HTTPException(status_code=400,
-                                detail="Стоп с таким периодом уже существует для данной компании")
+            raise HTTPException(
+                status_code=400,
+                detail="Стоп с таким периодом уже существует для данной компании",
+            )
 
         company = await self.session.get(CompanyModel, company_id)
         if not company:
@@ -58,15 +62,16 @@ class StopsDAO:
         company_id = stop_data.get("company_id")
 
         raw_stop = await self.session.execute(
-            select(StopModel)
-            .where(StopModel.id != stop_id, StopModel.period == period,
-                   StopModel.company_id == company_id)
+            select(StopModel).where(
+                StopModel.id != stop_id,
+                StopModel.period == period,
+                StopModel.company_id == company_id,
+            )
         )
         existing_stop: StopModel = raw_stop.scalars().one_or_none()
         if existing_stop:
             raise HTTPException(
-                status_code=400,
-                detail="Стоп с такими параметрами уже существует"
+                status_code=400, detail="Стоп с такими параметрами уже существует"
             )
 
         stop = await self.get_stop_model(stop_id)
