@@ -261,7 +261,8 @@ async def test_update_stop_model_prevent_duplicate(
     stop_models = company.stops
     assert len(stop_models) == 2
 
-    # Attempt to update the stop model to a period that already exists for the same company
+    # Attempt to update the stop model to a period that already exists for the
+    # same company
     updated_stop_fields = {
         "company_id": company.id,
         "value": 200.0,

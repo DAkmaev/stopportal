@@ -80,7 +80,8 @@ class StopsDAO:
                 setattr(stop, field, value)
             return stop
 
-        # If stop_id is not provided or stop with given id is not found, create a new stop
+        # If stop_id is not provided or stop with given id is not found, create a
+        # new stop
         stop = StopModel(**stop_data)
         self.session.add(stop)
         return stop

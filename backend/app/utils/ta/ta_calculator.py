@@ -35,7 +35,8 @@ class TACalculator:
             def week_start(date):
                 return date - pd.DateOffset(days=date.weekday())
 
-            # Группируем данные по неделям, начиная с понедельника, и вычисляем необходимые агрегированные значения
+            # Группируем данные по неделям, начиная с понедельника, и вычисляем
+            # необходимые агрегированные значения
             df = df.groupby(week_start)[["OPEN", "CLOSE", "HIGH", "LOW"]].agg(
                 {"OPEN": "first", "CLOSE": "last", "HIGH": "max", "LOW": "min"}
             )
@@ -49,7 +50,8 @@ class TACalculator:
             def month_start(date):
                 return date.replace(day=1)
 
-            # Группируем данные по месяцам и вычисляем необходимые агрегированные значения
+            # Группируем данные по месяцам и вычисляем необходимые агрегированные
+            # значения
             df = df.groupby(month_start)[["OPEN", "CLOSE", "HIGH", "LOW"]].agg(
                 {"OPEN": "first", "CLOSE": "last", "HIGH": "max", "LOW": "min"}
             )

@@ -160,7 +160,8 @@ async def update_briefcase_item(
     :param updated_item: Updated BriefcaseItemModel object data.
     :param dao: DAO for Briefcase models.
     """
-    # Similar to creation, you'll need to pass the updated attributes to update_briefcase_item_model
+    # Similar to creation, you'll need to pass the updated attributes to
+    # update_briefcase_item_model
     await dao.update_briefcase_item_model(
         briefcase_item_id=item_id,
         count=updated_item.count,
