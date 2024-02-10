@@ -37,7 +37,7 @@ async def create_company_model(
     await company_dao.create_company_model(
         tiker=new_company_object.tiker,
         name=new_company_object.name if new_company_object.name else new_company_object.tiker,
-        type=new_company_object.type,
+        company_type=new_company_object.type,
         strategies=[
             strategy.id for strategy in new_company_object.strategies
         ] if new_company_object.strategies else None,

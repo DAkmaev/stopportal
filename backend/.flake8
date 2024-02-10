@@ -125,3 +125,4 @@ exclude =
   ./var,
   ./.vscode,
   *migrations*,
+  ./app/tests,

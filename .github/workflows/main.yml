@@ -49,26 +49,26 @@ jobs:
       - name: Run black check
         working-directory: backend
         run: poetry run black --check .
-#  flake8:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - name: Setup python
-#        uses: actions/setup-python@v5
-#        with:
-#          python-version: 3.11
-#
-#      - name: Install poetry
-#        uses: Gr1N/setup-poetry@v8
-#
-#      - name: Install dependencies
-#        working-directory: backend
-#        run: poetry install
-#
-#      - name: Run flake8 check
-#        working-directory: backend
-#        run: poetry run flake8 --count .
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install poetry
+        uses: Gr1N/setup-poetry@v8
+
+      - name: Install dependencies
+        working-directory: backend
+        run: poetry install
+
+      - name: Run flake8 check
+        working-directory: backend
+        run: poetry run flake8 --count .
 #  mypy:
 #    runs-on: ubuntu-latest
 #    steps:

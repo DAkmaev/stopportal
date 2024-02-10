@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from app.db.base import Base
 from app.db.models.company import CompanyModel, StrategyModel
-from sqlalchemy import Enum, ForeignKey, func
+from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DECIMAL, TIMESTAMP, Integer
 
@@ -28,7 +28,7 @@ class BriefcaseModel(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
     items: Mapped[List["BriefcaseItemModel"]] = relationship(
-        lazy="selectin", cascade="all,delete"
+        lazy="selectin", cascade="all,delete",
     )
 
 

@@ -1,45 +1,22 @@
-import asyncio
-import concurrent
 import datetime
 from typing import Optional, Tuple
 
 import apimoex
 import pandas as pd
 import requests
-from aiohttp import ClientSession
 from pandas import DataFrame
 
 
 class MoexReader:
-    def _fetch_board_history(
-        self,
-        session: requests.Session(),
-        tiker: str,
-        start: datetime,
-        columns: Optional[Tuple[str, ...]],
-    ) -> dict:
-
-        return apimoex.get_board_history(
-            session, security=tiker, start=str(start), columns=columns
-        )
-
-    def _fetch_board_candles(
-        self, session: requests.Session(), tiker: str, start: datetime
-    ) -> list:
-
-        return apimoex.get_board_candles(
-            session, security=tiker, interval=10, start=str(start), columns=None
-        )
-
-    def get_company_history(
-        self, start: datetime, tiker: str, add_current: bool = True
+    def get_company_history(  # noqa: WPS210
+        self, start: datetime, tiker: str, add_current: bool = True,
     ) -> DataFrame:
 
-        COLUMNS = ("OPEN", "HIGH", "LOW", "TRADEDATE", "CLOSE", "VOLUME", "VALUE")
+        columns = ("OPEN", "HIGH", "LOW", "TRADEDATE", "CLOSE", "VOLUME", "VALUE")
         candle_start = datetime.datetime.today().strftime("%Y-%m-%d")
 
         with requests.Session() as session:
-            data = self._fetch_board_history(session, tiker, start, COLUMNS)
+            data = self._fetch_board_history(session, tiker, start, columns)
             if add_current:
                 candles = self._fetch_board_candles(session, tiker, candle_start)
 
@@ -65,3 +42,23 @@ class MoexReader:
                 df["TRADEDATE"] = pd.to_datetime(df["TRADEDATE"])
                 df.set_index("TRADEDATE", inplace=True)
             return df
+
+    def _fetch_board_history(
+        self,
+        session: requests.Session(),
+        tiker: str,
+        start: datetime,
+        columns: Optional[Tuple[str, ...]],
+    ) -> dict:
+
+        return apimoex.get_board_history(
+            session, security=tiker, start=str(start), columns=columns,
+        )
+
+    def _fetch_board_candles(
+        self, session: requests.Session(), tiker: str, start: datetime,
+    ) -> list:
+
+        return apimoex.get_board_candles(
+            session, security=tiker, interval=10, start=str(start), columns=None,
+        )

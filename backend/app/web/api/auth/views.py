@@ -14,7 +14,7 @@ async def get_user_model(
     user_id: int,
     user_dao: UserDAO = Depends(),
 ) -> UserModel:
-    return await user_dao.get_user(id=user_id)
+    return await user_dao.get_user(user_id=user_id)
 
 
 @router.get("/", response_model=List[UserModelDTO])

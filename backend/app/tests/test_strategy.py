@@ -190,7 +190,7 @@ async def test_update_strategies_in_company(
     strategies_dao = StrategiesDAO(dbsession)
 
     await company_dao.create_company_model(
-        name=company_name, tiker=company_ticker, type=company_type
+        name=company_name, tiker=company_ticker, company_type=company_type
     )
     for strategy_name in strategy_names:
         await strategies_dao.create_strategy_model(

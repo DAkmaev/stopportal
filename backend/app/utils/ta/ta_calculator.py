@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 
 import pandas as pd
-import pandas_ta as ta
+import pandas_ta as ta  # noqa: F401
 from app.db.models.company import CompanyModel
 from app.utils.moex.moex_reader import MoexReader
 from app.utils.yahoo.yahoo_reader import YahooReader

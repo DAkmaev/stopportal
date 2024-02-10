@@ -13,23 +13,15 @@ class TADecisionDAO:
         self.session = session
 
     async def get_ta_decision_models(self) -> List[TADecisionModel]:
-        """
-        Get ta_decision models.
-        """
         query = select(TADecisionModel)
         # if period:
         #     query = query.where(StochDecisionModel.period == period)
 
         rows = await self.session.execute(query)
-        sc_rows = list(rows.scalars().fetchall())
-        return sc_rows
+        return list(rows.scalars().fetchall())
 
-    async def get_ta_decision_model(self, id: int) -> TADecisionModel:
-        """
-        Get ta_decision model.
-
-        """
-        ta_decision = await self.session.get(TADecisionModel, id)
+    async def get_ta_decision_model(self, decision_id: int) -> TADecisionModel:
+        ta_decision = await self.session.get(TADecisionModel, decision_id)
 
         if not ta_decision:
             raise HTTPException(status_code=404, detail="Запись о TA не найдена")
@@ -37,51 +29,37 @@ class TADecisionDAO:
         return ta_decision
 
     async def get_ta_decision_models_by_company_id(
-        self, company_id: int
+        self, company_id: int,
     ) -> List[TADecisionModel]:
-        """
-        Get ta_decision models by company.
-
-        """
-
         ta_decisions = await self.session.execute(
-            select(TADecisionModel).where(TADecisionModel.company_id == company_id)
+            select(TADecisionModel).where(TADecisionModel.company_id == company_id),
         )
 
         return ta_decisions.scalars().fetchall()
 
     async def get_ta_decision_model_by_company_period(
-        self, company_id: int, period: str
+        self, company_id: int, period: str,
     ) -> TADecisionModel:
-        """
-        Get ta_decision models by company and period.
-
-        """
-
         ta_decisions = await self.session.execute(
             select(TADecisionModel).where(
                 TADecisionModel.company_id == company_id,
                 TADecisionModel.period == period,
-            )
+            ),
         )
 
         return ta_decisions.scalars().one_or_none()
 
-    async def update_or_create_ta_decision_model(
+    async def update_or_create_ta_decision_model(  # noqa:WPS211
         self,
-        id,
+        decision_id,
         company: CompanyModel,
         period: str,
         decision: str,
-        k: float = None,
-        d: float = None,
+        k: float = None,   # noqa:WPS111
+        d: float = None,   # noqa:WPS111
         last_price: float = None,
     ) -> TADecisionModel:
-        """
-        Update orcompany model in the session.
-        """
-
-        if not id:
+        if not decision_id:
             ta_decision = TADecisionModel(
                 period=period,
                 decision=decision,
@@ -94,7 +72,7 @@ class TADecisionDAO:
 
             return ta_decision
 
-        ta_decision = await self.get_ta_decision_model(id)
+        ta_decision = await self.get_ta_decision_model(decision_id)
         ta_decision.decision = decision
         ta_decision.k = k
         ta_decision.d = d

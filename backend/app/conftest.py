@@ -112,15 +112,13 @@ async def client(
 
 @pytest.fixture()
 async def superuser_token_headers(
-    client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession
+    client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession,
 ) -> dict[str, str]:
-    headers = await get_superuser_token_headers(client, fastapi_app, dbsession)
-    return headers
+    return await get_superuser_token_headers(client, fastapi_app, dbsession)
 
 
 @pytest.fixture()
 async def user_token_headers(
-    client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession
+    client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession,
 ) -> dict[str, str]:
-    headers = await get_user_token_headers(client, fastapi_app, dbsession)
-    return headers
+    return await get_user_token_headers(client, fastapi_app, dbsession)

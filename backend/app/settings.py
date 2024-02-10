@@ -1,5 +1,4 @@
 import enum
-import os
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -60,16 +59,17 @@ class Settings(BaseSettings):
 
         :return: database URL.
         """
-        if self.environment not in ["prod", "test"]:
+        if self.environment not in {"prod", "test"}:
             return URL.build(
                 scheme="sqlite+aiosqlite",
                 path=f"///{self.db_file}",
             )
 
-        return URL.build(
-            scheme="postgresql+psycopg",
-            path=f"//{self.postgres_user}:{self.postgres_password}@{self.postgres_server}/{self.postgres_db}",
-        )
+        url_scheme = "postgresql+psycopg"
+        url_account = f"{self.postgres_user}:{self.postgres_password}"
+        url_db = f"{self.postgres_server}/{self.postgres_db}"
+        url_path = f"//{url_account}@{url_db}"
+        return URL.build(scheme=url_scheme, path=url_path)
 
     model_config = SettingsConfigDict(
         env_file=".env",

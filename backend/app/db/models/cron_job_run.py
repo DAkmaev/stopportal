@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql.sqltypes import DateTime, String
 
 if TYPE_CHECKING:
-    from .item import Item  # noqa: F401
+    from .item import Item  # noqa: F401,WPS300
 
 
 class CronJobRunModel(Base):

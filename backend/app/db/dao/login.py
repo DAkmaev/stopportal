@@ -10,8 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class LoginDAO:
-    """Class for accessing user table."""
-
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
@@ -25,6 +23,6 @@ class LoginDAO:
         access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
         return Token(
             access_token=security.create_access_token(
-                user.id, expires_delta=access_token_expires
-            )
+                user.id, expires_delta=access_token_expires,
+            ),
         )

@@ -45,7 +45,7 @@ async def test_get_strategy_model(
     assert strategy is not None
 
     # Получаем стратегию по идентификатору
-    retrieved_strategy = await strategies_dao.get_strategy_model(id=created_strategy.id)
+    retrieved_strategy = await strategies_dao.get_strategy_model(strategy_id=created_strategy.id)
 
     # Проверяем, что стратегия была успешно получена и имеет правильные параметры
     assert retrieved_strategy is not None
