@@ -17,6 +17,7 @@
     </connection>
     <connection id="113e311b-eb06-48c5-90fb-338cdce7a3e9">
       <console name="Connection 1" type="STANDARD" schema="database" session="Main" />
+      <console name="postgress" type="STANDARD" schema="public" session="Main"><![CDATA[select * from companies]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -25,13 +26,31 @@
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files />
   </component>
+  <component name="DBNavigator.Project.DatabaseSessionManager">
+    <connection id="ed71100b-d8b8-4b17-8801-77805c1a5b93" />
+    <connection id="113e311b-eb06-48c5-90fb-338cdce7a3e9" />
+  </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="ed71100b-d8b8-4b17-8801-77805c1a5b93" dataset="main.companies" active-filter-id="EMPTY_FILTER" />
     <filter-actions connection-id="ed71100b-d8b8-4b17-8801-77805c1a5b93" dataset="main.stock" active-filter-id="" />
     <filter-actions connection-id="ed71100b-d8b8-4b17-8801-77805c1a5b93" dataset="main.dummy_model" active-filter-id="" />
     <filter-actions connection-id="ed71100b-d8b8-4b17-8801-77805c1a5b93" dataset="main.user" active-filter-id="" />
+    <filter-actions connection-id="ed71100b-d8b8-4b17-8801-77805c1a5b93" dataset="main.briefcases" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="ed71100b-d8b8-4b17-8801-77805c1a5b93" dataset="main.alembic_version" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="113e311b-eb06-48c5-90fb-338cdce7a3e9" dataset="public.alembic_version" active-filter-id="" />
+    <filter-actions connection-id="113e311b-eb06-48c5-90fb-338cdce7a3e9" dataset="public.companies" active-filter-id="EMPTY_FILTER" />
+    <filter-actions connection-id="113e311b-eb06-48c5-90fb-338cdce7a3e9" dataset="public.strategies" active-filter-id="EMPTY_FILTER" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
     <retain-sticky-names value="false" />
+  </component>
+  <component name="DBNavigator.Project.MethodExecutionManager">
+    <method-browser />
+    <execution-history>
+      <group-entries value="true" />
+      <execution-inputs />
+    </execution-history>
+    <argument-values-cache />
   </component>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
@@ -41,7 +60,7 @@
     <connections>
       <connection id="ed71100b-d8b8-4b17-8801-77805c1a5b93" active="true" signed="true">
         <database>
-          <name value="Connection" />
+          <name value="sqllite" />
           <description value="" />
           <database-type value="SQLITE" />
           <config-type value="BASIC" />
@@ -130,19 +149,23 @@
       </connection>
       <connection id="113e311b-eb06-48c5-90fb-338cdce7a3e9" active="true" signed="true">
         <database>
-          <name value="Connection 1" />
+          <name value="postgress" />
           <description value="" />
-          <database-type value="GENERIC" />
+          <database-type value="POSTGRES" />
           <config-type value="CUSTOM" />
-          <database-version value="9999.0" />
-          <driver-source value="EXTERNAL" />
+          <database-version value="16.1" />
+          <driver-source value="BUNDLED" />
           <driver-library value="" />
           <driver value="" />
-          <url-type value="CUSTOM" />
-          <url value="" />
+          <url-type value="DATABASE" />
+          <host value="localhost" />
+          <port value="5432" />
+          <database value="stopportal" />
+          <tns-folder value="" />
+          <tns-profile value="" />
           <type value="USER_PASSWORD" />
-          <user value="" />
-          <deprecated-pwd value="" />
+          <user value="stopportal_user" />
+          <deprecated-pwd value="c3RvcHBvcnRhbF9wYXNzd29yZA==" />
         </database>
         <properties>
           <auto-commit value="false" />
@@ -604,5 +627,8 @@
         </visibility-settings>
       </environment>
     </general-settings>
+  </component>
+  <component name="DBNavigator.Project.StatementExecutionManager">
+    <execution-variables />
   </component>
 </project>

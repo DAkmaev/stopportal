@@ -18,7 +18,7 @@ services:
 
   migrator:
     image: backend:${BACKEND_VERSION:-latest}
-    restart: "no"
+    restart: on-failure
     command: alembic upgrade head
     environment:
       BACKEND_DB_FILE: /db_data/db.sqlite3

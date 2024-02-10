@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+  backend:
+    image: dakmaev/stopportal-backend:latest
+    env_file:
+      - .env
+    links:
+      - db
+    networks:
+      - app-network
+
+  migrator:
+    image: dakmaev/stopportal-backend:latest
+    env_file:
+      - .env
+    restart: on-failure
+    command: alembic upgrade head
+#    command: >
+#      /bin/bash -c 'pg_dump -U "$POSTGRES_USER" -h "$POSTGRES_SERVER" -d "$POSTGRES_DB" > /path/to/backup.sql && alembic upgrade head'
+    links:
+      - db
+    networks:
+      - app-network
+
+  frontend:
+    image: dakmaev/stopportal-frontend:latest
+    env_file:
+      - .env
+    command: [ "cp", "-r", "/app/dist/.", "/staticfiles/" ]
+    volumes:
+      - static:/staticfiles
+
+  gateway:
+    image: dakmaev/stopportal-gateway:latest
+    env_file:
+      - .env
+    links:
+      - backend
+    ports:
+      - "${PORT}:80"
+    volumes:
+      - static:/usr/share/nginx/html/
+    networks:
+      - app-network
+
+  db:
+    image: postgres:16
+    env_file:
+      - .env
+    volumes:
+      - dg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  static:
+  dg_data:
+  backup:
+
+networks:
+  app-network:
+    driver: bridge

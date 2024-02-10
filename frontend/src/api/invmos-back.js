@@ -1,5 +1,5 @@
 function fillUrl(endpoint, params) {
-  let url = `http://localhost:8000/${endpoint}`
+  let url = `${process.env.VUE_APP_API_URL}/${endpoint}`
   if (params && Object.keys(params).length > 0) {
     url += '?'
     url += Object.keys(params)
@@ -68,12 +68,12 @@ export async function getStrategies() {
 }
 
 export const endpoints = Object.freeze({
-  BRIEFCASE: 'api/briefcase',
-  BRIEFCASE_ITEMS: 'api/briefcase/items',
-  BRIEFCASE_REGISTRY: 'api/briefcase/registry',
-  COMPANIES: 'api/companies/',
+  BRIEFCASE: 'briefcase',
+  BRIEFCASE_ITEMS: 'briefcase/items',
+  BRIEFCASE_REGISTRY: 'briefcase/registry',
+  COMPANIES: 'companies/',
   COMPANIES_CATEGORIES: 'companies/categories',
-  COMPANIES_STRATEGIES: 'api/companies/strategies',
+  COMPANIES_STRATEGIES: 'companies/strategies',
   DIVIDENDS: 'dividends',
   DIVIDENDS_DATA: 'dividends/data',
   DIVIDENDS_DOHODNOST: 'dividends/dohodnost',
@@ -95,9 +95,9 @@ export const endpoints = Object.freeze({
   REPORTS_VALUES: 'reports/values',
   REPORTS_VALUE: 'reports/value',
   REPORTS_UNITS: 'reports/units',
-  TA: 'api/ta/',
-  STOPS: 'api/stops/',
-  STRATEGIES: 'api/strategies/',
+  TA: 'ta/',
+  STOPS: 'stops/',
+  STRATEGIES: 'strategies/',
   STRATEGIES_MIH: 'strategies/mih',
   STRATEGIES_MIH_DETAILS: 'strategies/mih/details'
 })

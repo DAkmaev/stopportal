@@ -1,0 +1,258 @@
+name: Main Stopportal workflow
+
+on:
+  push:
+    branches:
+      - deploy
+      - main
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install poetry
+      uses: Gr1N/setup-poetry@v8
+
+    - name: Install dependencies
+      working-directory: backend
+      run: poetry install
+
+    - name: Run pytest check
+      working-directory: backend
+      run: poetry run pytest -vv .
+      env:
+        BACKEND_HOST: "0.0.0.0"
+#  black:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: 3.11
+#
+#      - name: Install poetry
+#        uses: Gr1N/setup-poetry@v8
+#
+#      - name: Install dependencies
+#        working-directory: backend
+#        run: poetry install
+#
+#      - name: Run black check
+#        working-directory: backend
+#        run: poetry run black --check .
+#  flake8:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: 3.11
+#
+#      - name: Install poetry
+#        uses: Gr1N/setup-poetry@v8
+#
+#      - name: Install dependencies
+#        working-directory: backend
+#        run: poetry install
+#
+#      - name: Run flake8 check
+#        working-directory: backend
+#        run: poetry run flake8 --count .
+#  mypy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#
+#      - name: Setup python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: 3.11
+#
+#      - name: Install poetry
+#        uses: Gr1N/setup-poetry@v8
+#
+#      - name: Install dependencies
+#        working-directory: backend
+#        run: poetry install
+#
+#      - name: Run mypy check
+#        working-directory: backend
+#        run: poetry run mypy .
+
+  build_backend_docker:
+    name: Build and push Backend Docker image to DockerHub
+    runs-on: ubuntu-latest
+    needs: pytest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-backend:latest
+
+  frontend_lint:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up nodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Install dependencies 2
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+  build_frontend_docker:
+    name: Build and push Frontend Docker image to DockerHub
+    runs-on: ubuntu-latest
+    needs: frontend_lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend/
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-frontend:latest
+
+  build_nginx_docker:
+    name: Build and push Gateway Docker image to DockerHub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./infra/nginx/
+          file: ./infra/nginx/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-gateway:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - build_backend_docker
+      - build_frontend_docker
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            deploy/docker-compose.yml
+          sparse-checkout-cone-mode: false
+#      - name: Copy docker-compose.yml via ssh
+#        uses: appleboy/scp-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USER }}
+#          key: ${{ secrets.SSH_KEY }}
+#          source: "docker-compose.yml"
+#          target: "stopportal"
+#      - name: Executing remote ssh commands to deploy
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USER }}
+#          key: ${{ secrets.SSH_KEY }}
+#          script: |
+#            cd stopportal
+#            sudo docker compose -f docker-compose.yml pull
+#            sudo docker compose -f docker-compose.yml down
+#            sudo docker compose -f docker-compose.yml up -d
+#            # Выполняет миграции и сбор статики
+#            sudo docker compose -f docker-compose.yml exec backend alembic upgrade "head"
+#            # sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+#            # sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
+#            # sudo docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+
+  send_message:
+    name: Sent notification to Telegram
+    runs-on: ubuntu-latest
+    needs:
+      - deploy
+    steps:
+      - name: Send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: Деплой успешно выполнен!
+
+#  build_gateway_and_push_to_docker_hub:
+#    name: Push gateway Docker image to DockerHub
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out the repo
+#        uses: actions/checkout@v3
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v2
+#      - name: Login to Docker
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#      - name: Push to DockerHub
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: ./nginx/
+#          push: true
+#          # Тут вместо username должен быть ваш логин на Docker Hub
+#          tags: ${{ secrets.DOCKER_USERNAME }}/kittygram_gateway:latest
