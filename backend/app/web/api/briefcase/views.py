@@ -174,7 +174,8 @@ async def update_briefcase_registry(
     dao: BriefcaseDAO = Depends(),
 ) -> None:
     await dao.update_briefcase_registry_model(
-        registry_id=item_id, updated_fields=updated_item.model_dump(),
+        registry_id=item_id,
+        updated_fields=updated_item.model_dump(),
     )
 
 

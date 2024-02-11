@@ -25,7 +25,7 @@ class BriefcaseDAO:
         self.session.add(briefcase)
         return briefcase
 
-    async def create_briefcase_item_model(   # noqa:  WPS211
+    async def create_briefcase_item_model(  # noqa:  WPS211
         self,
         count: int,
         briefcase_id: int,
@@ -42,7 +42,10 @@ class BriefcaseDAO:
             raise HTTPException(status_code=404, detail="Компания не найдена")
 
         briefcase_item = BriefcaseItemModel(
-            count=count, dividends=dividends, company=company, briefcase_id=briefcase.id,
+            count=count,
+            dividends=dividends,
+            company=company,
+            briefcase_id=briefcase.id,
         )
         if strategy_id:
             strategy = await self.session.get(StrategyModel, strategy_id)
@@ -52,7 +55,9 @@ class BriefcaseDAO:
         return briefcase_item
 
     async def get_all_briefcases(
-        self, limit: int = 10000, offset: int = 0,
+        self,
+        limit: int = 10000,
+        offset: int = 0,
     ) -> List[BriefcaseModel]:
         raw_briefcases = await self.session.execute(
             select(BriefcaseModel).limit(limit).offset(offset),
@@ -72,7 +77,8 @@ class BriefcaseDAO:
         return list(raw_briefcase_items.scalars().fetchall())
 
     async def get_briefcase_item_model(
-        self, briefcase_item_id: int,
+        self,
+        briefcase_item_id: int,
     ) -> BriefcaseItemModel:
         briefcase_item = await self.session.get(BriefcaseItemModel, briefcase_item_id)
 
@@ -82,7 +88,8 @@ class BriefcaseDAO:
         return briefcase_item
 
     async def get_briefcase_items_by_company(
-        self, company_id: int,
+        self,
+        company_id: int,
     ) -> List[BriefcaseItemModel]:
         raw_briefcase_items = await self.session.execute(
             select(BriefcaseItemModel).filter_by(company_id=company_id),
@@ -90,7 +97,8 @@ class BriefcaseDAO:
         return list(raw_briefcase_items.scalars().fetchall())
 
     async def get_briefcase_items_by_briefcase(
-        self, briefcase_id: int,
+        self,
+        briefcase_id: int,
     ) -> List[BriefcaseItemModel]:
         raw_briefcase_items = await self.session.execute(
             select(BriefcaseItemModel).filter_by(briefcase_id=briefcase_id),
@@ -98,14 +106,19 @@ class BriefcaseDAO:
         return list(raw_briefcase_items.scalars().fetchall())
 
     async def update_briefcase_model(
-        self, briefcase_id: int, fill_up: float,
+        self,
+        briefcase_id: int,
+        fill_up: float,
     ) -> BriefcaseModel:
         briefcase = await self.get_briefcase_model(briefcase_id)
         briefcase.fill_up = fill_up
         return briefcase
 
     async def update_briefcase_item_model(
-        self, briefcase_item_id: int, count: int, dividends: float,
+        self,
+        briefcase_item_id: int,
+        count: int,
+        dividends: float,
     ) -> BriefcaseItemModel:
         briefcase_item = await self.get_briefcase_item_model(briefcase_item_id)
         briefcase_item.count = count
@@ -120,7 +133,7 @@ class BriefcaseDAO:
         briefcase_item = await self.get_briefcase_item_model(briefcase_item_id)
         await self.session.delete(briefcase_item)
 
-    async def get_all_briefcase_registry(   # noqa:  WPS211
+    async def get_all_briefcase_registry(  # noqa:  WPS211
         self,
         briefcase_id: int,
         limit: int = 100,
@@ -144,7 +157,8 @@ class BriefcaseDAO:
         return list(raw_briefcase_registry.scalars().fetchall())
 
     async def get_briefcase_registry_model(
-        self, registry_id: int,
+        self,
+        registry_id: int,
     ) -> BriefcaseRegistryModel:
         registry_item = await self.session.get(BriefcaseRegistryModel, registry_id)
 
@@ -153,7 +167,7 @@ class BriefcaseDAO:
 
         return registry_item
 
-    async def create_briefcase_registry_model(   # noqa:  WPS211
+    async def create_briefcase_registry_model(  # noqa:  WPS211
         self,
         count: int,
         amount: float,
@@ -194,7 +208,9 @@ class BriefcaseDAO:
         return registry
 
     async def update_briefcase_registry_model(
-        self, registry_id: int, updated_fields: dict,
+        self,
+        registry_id: int,
+        updated_fields: dict,
     ) -> BriefcaseRegistryModel:
         registry_item = await self.get_briefcase_registry_model(registry_id)
         if not registry_item:

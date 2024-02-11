@@ -146,8 +146,12 @@ async def test_get_all_companies(
     assert len(all_companies) == 0  # Assuming there are no companies at the beginning
 
     # Create some test companies
-    await company_dao.create_company_model(tiker="TEST1", name="Company1", company_type="MOEX")
-    await company_dao.create_company_model(tiker="TEST2", name="Company2", company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker="TEST1", name="Company1", company_type="MOEX"
+    )
+    await company_dao.create_company_model(
+        tiker="TEST2", name="Company2", company_type="MOEX"
+    )
 
     # Get all companies again
     all_companies = await company_dao.get_all_companies(limit=10, offset=0)
@@ -188,8 +192,12 @@ async def test_filter(
     company_dao = CompanyDAO(dbsession)
 
     # Create some test companies
-    await company_dao.create_company_model(tiker="TEST1", name="Company1", company_type="MOEX")
-    await company_dao.create_company_model(tiker="TEST2", name="Company2", company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker="TEST1", name="Company1", company_type="MOEX"
+    )
+    await company_dao.create_company_model(
+        tiker="TEST2", name="Company2", company_type="MOEX"
+    )
 
     # Filter companies by tiker
     filtered_companies = await company_dao.filter(tiker="TEST1")

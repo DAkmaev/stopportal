@@ -11,7 +11,9 @@ async def add_stop_model(
     dao: StopsDAO = Depends(),
 ) -> None:
     await dao.add_stop_model(
-        company_id=new_stop.company_id, period=new_stop.period, value=new_stop.value,
+        company_id=new_stop.company_id,
+        period=new_stop.period,
+        value=new_stop.value,
     )
 
 

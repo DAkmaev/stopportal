@@ -17,11 +17,15 @@ class StopsDAO:
         return company.scalars().one_or_none()
 
     async def add_stop_model(
-        self, company_id: int, period: str, value: float,
+        self,
+        company_id: int,
+        period: str,
+        value: float,
     ) -> StopModel:
         raw_stop = await self.session.execute(
             select(StopModel).where(
-                StopModel.company_id == company_id, StopModel.period == period,
+                StopModel.company_id == company_id,
+                StopModel.period == period,
             ),
         )
         existing_stop: StopModel = raw_stop.scalars().one_or_none()
@@ -55,7 +59,8 @@ class StopsDAO:
         existing_stop: StopModel = raw_stop.scalars().one_or_none()
         if existing_stop:
             raise HTTPException(
-                status_code=400, detail="Стоп с такими параметрами уже существует",
+                status_code=400,
+                detail="Стоп с такими параметрами уже существует",
             )
 
         stop = await self.get_stop_model(stop_id)

@@ -16,7 +16,11 @@ class CompanyDAO:
         self.strategy_dao = StrategiesDAO(session)
 
     async def create_company_model(
-        self, tiker: str, name: str, company_type: str, strategies: list[int] = None,
+        self,
+        tiker: str,
+        name: str,
+        company_type: str,
+        strategies: list[int] = None,
     ) -> CompanyModel:
         raw_company = await self.session.execute(
             select(CompanyModel).where(CompanyModel.tiker == tiker),
@@ -25,7 +29,8 @@ class CompanyDAO:
 
         if exist_company:
             raise HTTPException(
-                status_code=400, detail=f"Компания {exist_company.tiker} уже существует",
+                status_code=400,
+                detail=f"Компания {exist_company.tiker} уже существует",
             )
 
         company = CompanyModel(tiker=tiker, name=name, type=company_type)
@@ -41,7 +46,9 @@ class CompanyDAO:
         exist_companies = list(raw_companies.scalars().fetchall())
 
         if exist_companies:
-            exist_companies_tikers_str = ",".join([comp.tiker for comp in exist_companies])
+            exist_companies_tikers_str = ",".join(
+                [comp.tiker for comp in exist_companies],
+            )
             raise HTTPException(
                 status_code=400,
                 detail=f"В базе уже есть тикеры {exist_companies_tikers_str}",
@@ -50,7 +57,10 @@ class CompanyDAO:
         self.session.add_all(items)
 
     async def update_company_model(
-        self, company_id: int, updated_fields: dict, partial: bool = False,
+        self,
+        company_id: int,
+        updated_fields: dict,
+        partial: bool = False,
     ) -> CompanyModel:
         company = await self.get_company_model(company_id)
 
@@ -81,7 +91,9 @@ class CompanyDAO:
         await self.session.delete(company)
 
     async def get_all_companies(
-        self, limit: int = 10000, offset: int = 0,
+        self,
+        limit: int = 10000,
+        offset: int = 0,
     ) -> List[CompanyModel]:
         raw_companies = await self.session.execute(
             select(CompanyModel).limit(limit).offset(offset),

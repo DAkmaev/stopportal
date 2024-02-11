@@ -25,7 +25,11 @@ async def generate_ta_decisions(
     briefcase_id = 1
 
     return await ta_service.generate_ta_decisions(
-        briefcase_id, period, is_cron, send_messages, send_test,
+        briefcase_id,
+        period,
+        is_cron,
+        send_messages,
+        send_test,
     )
 
 
@@ -37,7 +41,9 @@ async def generate_ta_decision(
     ta_service: TAService = Depends(),
 ) -> Dict[str, TADecisionDTO]:
     return await ta_service.generate_ta_decision(
-        tiker=tiker, period=period, send_messages=send_messages,
+        tiker=tiker,
+        period=period,
+        send_messages=send_messages,
     )
 
 

@@ -12,7 +12,7 @@ class UserDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_user_model(   # noqa: WPS211
+    async def create_user_model(  # noqa: WPS211
         self,
         name: str,
         email: str,

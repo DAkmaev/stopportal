@@ -13,7 +13,8 @@ router = APIRouter()
 
 @router.post("/access-token")
 async def login_access_token(
-    dao: LoginDAO = Depends(), form_data: OAuth2PasswordRequestForm = Depends(),
+    dao: LoginDAO = Depends(),
+    form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Token:
     return await dao.authenticate(form_data.username, form_data.password)
 

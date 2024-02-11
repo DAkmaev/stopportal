@@ -124,7 +124,9 @@ async def test_update_strategy_model(
     assert strategy is not None
 
     # Отправляем PUT-запрос для обновления стратегии
-    url = fastapi_app.url_path_for("update_strategy_model", strategy_id=original_strategy.id)
+    url = fastapi_app.url_path_for(
+        "update_strategy_model", strategy_id=original_strategy.id
+    )
     response = await client.put(
         url,
         json={

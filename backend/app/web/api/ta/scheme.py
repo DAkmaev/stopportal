@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class TADecisionEnum(str, Enum):    # noqa: WPS600
+class TADecisionEnum(str, Enum):  # noqa: WPS600
     BUY = "BUY"
     SELL = "SELL"
     RELAX = "RELAX"
@@ -28,8 +28,8 @@ class TADecisionDTO(BaseModel):
     company: TACompanyDTO
     decision: TADecisionEnum
     # last_price: Optional[float] = None
-    k: Optional[float] = None   # noqa: WPS111
-    d: Optional[float] = None   # noqa: WPS111
+    k: Optional[float] = None  # noqa: WPS111
+    d: Optional[float] = None  # noqa: WPS111
     period: str
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None

@@ -15,7 +15,9 @@ class TADecisionModel(Base):
     d: Mapped[float] = mapped_column(Float, nullable=True)  # noqa: WPS111
     last_price: Mapped[float] = mapped_column(Float, nullable=True)
     last_updated: Mapped[TIMESTAMP] = mapped_column(
-        TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp(),
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.current_timestamp(),
     )
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
     company: Mapped["CompanyModel"] = relationship(lazy="selectin")

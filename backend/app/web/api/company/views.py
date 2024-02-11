@@ -36,11 +36,13 @@ async def create_company_model(
 ) -> None:
     await company_dao.create_company_model(
         tiker=new_company_object.tiker,
-        name=new_company_object.name if new_company_object.name else new_company_object.tiker,
+        name=new_company_object.name
+        if new_company_object.name
+        else new_company_object.tiker,
         company_type=new_company_object.type,
-        strategies=[
-            strategy.id for strategy in new_company_object.strategies
-        ] if new_company_object.strategies else None,
+        strategies=[strategy.id for strategy in new_company_object.strategies]
+        if new_company_object.strategies
+        else None,
     )
 
 
@@ -49,13 +51,16 @@ async def create_company_batch_models(
     new_company_list: List[CompanyModelInputDTO],
     company_dao: CompanyDAO = Depends(),
 ) -> None:
-    await company_dao.create_companies_models([
-        CompanyModel(
-            tiker=comp.tiker,
-            name=comp.name if comp.name else comp.tiker,
-            type=comp.type,
-        ) for comp in new_company_list
-    ])
+    await company_dao.create_companies_models(
+        [
+            CompanyModel(
+                tiker=comp.tiker,
+                name=comp.name if comp.name else comp.tiker,
+                type=comp.type,
+            )
+            for comp in new_company_list
+        ],
+    )
 
 
 @router.patch("/{company_id}")
@@ -65,7 +70,9 @@ async def partial_update_company_model(
     company_dao: CompanyDAO = Depends(),
 ) -> None:
     await company_dao.update_company_model(
-        company_id, updated_company.model_dump(), True,  # noqa: WPS425
+        company_id,
+        updated_company.model_dump(),
+        True,  # noqa: WPS425
     )
 
 

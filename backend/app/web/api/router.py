@@ -26,7 +26,9 @@ api_router.include_router(company.router, prefix="/companies", tags=["companies"
 api_router.include_router(stop.router, prefix="/stops", tags=["stops"])
 api_router.include_router(strategy.router, prefix="/strategies", tags=["strategies"])
 api_router.include_router(
-    cron_job_run.router, prefix="/cron_job_run", tags=["cron_job_run"],
+    cron_job_run.router,
+    prefix="/cron_job_run",
+    tags=["cron_job_run"],
 )
 api_router.include_router(briefcase.router, prefix="/briefcase", tags=["briefcase"])
 api_router.include_router(login.router, prefix="/login", tags=["login"])

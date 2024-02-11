@@ -28,7 +28,8 @@ class BriefcaseModel(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
     items: Mapped[List["BriefcaseItemModel"]] = relationship(
-        lazy="selectin", cascade="all,delete",
+        lazy="selectin",
+        cascade="all,delete",
     )
 
 

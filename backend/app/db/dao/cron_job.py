@@ -15,7 +15,9 @@ class CronJobRunDao:
         self.session = session
 
     async def get_all_cron_job_runs(
-        self, limit: int, offset: int,
+        self,
+        limit: int,
+        offset: int,
     ) -> List[CronJobRunModel]:
         cron_job_runs = await self.session.execute(
             select(CronJobRunModel).limit(limit).offset(offset),
@@ -32,11 +34,14 @@ class CronJobRunDao:
         return cron_job_run
 
     async def get_cron_job_run_by_params(
-        self, period: str, name: str,
+        self,
+        period: str,
+        name: str,
     ) -> Type[CronJobRunModel]:
         cron_jobs_run = await self.session.execute(
             select(CronJobRunModel).where(
-                CronJobRunModel.period == period, CronJobRunModel.name == name,
+                CronJobRunModel.period == period,
+                CronJobRunModel.name == name,
             ),
         )
         return cron_jobs_run.scalars().one_or_none()
@@ -48,7 +53,9 @@ class CronJobRunDao:
 
         if exist_run_job is None:
             new_run = CronJobRunModel(
-                period=period, name=name, last_run_date=last_run_date,
+                period=period,
+                name=name,
+                last_run_date=last_run_date,
             )
             self.session.add(new_run)
             return new_run
@@ -61,7 +68,8 @@ class CronJobRunDao:
         cron_job_run = await self.session.get(CronJobRunModel, cron_job_run_id)
         if not cron_job_run:
             raise HTTPException(
-                status_code=404, detail="Информация о запуске джобы не найдена",
+                status_code=404,
+                detail="Информация о запуске джобы не найдена",
             )
 
         await self.session.delete(cron_job_run)

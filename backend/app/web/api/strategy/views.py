@@ -29,7 +29,8 @@ async def create_strategy_model(
     dao: StrategiesDAO = Depends(),
 ) -> None:
     return await dao.create_strategy_model(
-        name=new_strategy_object.name, description=new_strategy_object.description,
+        name=new_strategy_object.name,
+        description=new_strategy_object.description,
     )
 
 
@@ -40,7 +41,9 @@ async def update_strategy_model(
     dao: StrategiesDAO = Depends(),
 ) -> None:
     return await dao.update_strategy_model(
-        strategy_id, name=updated_strategy.name, description=updated_strategy.description,
+        strategy_id,
+        name=updated_strategy.name,
+        description=updated_strategy.description,
     )
 
 

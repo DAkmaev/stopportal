@@ -31,7 +31,8 @@ async def update_cron_job_run_model(
     cron_job_run_dao: CronJobRunDao = Depends(),
 ) -> None:
     await cron_job_run_dao.update_cron_job_run(
-        period=new_cron_job_run_object.period, name=new_cron_job_run_object.name,
+        period=new_cron_job_run_object.period,
+        name=new_cron_job_run_object.name,
     )
 
 

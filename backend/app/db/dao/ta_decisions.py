@@ -29,7 +29,8 @@ class TADecisionDAO:
         return ta_decision
 
     async def get_ta_decision_models_by_company_id(
-        self, company_id: int,
+        self,
+        company_id: int,
     ) -> List[TADecisionModel]:
         ta_decisions = await self.session.execute(
             select(TADecisionModel).where(TADecisionModel.company_id == company_id),
@@ -38,7 +39,9 @@ class TADecisionDAO:
         return ta_decisions.scalars().fetchall()
 
     async def get_ta_decision_model_by_company_period(
-        self, company_id: int, period: str,
+        self,
+        company_id: int,
+        period: str,
     ) -> TADecisionModel:
         ta_decisions = await self.session.execute(
             select(TADecisionModel).where(
@@ -55,8 +58,8 @@ class TADecisionDAO:
         company: CompanyModel,
         period: str,
         decision: str,
-        k: float = None,   # noqa:WPS111
-        d: float = None,   # noqa:WPS111
+        k: float = None,  # noqa:WPS111
+        d: float = None,  # noqa:WPS111
         last_price: float = None,
     ) -> TADecisionModel:
         if not decision_id:

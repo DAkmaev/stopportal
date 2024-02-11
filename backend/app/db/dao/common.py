@@ -2,7 +2,12 @@ from fastapi import HTTPException
 
 
 async def update_registry_field(  # noqa: WPS231, WPS211
-    session, model, field_name, updated_fields, registry_item, error_message,
+    session,
+    model,
+    field_name,
+    updated_fields,
+    registry_item,
+    error_message,
 ):
     data = updated_fields.pop(field_name, None)
     current_value = getattr(registry_item, field_name)

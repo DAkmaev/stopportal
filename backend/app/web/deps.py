@@ -23,7 +23,9 @@ async def get_current_user(
 ) -> UserModel:
     try:
         payload = jwt.decode(
-            token, settings.secret_key, algorithms=[settings.algorithm],
+            token,
+            settings.secret_key,
+            algorithms=[settings.algorithm],
         )
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
@@ -45,6 +47,7 @@ CurrentUser = Annotated[UserModel, Depends(get_current_user)]
 def get_current_active_superuser(current_user: CurrentUser) -> UserModel:
     if not current_user.is_superuser:
         raise HTTPException(
-            status_code=403, detail="The user doesn't have enough privileges",
+            status_code=403,
+            detail="The user doesn't have enough privileges",
         )
     return current_user

@@ -73,14 +73,18 @@ class TACalculator:
         mreader = MoexReader()
         return (
             mreader.get_company_history(
-                start=start, tiker=company.tiker, add_current=add_current,
+                start=start,
+                tiker=company.tiker,
+                add_current=add_current,
             )
             if company.type == CompanyTypeEnum.MOEX
             else YahooReader.get_company_history(start=start, tiker=company.tiker)
         )
 
     def get_company_ta_decisions(
-        self, company: CompanyModel, period: str,
+        self,
+        company: CompanyModel,
+        period: str,
     ) -> dict[str, TADecisionDTO]:
         df = self.get_history_data(company)
         results = {}
@@ -92,7 +96,9 @@ class TACalculator:
         return results
 
     async def get_companies_ta_decisions(
-        self, companies: list[CompanyModel], period: str,
+        self,
+        companies: list[CompanyModel],
+        period: str,
     ):
         decisions = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -166,7 +172,11 @@ class TACalculator:
         return TADecision(decision=decision, df=stoch_df)
 
     def _calculate_decision(  # noqa: WPS210
-        self, company: CompanyModel, period: str, df: DataFrame, last_price: float,
+        self,
+        company: CompanyModel,
+        period: str,
+        df: DataFrame,
+        last_price: float,
     ):
         # Для некоторых акций увеличиваем bottom_border
         tikers_high_bottom = ["LKOH"]
@@ -174,7 +184,9 @@ class TACalculator:
 
         # для продажи проверяем границы и разворот для всех периодов
         per_decision = self._get_period_decision(
-            df, period, bottom_border=bottom_border,
+            df,
+            period,
+            bottom_border=bottom_border,
         )
 
         if per_decision.decision == TADecisionEnum.UNKNOWN:
@@ -182,7 +194,9 @@ class TACalculator:
                 decision=per_decision.decision,
                 period=period,
                 company=TACompanyDTO(
-                    id=company.id, name=company.name, tiker=company.tiker,
+                    id=company.id,
+                    name=company.name,
+                    tiker=company.tiker,
                 ),
             )
 
@@ -192,7 +206,9 @@ class TACalculator:
             need_buy = False
             if period == "W":
                 decision_month = self._get_period_decision(
-                    df, "M", skip_check_borders=True,
+                    df,
+                    "M",
+                    skip_check_borders=True,
                 )
                 decision_week = self._get_period_decision(df, "W", bottom_border=40)
 
@@ -204,8 +220,16 @@ class TACalculator:
 
             elif period == "D":
                 decision_day = self._get_period_decision(df, "D")
-                decision_week = self._get_period_decision(df, "W", skip_check_borders=True)
-                decision_month = self._get_period_decision(df, "M", skip_check_borders=True)
+                decision_week = self._get_period_decision(
+                    df,
+                    "W",
+                    skip_check_borders=True,
+                )
+                decision_month = self._get_period_decision(
+                    df,
+                    "M",
+                    skip_check_borders=True,
+                )
 
                 need_buy = (
                     decision_day.decision
@@ -228,21 +252,37 @@ class TACalculator:
             last_price=last_price,
         )
 
-    def _process_period(self, df: DataFrame, cur_period: str, company: CompanyModel) -> TADecisionDTO:
+    def _process_period(
+        self,
+        df: DataFrame,
+        cur_period: str,
+        company: CompanyModel,
+    ) -> TADecisionDTO:
         if df.size == 0:
             return TADecisionDTO(
                 decision=TADecisionEnum.UNKNOWN,
                 period=cur_period,
-                company=TACompanyDTO(id=company.id, name=company.name, tiker=company.tiker),
+                company=TACompanyDTO(
+                    id=company.id,
+                    name=company.name,
+                    tiker=company.tiker,
+                ),
             )
 
         last_price = df.iloc[-1]["CLOSE"]
         stops_or_none = company.stops or []
-        stop = next((stop.value for stop in stops_or_none if stop.period == cur_period), None)
+        stop = next(
+            (stop.value for stop in stops_or_none if stop.period == cur_period),
+            None,
+        )
 
         if stop is not None and last_price <= stop:
             return TADecisionDTO(
-                company=TACompanyDTO(id=company.id, name=company.name, tiker=company.tiker),
+                company=TACompanyDTO(
+                    id=company.id,
+                    name=company.name,
+                    tiker=company.tiker,
+                ),
                 period=cur_period,
                 decision=TADecisionEnum.SELL,
                 last_price=last_price,

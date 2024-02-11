@@ -46,7 +46,10 @@ class StrategiesDAO:
         await self.session.delete(strategy)
 
     async def update_strategy_model(
-        self, strategy_id: int, name: str, description: str,
+        self,
+        strategy_id: int,
+        name: str,
+        description: str,
     ) -> StrategyModel:
         strategy = await self.session.get(StrategyModel, strategy_id)
         if not strategy:

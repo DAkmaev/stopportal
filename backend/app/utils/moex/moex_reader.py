@@ -9,7 +9,10 @@ from pandas import DataFrame
 
 class MoexReader:
     def get_company_history(  # noqa: WPS210
-        self, start: datetime, tiker: str, add_current: bool = True,
+        self,
+        start: datetime,
+        tiker: str,
+        add_current: bool = True,
     ) -> DataFrame:
 
         columns = ("OPEN", "HIGH", "LOW", "TRADEDATE", "CLOSE", "VOLUME", "VALUE")
@@ -52,13 +55,23 @@ class MoexReader:
     ) -> dict:
 
         return apimoex.get_board_history(
-            session, security=tiker, start=str(start), columns=columns,
+            session,
+            security=tiker,
+            start=str(start),
+            columns=columns,
         )
 
     def _fetch_board_candles(
-        self, session: requests.Session(), tiker: str, start: datetime,
+        self,
+        session: requests.Session(),
+        tiker: str,
+        start: datetime,
     ) -> list:
 
         return apimoex.get_board_candles(
-            session, security=tiker, interval=10, start=str(start), columns=None,
+            session,
+            security=tiker,
+            interval=10,
+            start=str(start),
+            columns=None,
         )

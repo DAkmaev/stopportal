@@ -48,7 +48,8 @@ class TAService:
         # briefcase_dict = {briefcase.company.id: briefcase for briefcase in briefcase_items}
 
         decisions = await self.ta_calculator.get_companies_ta_decisions(
-            companies, period,
+            companies,
+            period,
         )
 
         for per_desisions in decisions:
@@ -59,7 +60,10 @@ class TAService:
                 #     decision.decision = StochDecisionEnum.RELAX
 
                 await self._update_stoch(decision.company, per_des, decision)
-                result.setdefault(per_des, {}).setdefault(decision.decision.name, []).append(
+                result.setdefault(per_des, {}).setdefault(
+                    decision.decision.name,
+                    [],
+                ).append(
                     decision,
                 )
 
@@ -68,12 +72,16 @@ class TAService:
                 send_tasks = [
                     send_tg_message(
                         self._fill_messages(
-                            "продавать", result[per].setdefault("SELL", []), per,
+                            "продавать",
+                            result[per].setdefault("SELL", []),
+                            per,
                         ),
                     ),
                     send_tg_message(
                         self._fill_messages(
-                            "покупать", result[per].setdefault("BUY", []), per,
+                            "покупать",
+                            result[per].setdefault("BUY", []),
+                            per,
                         ),
                     ),
                 ]
@@ -81,7 +89,9 @@ class TAService:
                     send_tasks.append(
                         send_tg_message(
                             self._fill_messages(
-                                "тест", result[per].setdefault("RELAX", []), per,
+                                "тест",
+                                result[per].setdefault("RELAX", []),
+                                per,
                             ),
                         ),
                     )
@@ -91,7 +101,10 @@ class TAService:
         return result
 
     async def generate_ta_decision(  # noqa: WPS210
-        self, tiker: str, period: str = "All", send_messages: bool = False,
+        self,
+        tiker: str,
+        period: str = "All",
+        send_messages: bool = False,
     ) -> TADecisionDTO:
         company = await self.company_dao.get_company_model_by_tiker(tiker=tiker)
         decision_model = self.ta_calculator.get_company_ta_decisions(company, period)
@@ -189,11 +202,15 @@ class TAService:
         return {"status": "SUCCESS", "file_name": file_name, "path": current_directory}
 
     async def _update_stoch(
-        self, company: CompanyModel, period: str, decision: TADecisionDTO,
+        self,
+        company: CompanyModel,
+        period: str,
+        decision: TADecisionDTO,
     ):
         exist_ta_decision = (
             await self.stoch_dao.get_ta_decision_model_by_company_period(
-                company_id=company.id, period=period,
+                company_id=company.id,
+                period=period,
             )
         )
         return await self.stoch_dao.update_or_create_ta_decision_model(
@@ -214,7 +231,9 @@ class TAService:
         for dec in companies:
             tiker = dec.company.tiker
             price = round(dec.last_price, 2)
-            name = f"[{tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={tiker})"
+            name = (
+                f"[{tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={tiker})"
+            )
             price_str = f" - цена: {price}"
 
             # Сейчас не возвращается stop
