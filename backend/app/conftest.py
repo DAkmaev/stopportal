@@ -1,6 +1,11 @@
 from typing import Any, AsyncGenerator
 
 import pytest
+from app.db.dependencies import get_db_session
+from app.db.utils import create_database, drop_database
+from app.settings import settings
+from app.tests.utils.common import get_superuser_token_headers, get_user_token_headers
+from app.web.application import get_app
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import (
@@ -9,12 +14,6 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-
-from app.db.dependencies import get_db_session
-from app.db.utils import create_database, drop_database
-from app.settings import settings
-from app.web.application import get_app
-from app.tests.utils.common import get_superuser_token_headers, get_user_token_headers
 
 
 @pytest.fixture(scope="session")
@@ -112,12 +111,18 @@ async def client(
 
 
 @pytest.fixture()
-async def superuser_token_headers(client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession) -> dict[str, str]:
-    headers = await get_superuser_token_headers(client, fastapi_app, dbsession)
-    return headers
+async def superuser_token_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+) -> dict[str, str]:
+    return await get_superuser_token_headers(client, fastapi_app, dbsession)
 
 
 @pytest.fixture()
-async def user_token_headers(client: AsyncClient, fastapi_app: FastAPI, dbsession: AsyncSession) -> dict[str, str]:
-    headers = await get_user_token_headers(client, fastapi_app, dbsession)
-    return headers
+async def user_token_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+) -> dict[str, str]:
+    return await get_user_token_headers(client, fastapi_app, dbsession)

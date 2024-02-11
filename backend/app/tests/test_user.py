@@ -1,13 +1,16 @@
 import pytest
+from app.db.dao.user import UserDAO
+from app.db.models.user import UserModel
+from app.tests.utils.common import (
+    create_test_user,
+    get_headers,
+    random_email,
+    random_lower_string,
+)
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.db.dao.user import UserDAO
-from app.db.models.user import UserModel
-from app.tests.utils.common import (random_lower_string, create_test_user,
-                                    get_headers, random_email)
 
 
 @pytest.mark.anyio
@@ -32,8 +35,8 @@ async def test_get_user_models(
 
     assert response.status_code == status.HTTP_200_OK
     assert len(users) == len(names)
-    assert all(user['name'] in names for user in users)
-    assert all(user['email'] in emails for user in users)
+    assert all(user["name"] in names for user in users)
+    assert all(user["email"] in emails for user in users)
 
 
 @pytest.mark.anyio
@@ -49,7 +52,7 @@ async def test_create_user_model(
         "email": "test@example.com",
         "password": "testpassword",
         "is_superuser": False,
-        "is_active": True
+        "is_active": True,
     }
     response = await client.post(url, json=new_user_data)
 
@@ -84,7 +87,7 @@ async def test_get_user_me(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str]
+    user_token_headers: dict[str, str],
 ) -> None:
     name = random_lower_string()
     password = random_lower_string()

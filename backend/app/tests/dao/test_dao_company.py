@@ -1,9 +1,9 @@
 import pytest
-from fastapi import FastAPI, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
 from app.db.dao.strategies import StrategiesDAO
+from fastapi import FastAPI, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.anyio
@@ -22,7 +22,7 @@ async def test_add_company_model(
     assert existing_company is None
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     new_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
 
@@ -48,13 +48,12 @@ async def test_update_company_model(
     STRATEGY_NAME2 = "Strategy2"
     STRATEGY_DESCRIPTION2 = "Strategy Description 2"
 
-
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
     strategies_dao = StrategiesDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -74,10 +73,7 @@ async def test_update_company_model(
     # Update the company
     updated_fields = {
         "name": NEW_NAME,
-        "strategies": [
-            {"id": strategies[0].id},
-            {"id": strategies[1].id}
-        ]
+        "strategies": [{"id": strategies[0].id}, {"id": strategies[1].id}],
     }
     await company_dao.update_company_model(company.id, updated_fields, partial=True)
 
@@ -110,6 +106,7 @@ async def test_update_company_model_not_found(
 
     assert exc_info.value.status_code == 404
 
+
 @pytest.mark.anyio
 async def test_delete_company_model(
     fastapi_app: FastAPI,
@@ -121,7 +118,7 @@ async def test_delete_company_model(
     company_dao = CompanyDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -149,8 +146,12 @@ async def test_get_all_companies(
     assert len(all_companies) == 0  # Assuming there are no companies at the beginning
 
     # Create some test companies
-    await company_dao.create_company_model(tiker="TEST1", name="Company1", type="MOEX")
-    await company_dao.create_company_model(tiker="TEST2", name="Company2", type="MOEX")
+    await company_dao.create_company_model(
+        tiker="TEST1", name="Company1", company_type="MOEX"
+    )
+    await company_dao.create_company_model(
+        tiker="TEST2", name="Company2", company_type="MOEX"
+    )
 
     # Get all companies again
     all_companies = await company_dao.get_all_companies(limit=10, offset=0)
@@ -173,7 +174,7 @@ async def test_get_company_model(
     company_dao = CompanyDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -181,7 +182,6 @@ async def test_get_company_model(
 
     # Clean up - delete the test company
     await company_dao.delete_company_model(company.id)
-
 
 
 @pytest.mark.anyio
@@ -192,8 +192,12 @@ async def test_filter(
     company_dao = CompanyDAO(dbsession)
 
     # Create some test companies
-    await company_dao.create_company_model(tiker="TEST1", name="Company1", type="MOEX")
-    await company_dao.create_company_model(tiker="TEST2", name="Company2", type="MOEX")
+    await company_dao.create_company_model(
+        tiker="TEST1", name="Company1", company_type="MOEX"
+    )
+    await company_dao.create_company_model(
+        tiker="TEST2", name="Company2", company_type="MOEX"
+    )
 
     # Filter companies by tiker
     filtered_companies = await company_dao.filter(tiker="TEST1")

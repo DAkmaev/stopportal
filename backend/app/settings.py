@@ -1,5 +1,4 @@
 import enum
-import os
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -48,7 +47,7 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60 * 24 * 8
     api_v1_str: str = "/api"
     algorithm: str = "HS256"
-    secret_key: str = "sdsdsdw34fdfwr2efdfwe2" #secrets.token_urlsafe(32)
+    secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
 
     first_superuser: str = "admin"
     first_superuser_password: str = "changethis"
@@ -60,16 +59,17 @@ class Settings(BaseSettings):
 
         :return: database URL.
         """
-        if self.environment in ["dev", "pytest"]:
+        if self.environment not in {"prod", "test"}:
             return URL.build(
                 scheme="sqlite+aiosqlite",
                 path=f"///{self.db_file}",
             )
 
-        return URL.build(
-            scheme="postgresql+psycopg",
-            path=f"//{self.postgres_user}:{self.postgres_password}@{self.postgres_server}/{self.postgres_db}",
-        )
+        url_scheme = "postgresql+psycopg"
+        url_account = f"{self.postgres_user}:{self.postgres_password}"
+        url_db = f"{self.postgres_server}/{self.postgres_db}"
+        url_path = f"//{url_account}@{url_db}"
+        return URL.build(scheme=url_scheme, path=url_path)
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -1,7 +1,7 @@
 import pytest
+from app.db.dao.strategies import StrategiesDAO
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dao.strategies import StrategiesDAO
 
 
 @pytest.mark.anyio
@@ -37,8 +37,7 @@ async def test_get_strategy_model(
 
     strategies_dao = StrategiesDAO(dbsession)
     created_strategy = await strategies_dao.create_strategy_model(
-        name=strategy_name,
-        description=strategy_description
+        name=strategy_name, description=strategy_description
     )
 
     # Retrieve the created strategy
@@ -46,7 +45,9 @@ async def test_get_strategy_model(
     assert strategy is not None
 
     # Получаем стратегию по идентификатору
-    retrieved_strategy = await strategies_dao.get_strategy_model(id=created_strategy.id)
+    retrieved_strategy = await strategies_dao.get_strategy_model(
+        strategy_id=created_strategy.id
+    )
 
     # Проверяем, что стратегия была успешно получена и имеет правильные параметры
     assert retrieved_strategy is not None
@@ -55,6 +56,7 @@ async def test_get_strategy_model(
     assert retrieved_strategy.description == strategy_description
 
     await strategies_dao.delete_strategy_model(created_strategy.id)
+
 
 @pytest.mark.anyio
 async def test_get_strategies_model(
@@ -67,8 +69,7 @@ async def test_get_strategies_model(
 
     strategies_dao = StrategiesDAO(dbsession)
     await strategies_dao.create_strategy_model(
-        name=strategy_name,
-        description=strategy_description
+        name=strategy_name, description=strategy_description
     )
 
     # Получаем стратегию по идентификатору
@@ -81,6 +82,7 @@ async def test_get_strategies_model(
     assert retrieved_strategies[0].description == strategy_description
 
     await strategies_dao.delete_strategy_model(retrieved_strategies[0].id)
+
 
 @pytest.mark.anyio
 async def test_get_strategy_model_by_name(
@@ -149,7 +151,9 @@ async def test_delete_strategy_model(
     strategies_dao = StrategiesDAO(dbsession)
 
     # Create a new strategy
-    strategy = await strategies_dao.create_strategy_model(name=NAME, description=DESCRIPTION)
+    strategy = await strategies_dao.create_strategy_model(
+        name=NAME, description=DESCRIPTION
+    )
 
     # Retrieve the created strategy
     strategy = await strategies_dao.get_strategy_model_by_name(NAME)
@@ -176,8 +180,7 @@ async def test_update_strategy_model(
 
     strategies_dao = StrategiesDAO(dbsession)
     await strategies_dao.create_strategy_model(
-        name=original_name,
-        description=original_description
+        name=original_name, description=original_description
     )
 
     # Retrieve the created strategy
@@ -188,7 +191,7 @@ async def test_update_strategy_model(
     updated_strategy = await strategies_dao.update_strategy_model(
         strategy_id=original_strategy.id,
         name=updated_name,
-        description=updated_description
+        description=updated_description,
     )
 
     # Проверяем, что стратегия успешно отредактирована

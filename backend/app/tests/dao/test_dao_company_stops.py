@@ -1,9 +1,8 @@
 import pytest
-from fastapi import FastAPI, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
+from fastapi import FastAPI, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.mark.anyio
@@ -20,7 +19,7 @@ async def test_add_stop_model(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -53,7 +52,7 @@ async def test_delete_company_stop_model(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -92,7 +91,7 @@ async def test_get_company_stop_model(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -130,7 +129,7 @@ async def test_update_company_stop_model(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -174,7 +173,7 @@ async def test_get_company_stops_by_id(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -208,7 +207,7 @@ async def test_add_stop_model_prevent_duplicate(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -246,7 +245,7 @@ async def test_update_stop_model_prevent_duplicate(
     company_stops_dao = StopsDAO(dbsession)
 
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -261,12 +260,13 @@ async def test_update_stop_model_prevent_duplicate(
     stop_models = company.stops
     assert len(stop_models) == 2
 
-    # Attempt to update the stop model to a period that already exists for the same company
+    # Attempt to update the stop model to a period that already exists for the
+    # same company
     updated_stop_fields = {
         "company_id": company.id,
         "value": 200.0,
         "id": stop_models[0].id,
-        "period": stop_models[1].period
+        "period": stop_models[1].period,
     }
     with pytest.raises(HTTPException) as exc_info:
         await company_stops_dao.update_stop_model(updated_stop_fields)
@@ -276,4 +276,3 @@ async def test_update_stop_model_prevent_duplicate(
 
     # Clean up - delete the test company
     await company_dao.delete_company_model(company.id)
-

@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, field_validator
 
 from app.db.models.briefcase import CurrencyEnum, RegistryOperationEnum
+from pydantic import BaseModel
 
 
 class BriefcaseInputDTO(BaseModel):

@@ -1,12 +1,11 @@
 import pytest
+from app.db.dao.companies import CompanyDAO
+from app.db.dao.stops import StopsDAO
+from app.tests.utils.common import create_test_company
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.db.dao.companies import CompanyDAO
-from app.db.dao.stops import StopsDAO
-from app.tests.utils.common import create_test_company
 
 
 @pytest.mark.anyio
@@ -21,11 +20,7 @@ async def test_stop_adding(
     url = fastapi_app.url_path_for("add_stop_model")
     response = await client.post(
         url,
-        json={
-            "company_id": company.id,
-            "period": "D",
-            "value": 100
-        },
+        json={"company_id": company.id, "period": "D", "value": 100},
     )
     assert response.status_code == status.HTTP_200_OK
 
@@ -33,7 +28,7 @@ async def test_stop_adding(
     company_upd = await dao.get_company_model(company.id)
     assert len(company_upd.stops) == 1
     assert company_upd.stops[0].value == 100
-    assert company_upd.stops[0].period == 'D'
+    assert company_upd.stops[0].period == "D"
 
 
 @pytest.mark.anyio
@@ -72,7 +67,7 @@ async def test_stop_updating(
         "id": stop.id,
         "company_id": company.id,
         "period": updated_period,
-        "value": updated_value
+        "value": updated_value,
     }
 
     # Отправляем PUT-запрос для обновления стопа
@@ -88,4 +83,3 @@ async def test_stop_updating(
     assert updated_stop is not None
     assert updated_stop.period == updated_period
     assert updated_stop.value == updated_value
-

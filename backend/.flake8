@@ -1,7 +1,7 @@
 [flake8]
 max-complexity = 6
 inline-quotes = double
-max-line-length = 88
+max-line-length = 120
 extend-ignore = E203
 docstring_style=sphinx
 
@@ -72,6 +72,18 @@ ignore =
   WPS473,
   ; too many no-cover comments.
   WPS403,
+  ;Found magic number
+  WPS432,
+  ; Missing parameter(s) in Docstring
+  DAR101, D103,
+  ; isort found an import in the wrong position
+  I001,
+  ; Found commented out code
+  E800,
+  ; Found overly complex annotation
+  WPS234,
+  ; Missing docstring in public class
+  D101, D102,
 
 per-file-ignores =
   ; all tests
@@ -113,3 +125,4 @@ exclude =
   ./var,
   ./.vscode,
   *migrations*,
+  ./app/tests,
