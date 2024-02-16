@@ -27,7 +27,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend/
-          platforms: linux/amd64,linux/arm64
           file: ./backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-backend:latest
@@ -52,7 +51,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend/
-          platforms: linux/amd64,linux/arm64
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-frontend:latest
@@ -77,7 +75,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./infra/nginx/
-          platforms: linux/amd64,linux/arm64
           file: ./infra/nginx/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-gateway:latest
