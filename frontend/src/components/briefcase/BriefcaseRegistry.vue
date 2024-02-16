@@ -263,7 +263,7 @@
 
 <script>
 import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
-Aimport { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 // todo: переделать когда будет реализовано несколько портфелей
 const BRIEFCASE_ID = 1
