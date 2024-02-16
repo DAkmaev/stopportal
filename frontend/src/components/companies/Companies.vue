@@ -98,6 +98,7 @@ import {
 import PriceSynchronizer from '@/utils/PriceSynchronizer'
 import CompanyDialog from '@/components/companies/CompanyDialog.vue'
 import CompanyStops from '@/components/companies/CompanyStops.vue'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'Companies',
@@ -180,6 +181,7 @@ export default {
     this.fetchList()
   },
   methods: {
+    ...mapGetters(['token']),
     async fetchList() {
       // getCategoriesSimple('otrasli').then(otrasli => {
       //   this.otrasli = otrasli
@@ -190,11 +192,11 @@ export default {
       ])
     },
     async fetchCompanyList() {
-      const companies = await getData(endpoints.COMPANIES, { limit: 1000, offset: 0 })
+      const companies = await getData(endpoints.COMPANIES, { limit: 1000, offset: 0 }, this.token)
       this.$set(this, 'list', companies)
     },
     async fetchStochDataList() {
-      const stochs = await getData(endpoints.TA)
+      const stochs = await getData(endpoints.TA, null, this.token)
       this.stochs = stochs.reduce((acc, curr) => {
         if (!acc[curr.company.id]) {
           acc[curr.company.id] = {}
@@ -230,7 +232,7 @@ export default {
     },
     handleStoch() {
       this.checkingStoch = true
-      postData(endpoints.TA, {}, true, { period: 'ALL' }).then((results) => {
+      postData(endpoints.TA, {}, { period: 'ALL' }, this.token).then((results) => {
         this.checkingStoch = false
         this.fetchList()
         console.log(results)

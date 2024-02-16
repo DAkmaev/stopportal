@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import List, Type
 
-from datetime import datetime
 from app.db.dependencies import get_db_session
 from app.db.models.cron_job_run import CronJobRunModel
 from fastapi import Depends, HTTPException

@@ -53,6 +53,7 @@
 
 <script>
 import { postData, putData, deleteData, endpoints, getData } from '@/api/invmos-back'
+import { mapGetters } from 'vuex'
 export default {
   name: 'Strategies',
   props: {
@@ -110,8 +111,9 @@ export default {
     this.fetchList()
   },
   methods: {
+    ...mapGetters(['token']),
     fetchList() {
-      getData(endpoints.STRATEGIES).then(data => {
+      getData(endpoints.STRATEGIES, null, this.token).then(data => {
         this.list = data
       })
     },
@@ -125,7 +127,7 @@ export default {
       else this.editItem()
     },
     addItem() {
-      postData(endpoints.STRATEGIES, this.temp, false, { type: this.type })
+      postData(endpoints.STRATEGIES, this.temp, { type: this.type }, this.token)
         .then(() => {
           this.$nextTick(() => {
             this.fetchList()
@@ -152,7 +154,7 @@ export default {
       this.dialog = true
     },
     editItem() {
-      putData(endpoints.STRATEGIES + this.temp.id, this.temp, false)
+      putData(endpoints.STRATEGIES + this.temp.id, this.temp, this.token)
         .then(() => {
           this.$nextTick(() => {
             this.fetchList()
@@ -165,7 +167,7 @@ export default {
     },
     handleDelete(id) {
       confirm('Вы точно хотите удалить?') &&
-      deleteData(endpoints.STRATEGIES + id)
+      deleteData(endpoints.STRATEGIES + id, this.token)
         .then(() => {
           this.active = []
           this.selected = []

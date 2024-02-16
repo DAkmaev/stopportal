@@ -263,6 +263,7 @@
 
 <script>
 import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
+Aimport { mapGetters } from 'vuex'
 
 // todo: переделать когда будет реализовано несколько портфелей
 const BRIEFCASE_ID = 1
@@ -392,6 +393,7 @@ export default {
     this.fetchList()
   },
   methods: {
+    ...mapGetters(['token']),
     async fetchList() {
       const [data, strategies, companies] = await Promise.all([
         getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, {
@@ -399,9 +401,9 @@ export default {
           dateTo: this.dateTo
           // limit: this.itemsPerPage,
           // offset: (this.page - 1) * this.itemsPerPage
-        }),
-        getStrategies(),
-        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
+        }, this.token),
+        getStrategies(this.token),
+        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' }, this.token)
       ])
       this.strategies = strategies
       this.companies = companies
@@ -416,13 +418,13 @@ export default {
     },
     saveCompanyBriefcase(item) {
       if (item.count) {
-        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, false)
+        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, null, this.token)
           .then(() => {
             this.fetchList()
             console.log('Updated')
           })
       } else {
-        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`).then(() => {
+        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, null, this.token).then(() => {
           this.fetchList()
           console.log('Deleted')
         })
@@ -445,7 +447,7 @@ export default {
       temp.count = temp.count ? temp.count : null
       temp.created_date = this.toLocalISOString(temp.created_date)
 
-      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, temp, false)
+      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, temp, null, this.token)
         .then(() => {
           this.fetchList()
           this.dialog = false
@@ -468,7 +470,7 @@ export default {
       data.strategy = data.strategy && data.strategy.id ? data.strategy : null
       data.created_date = this.toLocalISOString(data.created_date)
 
-      putData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`, data, false)
+      putData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`, data, null, this.token)
         .then(() => {
           this.$nextTick(() => {
             this.fetchList()
@@ -482,7 +484,7 @@ export default {
     },
     handleDelete(id) {
       confirm('Вы точно хотите удалить?') &&
-      deleteData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`)
+      deleteData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`, null, this.token)
         .then(() => {
           this.active = []
           this.selected = []

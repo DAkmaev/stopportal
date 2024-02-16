@@ -9,6 +9,11 @@ from fastapi import APIRouter, Depends
 router = APIRouter()
 
 
+@router.get("/me", response_model=UserModelDTO)
+async def read_user_me(current_user: CurrentUser) -> UserModelDTO:
+    return current_user
+
+
 @router.get("/{user_id}", response_model=UserModelDTO)
 async def get_user_model(
     user_id: int,
@@ -38,8 +43,3 @@ async def create_user_model(
         is_superuser=new_user_object.is_superuser,
         is_active=new_user_object.is_active,
     )
-
-
-@router.post("/me", response_model=UserModelDTO)
-async def read_user_me(current_user: CurrentUser) -> UserModelDTO:
-    return current_user

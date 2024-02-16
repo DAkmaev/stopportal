@@ -185,6 +185,26 @@ async def get_user_token_headers(
     )
 
 
+async def get_inactive_user_token_headers(
+    client: AsyncClient,
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+    name: str = None,
+    email: str = None,
+    password: str = None,
+) -> dict[str, str]:
+    return await _get_test_user_headers(
+        client,
+        fastapi_app,
+        dbsession,
+        is_superuser=False,
+        is_active=False,
+        name=name,
+        email=email,
+        password=password,
+    )
+
+
 async def _get_test_user_headers(
     client: AsyncClient,
     fastapi_app: FastAPI,
@@ -193,6 +213,7 @@ async def _get_test_user_headers(
     name: str = None,
     email: str = None,
     password: str = None,
+    is_active: bool = True,
 ) -> dict[str, str]:
     name = (
         settings.first_superuser if is_superuser and not name else random_lower_string()
@@ -209,6 +230,7 @@ async def _get_test_user_headers(
         name=name,
         email=email,
         password=password,
+        is_active=is_active,
     )
 
     return await get_headers(client, fastapi_app, name, password)

@@ -95,7 +95,7 @@ async def test_get_user_me(
     headers = await get_headers(client, fastapi_app, name, password)
 
     url = fastapi_app.url_path_for("read_user_me")
-    response = await client.post(url, headers=headers)
+    response = await client.get(url, headers=headers)
 
     result = response.json()
     assert response.status_code == 200
