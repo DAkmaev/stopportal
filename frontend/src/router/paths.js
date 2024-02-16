@@ -1,15 +1,50 @@
 export default [
   {
     path: '/',
-    name: 'Home',
-    redirect: {
-      name: 'companies'
-    }
-  },
-  {
-    path: '/companies',
-    name: 'companies',
-    component: () => import(`@/components/companies/Companies`)
+    name: 'root',
+    component: () => import(`@/views/Start`),
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import(`@/views/Login`)
+      },
+      {
+        path: 'home',
+        name: 'home',
+        component: () => import(`@/views/Home`),
+        children: [
+          {
+            path: 'companies',
+            name: 'companies',
+            component: () => import(`@/components/companies/Companies`)
+          },
+          {
+            path: '/catalogs/strategies',
+            name: 'strategies',
+            component: () => import(`@/components/catalogs/Strategies`),
+            props: { type: 'strategies' }
+          },
+          {
+            path: '/briefcase',
+            name: 'briefcaseRoot',
+            component: () => import(`@/components/briefcase/BriefcaseRoot`),
+            children: [
+              {
+                path: 'registry',
+                name: 'briefcaseRegistry',
+                component: () => import(`@/components/briefcase/BriefcaseRegistry`)
+              },
+              {
+                path: 'summary',
+                name: 'briefcaseSummary',
+                component: () => import(`@/components/briefcase/BriefcaseSummary`)
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     path: '/prices',
@@ -44,12 +79,8 @@ export default [
     name: 'catalogOtrasli',
     component: () => import(`@/components/catalogs/CatalogSimple`),
     props: { type: 'otrasli' }
-  }, {
-    path: '/catalogs/strategies',
-    name: 'strategies',
-    component: () => import(`@/components/catalogs/Strategies`),
-    props: { type: 'strategies' }
-  }, {
+  },
+  {
     path: '/catalogs/coefficients',
     name: 'coefficients',
     component: () => import(`@/components/catalogs/Coefficients`),
@@ -101,23 +132,6 @@ export default [
         path: 'briefcase',
         name: 'ratingBriefcase',
         component: () => import(`@/components/ratings/RatingBriefcaseDividends`)
-      }
-    ]
-  },
-  {
-    path: '/briefcase',
-    name: 'briefcaseRoot',
-    component: () => import(`@/components/briefcase/BriefcaseRoot`),
-    children: [
-      {
-        path: 'registry',
-        name: 'briefcaseRegistry',
-        component: () => import(`@/components/briefcase/BriefcaseRegistry`)
-      },
-      {
-        path: 'summary',
-        name: 'briefcaseSummary',
-        component: () => import(`@/components/briefcase/BriefcaseSummary`)
       }
     ]
   },

@@ -1,0 +1,155 @@
+[
+  {
+    "pid": 1,
+    "hostname": "pfposago-pfposago-4166-64f7ddc9f-tplmq",
+    "name": "request.admin-integration-api",
+    "type": "error",
+    "level": "ERROR",
+    "event": "error",
+    "info": {
+      "url": "https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId",
+      "query": {},
+      "payload": {
+        "method": "getRoutesByDomainAndAppId",
+        "params": {
+          "filters": {
+            "domain": "tinkoff.ru",
+            "appIds": [
+              "platform"
+            ],
+            "properties": {
+              "bundle": []
+            }
+          }
+        },
+        "id": "null",
+        "jsonrpc": "2.0"
+      }
+    },
+    "error": {
+      "message": "request to https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId failed, reason: unable to get local issuer certificate",
+      "type": "system",
+      "errno": "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+      "code": "ERR_HTTP_ERROR",
+      "errorId": "CONFIG_REQUEST_ERROR",
+      "stack": "FetchError: request to https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId failed, reason: unable to get local issuer certificate\n    at ClientRequest.<anonymous> (/app/server.js:7:3886635)\n    at ClientRequest.emit (node:events:529:35)\n    at ClientRequest.emit (node:domain:489:12)\n    at TLSSocket.socketErrorListener (node:_http_client:501:9)\n    at TLSSocket.emit (node:events:517:28)\n    at TLSSocket.emit (node:domain:489:12)\n    at emitErrorNT (node:internal/streams/destroy:151:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:116:3)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)"
+    },
+    "meta": {
+      "log": {
+        "start": 1707897651742,
+        "end": 1707897651751,
+        "duration": 9
+      },
+      "cache": {
+        "forced": false,
+        "enabled": false,
+        "memoryEnabled": false,
+        "memoryForce": false,
+        "deduplicateEnabled": false,
+        "deduplicateForce": false
+      },
+      "validate": {
+        "errorValidated": false
+      }
+    },
+    "message": [
+      null
+    ],
+    "levelNumber": 10,
+    "@timestamp": "2024-02-14T08:00:51.751Z",
+    "env": "dynamic",
+    "system": "pfposago",
+    "inst": "pfposago-pfposago-4166-64f7ddc9f-tplmq",
+    "app": "pfposago",
+    "notIndexedError": "TypeError: Cannot set properties of undefined (setting 'appIds')\n    at walkObject (/app/server.js:7:3460920)\n    at walkObject (/app/server.js:7:3461227)\n    at walkObject (/app/server.js:7:3461227)\n    at walkObject (/app/server.js:7:3461227)\n    at walkObject (/app/server.js:7:3461227)\n    at Array.<anonymous> (/app/server.js:7:3461479)\n    at SageReporter._format (/app/server.js:1:901036)\n    at SageReporter.log (/app/server.js:7:3461831)\n    at Logger.log (/app/server.js:1:823623)\n    at <computed> [as error] (/app/server.js:1:819440)"
+  },
+  {
+    "pid": 1,
+    "hostname": "pfposago-pfposago-4166-64f7ddc9f-tplmq",
+    "name": "request.admin-integration-api",
+    "type": "error",
+    "level": "ERROR",
+    "event": "error",
+    "info": {
+      "url": "https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId",
+      "query": {},
+      "payload": {
+        "method": "getRoutesByDomainAndAppId",
+        "params": {
+          "filters": {
+            "domain": "tinkoff.ru",
+            "appIds": [
+              "pfposago",
+              "mpfposago"
+            ]
+          }
+        },
+        "id": "null",
+        "jsonrpc": "2.0"
+      }
+    },
+    "error": {
+      "message": "request to https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId failed, reason: unable to get local issuer certificate",
+      "type": "system",
+      "errno": "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+      "code": "ERR_HTTP_ERROR",
+      "errorId": "CONFIG_REQUEST_ERROR",
+      "stack": "FetchError: request to https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId failed, reason: unable to get local issuer certificate\n    at ClientRequest.<anonymous> (/app/server.js:7:3886635)\n    at ClientRequest.emit (node:events:529:35)\n    at ClientRequest.emit (node:domain:489:12)\n    at TLSSocket.socketErrorListener (node:_http_client:501:9)\n    at TLSSocket.emit (node:events:517:28)\n    at TLSSocket.emit (node:domain:489:12)\n    at emitErrorNT (node:internal/streams/destroy:151:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:116:3)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)"
+    },
+    "meta": {
+      "log": {
+        "start": 1707897652148,
+        "end": 1707897652154,
+        "duration": 6
+      },
+      "cache": {
+        "forced": false,
+        "enabled": false,
+        "memoryEnabled": false,
+        "memoryForce": false,
+        "deduplicateEnabled": false,
+        "deduplicateForce": false
+      },
+      "validate": {
+        "errorValidated": false
+      }
+    },
+    "message": [
+      null
+    ],
+    "levelNumber": 10,
+    "@timestamp": "2024-02-14T08:00:52.155Z",
+    "env": "dynamic",
+    "system": "pfposago",
+    "inst": "pfposago-pfposago-4166-64f7ddc9f-tplmq",
+    "app": "pfposago",
+    "notIndexedError": "TypeError: Cannot set properties of undefined (setting 'appIds')\n    at walkObject (/app/server.js:7:3460920)\n    at walkObject (/app/server.js:7:3461227)\n    at walkObject (/app/server.js:7:3461227)\n    at walkObject (/app/server.js:7:3461227)\n    at walkObject (/app/server.js:7:3461227)\n    at Array.<anonymous> (/app/server.js:7:3461479)\n    at SageReporter._format (/app/server.js:1:901036)\n    at SageReporter.log (/app/server.js:7:3461831)\n    at Logger.log (/app/server.js:1:823623)\n    at <computed> [as error] (/app/server.js:1:819440)"
+  },
+  {
+    "pid": 1,
+    "hostname": "pfposago-pfposago-4166-64f7ddc9f-tplmq",
+    "name": "papi.get_/bundleinfo",
+    "type": "error",
+    "level": "ERROR",
+    "error": {
+      "message": "Что-то пошло не так. Мы уже решаем проблему. Попробуйте снова через несколько минут.",
+      "type": "system",
+      "errno": "UNABLE_TO_GET_ISSUER_CERT_LOCALLY",
+      "code": "ERR_HTTP_ERROR",
+      "errorId": "CONFIG_REQUEST_ERROR",
+      "url": "https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId",
+      "originalMessage": "request to https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId failed, reason: unable to get local issuer certificate",
+      "stack": "FetchError: request to https://adm-pfp1.dev-tcsgroup.io/pages/api/integration/v1/getRoutesByDomainAndAppId failed, reason: unable to get local issuer certificate\n    at ClientRequest.<anonymous> (/app/server.js:7:3886635)\n    at ClientRequest.emit (node:events:529:35)\n    at ClientRequest.emit (node:domain:489:12)\n    at TLSSocket.socketErrorListener (node:_http_client:501:9)\n    at TLSSocket.emit (node:events:517:28)\n    at TLSSocket.emit (node:domain:489:12)\n    at emitErrorNT (node:internal/streams/destroy:151:8)\n    at emitErrorCloseNT (node:internal/streams/destroy:116:3)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)"
+    },
+    "message": [
+      "Что-то пошло не так. Мы уже решаем проблему. Попробуйте снова через несколько минут."
+    ],
+    "levelNumber": 10,
+    "@timestamp": "2024-02-14T08:00:52.155Z",
+    "env": "dynamic",
+    "system": "pfposago",
+    "inst": "pfposago-pfposago-4166-64f7ddc9f-tplmq",
+    "app": "pfposago",
+    "notIndexed": "{\"error.__meta.log.start\":1707897652148,\"error.__meta.log.end\":1707897652154,\"error.__meta.log.duration\":6,\"error.__meta.cache.forced\":false,\"error.__meta.cache.enabled\":false,\"error.__meta.cache.memoryEnabled\":false,\"error.__meta.cache.memoryForce\":false,\"error.__meta.cache.deduplicateEnabled\":false,\"error.__meta.cache.deduplicateForce\":false,\"error.__meta.validate.errorValidated\":false}"
+  }
+]

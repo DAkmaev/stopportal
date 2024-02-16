@@ -39,10 +39,10 @@ async def test_use_access_token(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    superuser_token_headers: dict[str, str],
+    user_token_headers: dict[str, str],
 ) -> None:
     url = fastapi_app.url_path_for("test_token")
-    response = await client.post(url, headers=superuser_token_headers)
+    response = await client.post(url, headers=user_token_headers)
 
     result = response.json()
     assert response.status_code == 200
@@ -54,11 +54,46 @@ async def test_use_access_token_no_access(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
 ) -> None:
     url = fastapi_app.url_path_for("test_token")
+    response = await client.post(url)
+
+    result = response.json()
+    assert response.status_code == 401
+    assert result["detail"] == "Not authenticated"
+
+
+# @pytest.mark.anyio
+# async def test_use_inactive_token_headers(
+#     fastapi_app: FastAPI,
+#     client: AsyncClient,
+#     dbsession: AsyncSession,
+#     user_inactive_token_headers: dict[str, str],
+# ) -> None:
+#     url = fastapi_app.url_path_for("test_token")
+#     response = await client.post(url, headers=user_inactive_token_headers)
+#
+#     result = response.json()
+#     assert response.status_code == 401
+#     assert result["detail"] == "Not authenticated"
+
+
+@pytest.mark.anyio
+async def test_use_admin_access_token(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+    user_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+) -> None:
+    url = fastapi_app.url_path_for("test_admin_token")
     response = await client.post(url, headers=user_token_headers)
 
     result = response.json()
     assert response.status_code == 403
-    assert result["detail"] == "Not enough permissions"
+    assert result["detail"] == "The user doesn't have enough privileges"
+
+    response_admin = await client.post(url, headers=superuser_token_headers)
+    result = response_admin.json()
+    assert response_admin.status_code == 200
+    assert result["name"] == "admin"

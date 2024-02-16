@@ -261,6 +261,7 @@
 
 <script>
 import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
+import { mapGetters } from 'vuex'
 
 // todo: переделать когда будет реализовано несколько портфелей
 const BRIEFCASE_ID = 1
@@ -334,11 +335,12 @@ export default {
     this.fetchList()
   },
   methods: {
+    ...mapGetters(['token']),
     async fetchList() {
       const [data, strategies, companies] = await Promise.all([
-        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, { dateFrom: this.dateFrom, dateTo: this.dateTo }),
-        getStrategies(),
-        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
+        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, { dateFrom: this.dateFrom, dateTo: this.dateTo }, this.token),
+        getStrategies(this.token),
+        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' }, this.token)
       ])
       this.strategies = strategies
       this.companies = companies
@@ -378,13 +380,13 @@ export default {
     },
     saveCompanyBriefcase(item) {
       if (item.count) {
-        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, false)
+        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, this.token)
           .then(() => {
             this.fetchList()
             console.log('Updated')
           })
       } else {
-        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`).then(() => {
+        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, this.token).then(() => {
           this.fetchList()
           console.log('Deleted')
         })
@@ -400,7 +402,7 @@ export default {
         temp.strategy = null
       }
 
-      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, temp, false)
+      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, temp, this.token)
         .then(() => {
           this.dialog = false
           this.fetchList()

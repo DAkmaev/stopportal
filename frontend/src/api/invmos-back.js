@@ -10,15 +10,17 @@ function fillUrl(endpoint, params) {
   return url
 }
 
-async function requestWithBody(method, endpoint = '', body = {}, parseResponse = true, params = {}) {
+async function requestWithBody(method, endpoint = '', body = {}, parseResponse = true, params = {}, authToken = null) {
   try {
     const url = fillUrl(endpoint, params)
+    const headers = { 'Content-Type': 'application/json' }
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`
+    }
     const data = await fetch(url, {
       method: method,
       mode: 'cors', // no-cors, *cors, same-origin
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: headers,
       redirect: 'follow', // manual, *follow, error
       body: JSON.stringify(body)
     })
@@ -31,40 +33,67 @@ async function requestWithBody(method, endpoint = '', body = {}, parseResponse =
   }
 }
 
-export async function getData(endpoint = '', params = {}, parseJsonResponse = true) {
+export async function sendFormData(endpoint = '', body = {}, parseResponse = true, params = {}) {
+  const url = fillUrl(endpoint, params)
+  const data = await fetch(url, {
+    method: 'POST',
+    mode: 'cors', // no-cors, *cors, same-origin
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    redirect: 'follow', // manual, *follow, error
+    body: new URLSearchParams(body).toString()
+  })
+  if (!data.ok) {
+    throw new Error(data.statusText)
+  }
+  if (parseResponse) {
+    return await data.json()
+  }
+  return data
+}
+
+export async function getData(endpoint = '', params = {}, authToken = null, parseJsonResponse = true) {
   try {
     const url = fillUrl(endpoint, params)
-    const data = await fetch(url)
+    const headers = { 'Content-Type': 'application/json' }
+    if (authToken) {
+      headers['Authorization'] = `Bearer ${authToken}`
+    }
+    const data = await fetch(url, {
+      method: 'GET',
+      headers: headers
+    })
     return parseJsonResponse ? await data.json() : await data.text()
   } catch (e) {
     console.error(e.message)
   }
 }
 
-export async function postData(endpoint = '', body = {}, parseResponse = true, params = {}) {
+export async function postData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
   return requestWithBody('POST', endpoint, body, parseResponse, params)
 }
 
-export async function putData(endpoint = '', body = {}, parseResponse = true, params = {}) {
+export async function putData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
   return requestWithBody('PUT', endpoint, body, parseResponse, params)
 }
 
-export async function patchData(endpoint = '', body = {}, parseResponse = true, params = {}) {
+export async function patchData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
   return requestWithBody('PATCH', endpoint, body, parseResponse, params)
 }
 
-export async function deleteData(endpoint = '', params = {}) {
+export async function deleteData(endpoint = '', params = {}, authToken = null) {
   return requestWithBody('DELETE', endpoint, {}, false, params)
 }
 
-export async function getCategoriesSimple(type) {
+export async function getCategoriesSimple(type, authToken = null) {
   return await getData('categories-simple', {
     'type': type
-  })
+  }, authToken)
 }
 
-export async function getStrategies() {
-  return await getData(endpoints.STRATEGIES)
+export async function getStrategies(authToken = null) {
+  return await getData(endpoints.STRATEGIES, {}, authToken)
 }
 
 export const endpoints = Object.freeze({
@@ -99,5 +128,7 @@ export const endpoints = Object.freeze({
   STOPS: 'stops/',
   STRATEGIES: 'strategies/',
   STRATEGIES_MIH: 'strategies/mih',
-  STRATEGIES_MIH_DETAILS: 'strategies/mih/details'
+  STRATEGIES_MIH_DETAILS: 'strategies/mih/details',
+  LOGIN: 'login',
+  ME: 'auth/me'
 })

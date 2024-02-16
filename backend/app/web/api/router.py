@@ -1,20 +1,18 @@
-from fastapi.routing import APIRouter
-from app.web.api import (
+from app.web.api import (  # noqa:WPS235
+    auth,
+    briefcase,
+    company,
+    cron_job_run,
     docs,
     dummy,
     echo,
-    monitoring,
     login,
-    auth,
-)
-from app.web.api import (
-    ta,
-    company,
-    cron_job_run,
-    strategy,
+    monitoring,
     stop,
-    briefcase,
+    strategy,
+    ta,
 )
+from fastapi.routing import APIRouter
 
 api_router = APIRouter()
 api_router.include_router(monitoring.router)

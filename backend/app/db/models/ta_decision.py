@@ -1,8 +1,8 @@
 from app.db.base import Base
+from app.db.models.company import CompanyModel
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import TIMESTAMP, Float, String
-from app.db.models.company import CompanyModel
 
 
 class TADecisionModel(Base):

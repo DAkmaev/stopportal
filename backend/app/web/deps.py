@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.api_v1_str}/login/access-token",
+    tokenUrl=f"{settings.api_v1_str}/login",
 )
 
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
@@ -44,10 +44,13 @@ async def get_current_user(
 CurrentUser = Annotated[UserModel, Depends(get_current_user)]
 
 
-def get_current_active_superuser(current_user: CurrentUser) -> UserModel:
+async def get_current_active_superuser(current_user: CurrentUser) -> UserModel:
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",
         )
     return current_user
+
+
+CurrentAdminUser = Annotated[UserModel, Depends(get_current_active_superuser)]
