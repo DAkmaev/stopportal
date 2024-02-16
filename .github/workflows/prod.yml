@@ -18,6 +18,7 @@ jobs:
         with:
           sparse-checkout: |
             deploy/docker-compose.yml
+            deploy/.env.prod
           sparse-checkout-cone-mode: false
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
@@ -25,7 +26,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "docker-compose.yml"
+          source: "deploy/docker-compose.yml,deploy/.env.prod"
           target: "stopportal/prod"
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
@@ -35,6 +36,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd stopportal/prod
+            cp .env.prod .env
             sudo docker compose -f docker-compose.yml -p prod pull
             sudo docker compose -f docker-compose.yml -p prod down
             sudo docker compose -f docker-compose.yml -p prod up -d
