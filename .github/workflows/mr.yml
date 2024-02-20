@@ -48,9 +48,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd stopportal/test
-            docker compose -f docker-compose.yml -p test pull
-            docker compose -f docker-compose.yml -p test down
-            docker compose -f docker-compose.yml -p test up -d
+            sudo docker compose -f docker-compose.yml -p test pull
+            sudo docker compose -f docker-compose.yml -p test down
+            sudo docker compose -f docker-compose.yml -p test up -d
 
 #    runs-on: ubuntu-latest
 #    steps:
