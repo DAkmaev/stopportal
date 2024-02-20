@@ -101,6 +101,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           source: "deploy/docker-compose.yml,deploy/.env"
           target: "stopportal/test"
+          strip_components: 1
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
