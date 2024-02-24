@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Dict, List
 
@@ -9,8 +8,6 @@ from fastapi import APIRouter, Depends
 from starlette.responses import FileResponse
 
 router = APIRouter()
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @router.post("/")

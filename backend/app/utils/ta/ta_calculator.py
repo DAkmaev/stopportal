@@ -89,10 +89,13 @@ class TACalculator:
         df = self.get_history_data(company)
         results = {}
 
+        logger.info(f'Start getting period decisions for {company.name}')
         for cur_period in ("M", "W", "D"):
             if period in {cur_period, "ALL"}:
                 results[cur_period] = self._process_period(df, cur_period, company)
+                logger.info(f'Got period decisions for {cur_period}, {results[cur_period].decision.name}')
 
+        logger.info(f'Return results count {len(results)}')
         return results
 
     async def get_companies_ta_decisions(
@@ -112,7 +115,7 @@ class TACalculator:
         # for company in companies:
         #     print(f'get_company_ta_decisions {company.tiker}: ')
         #     decisions.append(self.get_company_ta_decisions(company, period))
-
+        logger.info(f'Got companies_ta_decisions. Count: {len(decisions)}')
         return decisions
 
     # Вынесено в отдельный метод для тестирования
