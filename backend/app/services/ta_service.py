@@ -1,7 +1,9 @@
 import asyncio
+import logging
 import os
 
 import pandas as pd
+
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.cron_job import CronJobRunDao
@@ -11,6 +13,8 @@ from app.utils.ta.ta_calculator import TACalculator
 from app.utils.telegram.telegramm_client import send_tg_message
 from app.web.api.ta.scheme import TADecisionDTO
 from fastapi import Depends
+
+logger = logging.getLogger(__name__)
 
 PERIOD_NAMES = {"M": "месяц", "D": "день", "W": "неделя"}
 
@@ -37,8 +41,9 @@ class TAService:
         send_messages: bool = True,
         send_test: bool = False,
     ):
+        logger.info('Start generating TA decisions...')
         companies = await self.company_dao.get_all_companies()
-        # companies = companies[:200:]
+        logger.info(f'Got companies. Count: {len(companies)}')
         result = {}
 
         # todo раскоментировать, когда заполнится портфель
@@ -51,6 +56,7 @@ class TAService:
             companies,
             period,
         )
+        logger.info(f'Got decisions. Count: {len(decisions)}')
 
         for per_desisions in decisions:
             for per_des, decision in per_desisions.items():
@@ -60,6 +66,7 @@ class TAService:
                 #     decision.decision = StochDecisionEnum.RELAX
 
                 await self._update_stoch(decision.company, per_des, decision)
+                # logger.info(f'Update stoch for {decision.company.name}, {per_des}, {decision.decision.name}')
                 result.setdefault(per_des, {}).setdefault(
                     decision.decision.name,
                     [],

@@ -2,6 +2,7 @@ import logging
 from importlib import metadata
 from pathlib import Path
 
+from app.settings import settings
 from app.web.api.router import api_router
 from app.web.lifetime import register_shutdown_event, register_startup_event
 from fastapi import FastAPI
@@ -11,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 APP_ROOT = Path(__file__).parent.parent
 
+logging.basicConfig(level=settings.log_level)
 logger = logging.getLogger("stopportal")
 
 

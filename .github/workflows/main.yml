@@ -3,7 +3,7 @@ name: Main Stopportal workflow
 on:
   push:
     branches:
-      - deploy
+      - logging
       - main
 
 jobs:

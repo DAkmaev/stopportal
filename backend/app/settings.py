@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # Current environment
     environment: str = "dev"
 
-    log_level: LogLevel = LogLevel.INFO
+    log_level: LogLevel = LogLevel.DEBUG
 
     # Variables for the database
     db_file: Path = "./db.sqlite3"
@@ -51,6 +51,9 @@ class Settings(BaseSettings):
 
     first_superuser: str = "admin"
     first_superuser_password: str = "changethis"
+
+    bot_token: str = ""
+    chat_id: str = ""
 
     @property
     def db_url(self) -> URL:
