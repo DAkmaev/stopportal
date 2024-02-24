@@ -89,9 +89,9 @@ class TACalculator:
         df = self.get_history_data(company)
         results = {}
 
-        logger.info(f'Start getting period decisions for {company.name}')
         for cur_period in ("M", "W", "D"):
             if period in {cur_period, "ALL"}:
+                logger.info(f'Start getting period decisions for {company.name}, {cur_period}')
                 results[cur_period] = self._process_period(df, cur_period, company)
                 logger.info(f'Got period decisions for {cur_period}, {results[cur_period].decision.name}')
 
@@ -104,17 +104,17 @@ class TACalculator:
         period: str,
     ):
         decisions = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            tasks = [
-                executor.submit(self.get_company_ta_decisions, company, period)
-                for company in companies
-            ]
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        #     tasks = [
+        #         executor.submit(self.get_company_ta_decisions, company, period)
+        #         for company in companies
+        #     ]
+        #
+        #     decisions = [task.result() for task in tasks]
 
-            decisions = [task.result() for task in tasks]
-
-        # for company in companies:
-        #     print(f'get_company_ta_decisions {company.tiker}: ')
-        #     decisions.append(self.get_company_ta_decisions(company, period))
+        for company in companies:
+            logger.info(f'Get companies_ta_decisions for {company.name}, {period}')
+            decisions.append(self.get_company_ta_decisions(company, period))
         logger.info(f'Got companies_ta_decisions. Count: {len(decisions)}')
         return decisions
 

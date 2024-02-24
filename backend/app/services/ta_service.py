@@ -9,7 +9,6 @@ from app.db.dao.companies import CompanyDAO
 from app.db.dao.cron_job import CronJobRunDao
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.db.models.company import CompanyModel
-from app.settings import settings
 from app.utils.ta.ta_calculator import TACalculator
 from app.utils.telegram.telegramm_client import send_tg_message
 from app.web.api.ta.scheme import TADecisionDTO
