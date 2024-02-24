@@ -91,11 +91,11 @@ class TACalculator:
 
         for cur_period in ("M", "W", "D"):
             if period in {cur_period, "ALL"}:
-                logger.info(f'Start getting period decisions for {company.name}, {cur_period}')
+                logger.debug(f'Start getting period decisions for {company.name}, {cur_period}')
                 results[cur_period] = self._process_period(df, cur_period, company)
-                logger.info(f'Got period decisions for {cur_period}, {results[cur_period].decision.name}')
+                logger.debug(f'Got period decisions for {cur_period}, {results[cur_period].decision.name}')
 
-        logger.info(f'Return results count {len(results)}')
+        logger.debug(f'Return company_ta_decisions results count {len(results)}')
         return results
 
     async def get_companies_ta_decisions(
@@ -104,18 +104,18 @@ class TACalculator:
         period: str,
     ):
         decisions = []
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        #     tasks = [
-        #         executor.submit(self.get_company_ta_decisions, company, period)
-        #         for company in companies
-        #     ]
-        #
-        #     decisions = [task.result() for task in tasks]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            tasks = [
+                executor.submit(self.get_company_ta_decisions, company, period)
+                for company in companies
+            ]
 
-        for company in companies:
-            logger.info(f'Get companies_ta_decisions for {company.name}, {period}')
-            decisions.append(self.get_company_ta_decisions(company, period))
-        logger.info(f'Got companies_ta_decisions. Count: {len(decisions)}')
+            decisions = [task.result() for task in tasks]
+
+        # for company in companies:
+        #     logger.info(f'Get companies_ta_decisions for {company.name}, {period}')
+        #     decisions.append(self.get_company_ta_decisions(company, period))
+        logger.debug(f'Got companies_ta_decisions. Count: {len(decisions)}')
         return decisions
 
     # Вынесено в отдельный метод для тестирования
