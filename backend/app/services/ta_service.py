@@ -3,7 +3,6 @@ import logging
 import os
 
 import pandas as pd
-
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.cron_job import CronJobRunDao
@@ -41,9 +40,10 @@ class TAService:
         send_messages: bool = True,
         send_test: bool = False,
     ):
-        logger.info('Start generating TA decisions...')
+        logger.info("Start generating TA decisions...")
         companies = await self.company_dao.get_all_companies()
-        logger.info(f'Got companies. Count: {len(companies)}')
+        companies_count = len(companies)
+        logger.info(f"Got companies. Count: {companies_count}")
         result = {}
 
         # todo раскоментировать, когда заполнится портфель
@@ -56,7 +56,8 @@ class TAService:
             companies,
             period,
         )
-        logger.info(f'Got decisions. Count: {len(decisions)}')
+        decisions_count = len(decisions)
+        logger.info(f"Got decisions. Count: {decisions_count}")
 
         for per_desisions in decisions:
             for per_des, decision in per_desisions.items():
