@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from app.db.dao.companies import CompanyDAO
@@ -10,6 +11,7 @@ from app.web.api.company.scheme import (
 from fastapi import APIRouter, Depends
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/{company_id}", response_model=CompanyModelDTO)
@@ -34,7 +36,7 @@ async def create_company_model(
     new_company_object: CompanyModelInputDTO,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
-    await company_dao.create_company_model(
+    company = await company_dao.create_company_model(
         tiker=new_company_object.tiker,
         name=new_company_object.name
         if new_company_object.name
@@ -44,6 +46,7 @@ async def create_company_model(
         if new_company_object.strategies
         else None,
     )
+    logger.info(f"Created company model for name={company.name}")
 
 
 @router.post("/batch")

@@ -102,6 +102,7 @@ jobs:
           source: "deploy/docker-compose.yml,deploy/.env"
           target: "stopportal/test"
           strip_components: 1
+          overwrite: true
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:

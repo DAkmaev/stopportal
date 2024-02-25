@@ -14,7 +14,6 @@ from pandas import DataFrame
 
 pd.options.mode.chained_assignment = None
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -91,11 +90,16 @@ class TACalculator:
 
         for cur_period in ("M", "W", "D"):
             if period in {cur_period, "ALL"}:
-                logger.debug(f'Start getting period decisions for {company.name}, {cur_period}')
+                logger.debug(
+                    f"Start getting period decisions for {company.name}, {cur_period}",
+                )
                 results[cur_period] = self._process_period(df, cur_period, company)
-                logger.debug(f'Got period decisions for {cur_period}, {results[cur_period].decision.name}')
-
-        logger.debug(f'Return company_ta_decisions results count {len(results)}')
+                decision_name = results[cur_period].decision.name
+                logger.debug(
+                    f"Got period decisions for {cur_period}, {decision_name}",
+                )
+        results_count = len(results)
+        logger.debug(f"Return company_ta_decisions results count {results_count}")
         return results
 
     async def get_companies_ta_decisions(
@@ -115,7 +119,8 @@ class TACalculator:
         # for company in companies:
         #     logger.info(f'Get companies_ta_decisions for {company.name}, {period}')
         #     decisions.append(self.get_company_ta_decisions(company, period))
-        logger.debug(f'Got companies_ta_decisions. Count: {len(decisions)}')
+        decisions_count = len(decisions)
+        logger.debug(f"Got companies_ta_decisions. Count: {decisions_count}")
         return decisions
 
     # Вынесено в отдельный метод для тестирования

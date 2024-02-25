@@ -12,7 +12,11 @@ from fastapi.staticfiles import StaticFiles
 
 APP_ROOT = Path(__file__).parent.parent
 
-logging.basicConfig(level=settings.log_level)
+logging.basicConfig(
+    level=logging.getLevelName(settings.log_level.value),
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",  # noqa: WPS323
+)
+
 logger = logging.getLogger("stopportal")
 
 
