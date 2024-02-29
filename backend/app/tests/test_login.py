@@ -1,7 +1,6 @@
 import pytest
 from app.tests.utils.common import (
     create_test_user,
-    get_superuser_token_headers,
     random_lower_string,
 )
 from fastapi import FastAPI

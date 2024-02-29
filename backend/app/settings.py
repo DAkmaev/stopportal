@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # Current environment
     environment: str = "dev"
 
-    log_level: LogLevel = LogLevel.DEBUG
+    log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
     db_file: Path = "./db.sqlite3"

@@ -54,3 +54,12 @@ async def get_current_active_superuser(current_user: CurrentUser) -> UserModel:
 
 
 CurrentAdminUser = Annotated[UserModel, Depends(get_current_active_superuser)]
+
+
+async def check_owner_or_superuser(user_id: int, current_user: CurrentUser):
+    if not current_user.is_superuser and current_user.id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="The user doesn't have enough privileges",
+        )
+    return current_user

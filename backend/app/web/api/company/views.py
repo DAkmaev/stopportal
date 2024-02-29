@@ -10,6 +10,8 @@ from app.web.api.company.scheme import (
 )
 from fastapi import APIRouter, Depends
 
+from app.web.deps import CurrentUser
+
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 @router.get("/{company_id}", response_model=CompanyModelDTO)
 async def get_company_model(
     company_id: int,
+    current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> CompanyModel:
     return await company_dao.get_company_model(company_id)
@@ -24,6 +27,7 @@ async def get_company_model(
 
 @router.get("/", response_model=List[CompanyModelDTO])
 async def get_company_models(
+    current_user: CurrentUser,
     limit: int = 100,
     offset: int = 0,
     company_dao: CompanyDAO = Depends(),
@@ -34,17 +38,15 @@ async def get_company_models(
 @router.post("/")
 async def create_company_model(
     new_company_object: CompanyModelInputDTO,
+    current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
     company = await company_dao.create_company_model(
         tiker=new_company_object.tiker,
-        name=new_company_object.name
-        if new_company_object.name
-        else new_company_object.tiker,
+        name=new_company_object.name,
         company_type=new_company_object.type,
-        strategies=[strategy.id for strategy in new_company_object.strategies]
-        if new_company_object.strategies
-        else None,
+        strategies=new_company_object.strategies,
+        user_id=current_user.id,
     )
     logger.info(f"Created company model for name={company.name}")
 
@@ -52,6 +54,7 @@ async def create_company_model(
 @router.post("/batch")
 async def create_company_batch_models(
     new_company_list: List[CompanyModelInputDTO],
+    current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
     await company_dao.create_companies_models(
@@ -70,6 +73,7 @@ async def create_company_batch_models(
 async def partial_update_company_model(
     company_id: int,
     updated_company: CompanyModelPatchDTO,
+    current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
     await company_dao.update_company_model(
@@ -83,14 +87,19 @@ async def partial_update_company_model(
 async def update_company_model(
     company_id: int,
     updated_company: CompanyModelInputDTO,
+    current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
-    await company_dao.update_company_model(company_id, updated_company.model_dump())
+    await company_dao.update_company_model(
+        company_id,
+        updated_company.model_dump(),
+    )
 
 
 @router.delete("/{company_id}", status_code=204)
 async def delete_company_model(
     company_id: int,
+    current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
     await company_dao.delete_company_model(company_id)

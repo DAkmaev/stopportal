@@ -5,6 +5,8 @@ from app.db.dao.strategies import StrategiesDAO
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.tests.utils.common import create_test_user
+
 
 @pytest.mark.anyio
 async def test_add_company_model(
@@ -21,8 +23,11 @@ async def test_add_company_model(
     existing_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
     assert existing_company is None
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     new_company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
 
@@ -49,19 +54,21 @@ async def test_update_company_model(
     STRATEGY_DESCRIPTION2 = "Strategy Description 2"
 
     company_dao = CompanyDAO(dbsession)
-    company_stops_dao = StopsDAO(dbsession)
     strategies_dao = StrategiesDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
     assert company.name == NAME
 
     # Add two strategies models for the company
-    await strategies_dao.create_strategy_model(STRATEGY_NAME1, STRATEGY_DESCRIPTION1)
-    await strategies_dao.create_strategy_model(STRATEGY_NAME2, STRATEGY_DESCRIPTION2)
+    await strategies_dao.create_strategy_model(STRATEGY_NAME1, STRATEGY_DESCRIPTION1, user.id)
+    await strategies_dao.create_strategy_model(STRATEGY_NAME2, STRATEGY_DESCRIPTION2, user.id)
 
     # Retrieve the created company and strategies
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -117,8 +124,11 @@ async def test_delete_company_model(
 
     company_dao = CompanyDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -145,12 +155,15 @@ async def test_get_all_companies(
 
     assert len(all_companies) == 0  # Assuming there are no companies at the beginning
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create some test companies
     await company_dao.create_company_model(
-        tiker="TEST1", name="Company1", company_type="MOEX"
+        tiker="TEST1", name="Company1", company_type="MOEX", user_id=user.id
     )
     await company_dao.create_company_model(
-        tiker="TEST2", name="Company2", company_type="MOEX"
+        tiker="TEST2", name="Company2", company_type="MOEX", user_id=user.id
     )
 
     # Get all companies again
@@ -173,8 +186,11 @@ async def test_get_company_model(
 
     company_dao = CompanyDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -191,12 +207,15 @@ async def test_filter(
 ) -> None:
     company_dao = CompanyDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create some test companies
     await company_dao.create_company_model(
-        tiker="TEST1", name="Company1", company_type="MOEX"
+        tiker="TEST1", name="Company1", company_type="MOEX", user_id=user.id
     )
     await company_dao.create_company_model(
-        tiker="TEST2", name="Company2", company_type="MOEX"
+        tiker="TEST2", name="Company2", company_type="MOEX", user_id=user.id
     )
 
     # Filter companies by tiker

@@ -4,6 +4,8 @@ from app.db.dao.stops import StopsDAO
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.tests.utils.common import create_test_user
+
 
 @pytest.mark.anyio
 async def test_add_stop_model(
@@ -18,8 +20,11 @@ async def test_add_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -51,8 +56,11 @@ async def test_delete_company_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -90,8 +98,11 @@ async def test_get_company_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -128,8 +139,11 @@ async def test_update_company_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -172,8 +186,11 @@ async def test_get_company_stops_by_id(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -206,8 +223,11 @@ async def test_add_stop_model_prevent_duplicate(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
@@ -244,8 +264,11 @@ async def test_update_stop_model_prevent_duplicate(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id)
 
     # Retrieve the created company
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)

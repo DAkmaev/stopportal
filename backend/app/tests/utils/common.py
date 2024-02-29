@@ -27,11 +27,15 @@ async def create_test_company(
     need_add_strategy: bool = False,
     tiker_name: str = None,
     name: str = None,
+    user_id: int = None,
 ) -> CompanyModel:
     tiker_name = tiker_name if tiker_name else uuid.uuid4().hex
     name = name if name else uuid.uuid4().hex
+    if user_id is None:
+        user_id = (await create_test_user(dbsession)).id
+
     dao = CompanyDAO(dbsession)
-    company = await dao.create_company_model(tiker_name, name, "MOEX")
+    company = await dao.create_company_model(tiker_name, name, "MOEX", user_id)
 
     if need_add_stop:
         company.stops.append(StopModel(company_id=company.id, period="D", value=100))
@@ -52,6 +56,7 @@ async def create_test_company(
 async def create_test_companies(
     dbsession: AsyncSession,
     count: int,
+    user_id: int,
 ) -> list[CompanyModel]:
     dao = CompanyDAO(dbsession)
 
@@ -59,7 +64,7 @@ async def create_test_companies(
     for i in range(count):
         tiker_name: str = uuid.uuid4().hex
         name = uuid.uuid4().hex
-        tasks.append(dao.create_company_model(tiker_name, name, "MOEX"))
+        tasks.append(dao.create_company_model(tiker_name, name, "MOEX", user_id))
 
     await asyncio.gather(*tasks)
 

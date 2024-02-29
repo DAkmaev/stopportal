@@ -3,16 +3,14 @@ import time
 import uuid
 
 import pytest
-from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
-from app.db.dao.cron_job import CronJobRunDao
 from app.db.dao.ta_decisions import TADecisionDAO
-from app.services.ta_service import TAService
-from app.tests.utils.common import create_test_company
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
+from app.tests.utils.common import create_test_user
 
 
 @pytest.mark.anyio
@@ -33,10 +31,12 @@ async def test_generate_ta_decisions(
     name2 = uuid.uuid4().hex
     period = "W"
 
+    user = await create_test_user(dbsession)
+
     # create test companies
     await asyncio.gather(
-        dao.create_company_model(tiker_name1, name1, "MOEX"),
-        dao.create_company_model(tiker_name2, name2, "MOEX"),
+        dao.create_company_model(tiker_name1, name1, "MOEX", user.id),
+        dao.create_company_model(tiker_name2, name2, "MOEX", user.id),
     )
 
     url = fastapi_app.url_path_for("generate_ta_decisions")
@@ -67,8 +67,9 @@ async def test_update_stoch_decisions(
     name = uuid.uuid4().hex
     period = "W"
 
+    user = await create_test_user(dbsession)
     # Create a test company
-    company = await company_dao.create_company_model(tiker_name, name, "MOEX")
+    company = await company_dao.create_company_model(tiker_name, name, "MOEX", user.id)
 
     # Create a StochDecisionModel
     ta_decision = await decision_dao.update_or_create_ta_decision_model(
@@ -102,7 +103,9 @@ async def test_generate_ta_decision(
     tiker_name = uuid.uuid4().hex
     name = uuid.uuid4().hex
     period = "W"
-    await dao.create_company_model(tiker_name, name, "MOEX")
+
+    user = await create_test_user(dbsession)
+    await dao.create_company_model(tiker_name, name, "MOEX", user.id)
 
     print(f"\nstarted at {time.strftime('%a')}")
     url = fastapi_app.url_path_for("generate_ta_decision", tiker=tiker_name)
@@ -132,10 +135,11 @@ async def test_generate_ta_decision(
 #     # name2 = uuid.uuid4().hex
 #     period = 'ALL'
 #
+#     user = await create_test_user(dbsession)
 #     # create test companies
 #     await asyncio.gather(
-#         dao.create_company_model(tiker_name1, name1, "MOEX"),
-#         # dao.create_company_model(tiker_name2, name2, "MOEX")
+#         dao.create_company_model(tiker_name1, name1, "MOEX", user.id),
+#         # dao.create_company_model(tiker_name2, name2, "MOEX", user.id)
 #     )
 #
 #     url = fastapi_app.url_path_for("generate_ta_decisions")

@@ -7,7 +7,7 @@ from app.tests.utils.common import (
     create_test_briefcase,
     create_test_briefcase_item,
     create_test_briefcase_registry,
-    create_test_company,
+    create_test_company, create_test_user,
 )
 from fastapi import FastAPI, status
 from httpx import AsyncClient
@@ -48,7 +48,6 @@ async def test_create_briefcase_item_model(
     url = fastapi_app.url_path_for(
         "create_briefcase_item_model", briefcase_id=briefcase_id
     )
-
     company = await create_test_company(dbsession)
     briefcase = await create_test_briefcase(dbsession)
 
