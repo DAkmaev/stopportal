@@ -8,6 +8,8 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.models.user import UserModel
+
 
 class CompanyDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
@@ -20,10 +22,11 @@ class CompanyDAO:
         tiker: str,
         name: str,
         company_type: str,
-        strategies: list[int] = None,
+        user_id: int,
+        strategies: list[dict] = None,
     ) -> CompanyModel:
         raw_company = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.tiker == tiker),
+            select(CompanyModel).where(CompanyModel.tiker == tiker, CompanyModel.user_id == user_id),
         )
         exist_company: CompanyModel = raw_company.scalars().one_or_none()
 
@@ -33,7 +36,15 @@ class CompanyDAO:
                 detail=f"Компания {exist_company.tiker} уже существует",
             )
 
-        company = CompanyModel(tiker=tiker, name=name, type=company_type)
+        user = await self.session.get(UserModel, user_id)
+        company = CompanyModel(tiker=tiker, name=name, type=company_type, user=user)
+        if strategies:
+            ids = {strategy["id"] for strategy in strategies}
+            company.strategies = [
+                await self.strategy_dao.get_strategy_model(strategy_id)
+                for strategy_id in ids
+            ]
+
         self.session.add(company)
         return company
 
