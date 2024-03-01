@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 import pytest
 from app.db.dao.companies import CompanyDAO
@@ -16,7 +17,7 @@ async def test_creation(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests company instance creation."""
     url = fastapi_app.url_path_for("create_company_model")
@@ -26,7 +27,7 @@ async def test_creation(
         json={
             "tiker": tiker_name,
         },
-        headers=user_token_headers,
+        headers=user_token_headers['headers'],
     )
     assert response.status_code == status.HTTP_200_OK
     dao = CompanyDAO(dbsession)

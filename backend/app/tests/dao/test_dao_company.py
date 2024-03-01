@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
@@ -56,7 +58,7 @@ async def test_update_company_model(
     company_dao = CompanyDAO(dbsession)
     strategies_dao = StrategiesDAO(dbsession)
 
-    # Create test user
+    # Get test user
     user = await create_test_user(dbsession)
 
     # Create a new company
@@ -72,7 +74,7 @@ async def test_update_company_model(
 
     # Retrieve the created company and strategies
     company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
-    strategies = await strategies_dao.get_all_strategies_model()
+    strategies = await strategies_dao.get_all_strategies_model(user_id=user.id)
     assert company is not None
     assert len(company.strategies) == 0
     assert len(strategies) == 2

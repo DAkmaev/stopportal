@@ -80,7 +80,7 @@ async def test_get_strategies_model(
     )
 
     # Получаем стратегию по идентификатору
-    retrieved_strategies = await strategies_dao.get_all_strategies_model()
+    retrieved_strategies = await strategies_dao.get_all_strategies_model(user_id=user.id)
 
     # Проверяем, что стратегия была успешно получена и имеет правильные параметры
     assert retrieved_strategies is not None
@@ -137,7 +137,7 @@ async def test_get_all_strategies_model(
         await strategies_dao.create_strategy_model(name=name, description=description, user_id=user.id)
 
     # Получаем все стратегии
-    retrieved_strategies = await strategies_dao.get_all_strategies_model()
+    retrieved_strategies = await strategies_dao.get_all_strategies_model(user_id=user.id)
 
     # Проверяем, что количество полученных стратегий соответствует ограничению
     assert len(retrieved_strategies) == len(strategy_names)

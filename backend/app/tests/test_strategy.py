@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 import pytest
 from app.db.dao.companies import CompanyDAO
@@ -9,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from app.db.dao.user import UserDAO
-from app.tests.utils.common import create_test_user, get_headers
+from app.tests.utils.common import create_test_user, get_headers, get_user_token_headers
 
 
 @pytest.mark.anyio
@@ -17,9 +18,11 @@ async def test_get_strategy_model(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
-    user = await create_test_user(dbsession)
     """Tests getting a strategy model by ID."""
+    user, headers = user_token_headers.values()
+
     # Создаем стратегию для получения
     strategy_name = "Test Strategy"
     strategy_description = "Test description"
@@ -37,7 +40,7 @@ async def test_get_strategy_model(
     url = fastapi_app.url_path_for(
         "get_strategy_model", strategy_id=created_strategy.id
     )
-    response = await client.get(url)
+    response = await client.get(url, headers=headers)
     retrieved_strategy = response.json()
 
     # Проверяем успешный ответ и соответствие данных полученным из базы
@@ -52,9 +55,11 @@ async def test_get_strategy_models(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
-    user = await create_test_user(dbsession)
     """Tests getting a list of strategy models."""
+    user, headers = user_token_headers.values()
+
     # Создаем несколько стратегий в базе данных
     strategies_dao = StrategiesDAO(dbsession)
     strategy_names = ["Strategy 1", "Strategy 2", "Strategy 3"]
@@ -66,7 +71,7 @@ async def test_get_strategy_models(
 
     # Отправляем GET-запрос для получения списка стратегий
     url = fastapi_app.url_path_for("get_strategy_models")
-    response = await client.get(url)
+    response = await client.get(url, headers=headers)
     strategies = response.json()
 
     # Проверяем успешный ответ и соответствие данных полученным из базы
@@ -80,9 +85,10 @@ async def test_create_strategy_model(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests creating a new strategy model."""
+
     # Генерируем уникальное имя для стратегии
     strategy_name = uuid.uuid4().hex
 
@@ -94,11 +100,12 @@ async def test_create_strategy_model(
             "name": strategy_name,
             "description": "Test description",
         },
-        headers=user_token_headers,
+        headers=user_token_headers['headers'],
     )
 
     # Проверяем успешный ответ и наличие созданной стратегии в базе данных
     assert response.status_code == status.HTTP_200_OK
+
     dao = StrategiesDAO(dbsession)
     created_strategy = await dao.get_strategy_model_by_name(strategy_name)
     assert created_strategy is not None
@@ -113,9 +120,11 @@ async def test_update_strategy_model(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests updating a strategy model."""
+    user, headers = user_token_headers.values()
+
     # Создаем стратегию для обновления
     original_name = "Original Strategy"
     original_description = "Original description"
@@ -130,7 +139,7 @@ async def test_update_strategy_model(
             "name": original_name,
             "description": original_description,
         },
-        headers=user_token_headers,
+        headers=user_token_headers['headers'],
     )
     strategy_id = original_response.json()["user_id"]
 
@@ -144,7 +153,7 @@ async def test_update_strategy_model(
             "name": updated_name,
             "description": updated_description,
         },
-        headers=user_token_headers,
+        headers=user_token_headers['headers'],
     )
     assert response.status_code == status.HTTP_200_OK
 
@@ -164,7 +173,7 @@ async def test_delete_strategy_model(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests deleting a strategy model."""
     # Создаем стратегию для удаления
@@ -179,13 +188,13 @@ async def test_delete_strategy_model(
             "name": strategy_name,
             "description": strategy_description,
         },
-        headers=user_token_headers,
+        headers=user_token_headers['headers'],
     )
     strategy_id = response.json()["user_id"]
 
     # Отправляем DELETE-запрос для удаления стратегии
     url = fastapi_app.url_path_for("delete_strategy_model", strategy_id=strategy_id)
-    response = await client.delete(url, headers=user_token_headers,)
+    response = await client.delete(url, headers=user_token_headers['headers'],)
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
     # Проверяем успешный ответ и отсутствие удаленной стратегии в базе данных
@@ -199,13 +208,12 @@ async def test_update_strategies_in_company(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests updating strategies in a company."""
-    # Создаем компанию и несколько стратегий для обновления списка
-    user_name = "Test User"
-    user_email = "da@ya.ru"
-    user_password = "password"
+    user, headers = user_token_headers.values()
 
+    # Создаем компанию и несколько стратегий для обновления списка
     company_name = "Test Company"
     company_ticker = "TIKER"
     company_type = "MOEX"
@@ -213,14 +221,9 @@ async def test_update_strategies_in_company(
     company_dao = CompanyDAO(dbsession)
     strategies_dao = StrategiesDAO(dbsession)
 
-    dao = UserDAO(session=dbsession)
-    await dao.create_user_model(user_name, user_email, user_password)
-    user = await dao.get_user_by_email(user_email)
-
     await company_dao.create_company_model(
         name=company_name, tiker=company_ticker, company_type=company_type, user_id=user.id
     )
-    user_token_headers = await get_headers(client, fastapi_app, user_name, user_password)
 
     url = fastapi_app.url_path_for("create_strategy_model")
     for strategy_name in strategy_names:
@@ -230,7 +233,7 @@ async def test_update_strategies_in_company(
                 "name": strategy_name,
                 "description": f"{strategy_name} description",
             },
-            headers=user_token_headers,
+            headers=headers,
         )
 
     # Получаем созданную компанию и стратегии
@@ -256,7 +259,7 @@ async def test_update_strategies_in_company(
                 {"id": retrieved_strategies[2].id},
             ]
         },
-        headers=user_token_headers,
+        headers=headers,
     )
 
     # Проверяем успешный ответ и обновление списка стратегий компании в базе данных
@@ -273,7 +276,7 @@ async def test_update_strategies_in_company(
     response = await client.patch(
         url,
         json={"strategies": [{"id": retrieved_strategies[1].id}]},
-        headers=user_token_headers,
+        headers=headers,
     )
 
     # Проверяем успешный ответ и обновление списка стратегий компании в базе данных
@@ -290,7 +293,7 @@ async def test_update_strategies_in_company(
     response = await client.patch(
         url,
         json={"strategies": []},
-        headers=user_token_headers,
+        headers=headers,
     )
 
     # Проверяем успешный ответ и обновление списка стратегий компании в базе данных
@@ -309,15 +312,20 @@ async def test_check_permissions_delete_strategy_model(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
 ) -> None:
     """Tests deleting a strategy model."""
+
     # Создаем стратегию для удаления
     strategy_name = "Test Strategy"
     strategy_description = "Test description"
 
+    original_user_date = await get_user_token_headers(client, fastapi_app, dbsession)
+    new_user_data = await get_user_token_headers(client, fastapi_app, dbsession)
+
+    user_original = original_user_date['user']
+    user_new_headers = new_user_data['headers']
+
     strategy_dao = StrategiesDAO(dbsession)
-    user_original = await create_test_user(dbsession)
     await strategy_dao.create_strategy_model(
         name=strategy_name,
         description=strategy_description,
@@ -329,7 +337,7 @@ async def test_check_permissions_delete_strategy_model(
     url = fastapi_app.url_path_for("delete_strategy_model", strategy_id=strategy.id)
     response = await client.delete(
         url,
-        headers=user_token_headers,
+        headers=user_new_headers,
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
 

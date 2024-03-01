@@ -24,9 +24,9 @@ class StrategiesDAO:
 
         return strategy
 
-    async def get_all_strategies_model(self) -> List[StrategyModel]:
+    async def get_all_strategies_model(self, user_id: int) -> List[StrategyModel]:
         raw_strategies = await self.session.execute(
-            select(StrategyModel),
+            select(StrategyModel).where(StrategyModel.user_id == user_id),
         )
 
         return list(raw_strategies.scalars().fetchall())

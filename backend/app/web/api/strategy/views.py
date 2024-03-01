@@ -10,19 +10,23 @@ from app.web.deps import CurrentUser, check_owner_or_superuser
 router = APIRouter()
 
 
+@router.get("/", response_model=List[StrategiesDTO])
+async def get_strategy_models(
+    current_user: CurrentUser,
+    dao: StrategiesDAO = Depends(),
+) -> List[StrategyModel]:
+    return await dao.get_all_strategies_model(current_user.id)
+
+
 @router.get("/{strategy_id}", response_model=StrategiesDTO)
 async def get_strategy_model(
     strategy_id: int,
+    current_user: CurrentUser,
     dao: StrategiesDAO = Depends(),
 ) -> StrategyModel:
-    return await dao.get_strategy_model(strategy_id)
-
-
-@router.get("/", response_model=List[StrategiesDTO])
-async def get_strategy_models(
-    dao: StrategiesDAO = Depends(),
-) -> List[StrategyModel]:
-    return await dao.get_all_strategies_model()
+    exist_strategy = await dao.get_strategy_model(strategy_id)
+    await check_owner_or_superuser(exist_strategy.user_id, current_user)
+    return exist_strategy
 
 
 @router.post("/")

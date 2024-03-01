@@ -2,6 +2,7 @@ import asyncio
 import random
 import string
 import uuid
+from typing import Any
 
 import pytest
 from app.db.dao.briefcases import BriefcaseDAO
@@ -159,7 +160,7 @@ async def get_superuser_token_headers(
     name: str = None,
     email: str = None,
     password: str = None,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     return await _get_test_user_headers(
         client,
         fastapi_app,
@@ -178,7 +179,7 @@ async def get_user_token_headers(
     name: str = None,
     email: str = None,
     password: str = None,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     return await _get_test_user_headers(
         client,
         fastapi_app,
@@ -219,7 +220,7 @@ async def _get_test_user_headers(
     email: str = None,
     password: str = None,
     is_active: bool = True,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     name = (
         settings.first_superuser if is_superuser and not name else random_lower_string()
     )
@@ -238,7 +239,11 @@ async def _get_test_user_headers(
         is_active=is_active,
     )
 
-    return await get_headers(client, fastapi_app, name, password)
+    dao= UserDAO(dbsession)
+    user = await dao.get_user_by_name(name)
+    headers = await get_headers(client, fastapi_app, name, password)
+
+    return {'user': user, 'headers': headers}
 
 
 async def get_headers(
