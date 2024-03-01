@@ -25,17 +25,6 @@ class BriefcaseStrategyDTO(BaseModel):
     name: Optional[str] = None
 
 
-class BriefcaseItemInputDTO(BaseModel):
-    count: int
-    dividends: Optional[float] = None
-    company: BriefcaseCompanyDTO
-    strategy: Optional[BriefcaseStrategyDTO] = None
-
-
-class BriefcaseItemDTO(BriefcaseItemInputDTO):
-    id: int
-
-
 class BriefcaseRegistryInputDTO(BaseModel):
     count: Optional[int] = None
     company: BriefcaseCompanyDTO

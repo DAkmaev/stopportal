@@ -1,11 +1,13 @@
 import enum
-from typing import List, Optional
+from typing import Optional
 
 from app.db.base import Base
 from app.db.models.company import CompanyModel, StrategyModel
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DECIMAL, TIMESTAMP, Integer
+
+from app.db.models.user import UserModel
 
 
 class CurrencyEnum(enum.Enum):
@@ -27,25 +29,8 @@ class BriefcaseModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
-    items: Mapped[List["BriefcaseItemModel"]] = relationship(
-        lazy="selectin",
-        cascade="all,delete",
-    )
-
-
-class BriefcaseItemModel(Base):
-    """Model for BriefcaseItem."""
-
-    __tablename__ = "briefcase_items"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    count: Mapped[int] = mapped_column(Integer)
-    dividends: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
-    strategy_id: Mapped[int] = mapped_column(ForeignKey("strategies.id"), nullable=True)
-    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
-    strategy: Mapped[Optional["StrategyModel"]] = relationship()
-    briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True, nullable=True)
+    user: Mapped[Optional["UserModel"]] = relationship()
 
 
 class BriefcaseRegistryModel(Base):

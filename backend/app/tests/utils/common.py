@@ -9,7 +9,6 @@ from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.user import UserDAO
 from app.db.models.briefcase import (
-    BriefcaseItemModel,
     BriefcaseModel,
     BriefcaseRegistryModel,
     RegistryOperationEnum,
@@ -75,38 +74,26 @@ async def create_test_companies(
 
 async def create_test_briefcase(
     dbsession: AsyncSession,
+    user_id: int,
+    fill_up: float = None,
 ) -> BriefcaseModel:
     dao = BriefcaseDAO(dbsession)
-    await dao.create_briefcase_model()
-    briefcases = await dao.get_all_briefcases()
+    await dao.create_briefcase_model(user_id=user_id, fill_up=fill_up)
+    briefcases = await dao.get_all_briefcases(user_id=user_id)
     assert briefcases
 
     return briefcases[-1]
 
 
-async def create_test_briefcase_item(
-    dbsession: AsyncSession,
-) -> BriefcaseItemModel:
-    company = await create_test_company(dbsession)
-    briefcase = await create_test_briefcase(dbsession)
-    dao = BriefcaseDAO(dbsession)
-    await dao.create_briefcase_item_model(
-        count=1, dividends=10, company_id=company.id, briefcase_id=briefcase.id
-    )
-    briefcase_items = await dao.get_all_briefcase_items()
-    assert len(briefcase_items) == 1
-
-    return briefcase_items[0]
-
-
 async def create_test_briefcase_registry(
     dbsession: AsyncSession,
+    user_id: int,
     briefcase: BriefcaseModel = None,
     company: CompanyModel = None,
 ) -> BriefcaseRegistryModel:
     briefcase_dao = BriefcaseDAO(dbsession)
-    company = company if company else await create_test_company(dbsession)
-    briefcase = briefcase if briefcase else await create_test_briefcase(dbsession)
+    company = company if company else await create_test_company(dbsession, user_id=user_id)
+    briefcase = briefcase if briefcase else await create_test_briefcase(dbsession, user_id=user_id)
 
     # Создаем новую запись briefcase_registry
     await briefcase_dao.create_briefcase_registry_model(

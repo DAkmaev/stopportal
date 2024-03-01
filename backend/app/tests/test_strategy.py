@@ -9,8 +9,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
-from app.db.dao.user import UserDAO
-from app.tests.utils.common import create_test_user, get_headers, get_user_token_headers
+from app.tests.utils.common import get_user_token_headers
 
 
 @pytest.mark.anyio
