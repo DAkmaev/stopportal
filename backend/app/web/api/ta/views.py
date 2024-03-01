@@ -7,11 +7,14 @@ from app.web.api.ta.scheme import TADecisionDTO
 from fastapi import APIRouter, Depends
 from starlette.responses import FileResponse
 
+from app.web.deps import CurrentUser
+
 router = APIRouter()
 
 
 @router.post("/")
 async def generate_ta_decisions(
+    current_user: CurrentUser,
     period: str = "ALL",
     is_cron: bool = False,
     send_messages: bool = True,
@@ -22,17 +25,19 @@ async def generate_ta_decisions(
     briefcase_id = 1
 
     return await ta_service.generate_ta_decisions(
-        briefcase_id,
-        period,
-        is_cron,
-        send_messages,
-        send_test,
+        briefcase_id=briefcase_id,
+        user_id=current_user.id,
+        period=period,
+        is_cron=is_cron,
+        send_messages=send_messages,
+        send_test=send_test,
     )
 
 
 @router.post("/{tiker}")
 async def generate_ta_decision(
     tiker: str,
+    current_user: CurrentUser,
     period: str = "W",
     send_messages: bool = False,
     ta_service: TAService = Depends(),
@@ -41,6 +46,7 @@ async def generate_ta_decision(
         tiker=tiker,
         period=period,
         send_messages=send_messages,
+        user_id=current_user.id,
     )
 
 
@@ -52,9 +58,10 @@ async def get_stochs(stoch_dao: TADecisionDAO = Depends()) -> List[TADecisionDTO
 @router.get("/history/{tiker}")
 async def get_history_stochs(
     tiker: str,
+    current_user: CurrentUser,
     ta_service: TAService = Depends(),
 ):
-    result = await ta_service.history_stochs(tiker)
+    result = await ta_service.history_stochs(tiker, current_user.id)
     return FileResponse(
         os.path.join(result["path"], result["file_name"]),
         media_type="application/octet-stream",

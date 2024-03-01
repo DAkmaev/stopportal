@@ -103,6 +103,7 @@ class CompanyDAO:
 
     async def get_all_companies(
         self,
+        user_id: int,
         limit: int = 10000,
         offset: int = 0,
     ) -> List[CompanyModel]:
@@ -119,9 +120,9 @@ class CompanyDAO:
 
         return company.scalars().one_or_none()
 
-    async def get_company_model_by_tiker(self, tiker: str) -> CompanyModel:
+    async def get_company_model_by_tiker(self, tiker: str, user_id: int) -> CompanyModel:
         company = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.tiker == tiker),
+            select(CompanyModel).where(CompanyModel.tiker == tiker, CompanyModel.user_id == user_id),
         )
 
         return company.scalars().one_or_none()

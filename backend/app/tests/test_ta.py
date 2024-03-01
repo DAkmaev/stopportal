@@ -1,6 +1,7 @@
 import asyncio
 import time
 import uuid
+from typing import Any
 
 import pytest
 from app.db.dao.companies import CompanyDAO
@@ -18,12 +19,8 @@ async def test_generate_ta_decisions(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
-    """
-
-    :param fastapi_app: current application.
-    :param client: client for the app.
-    """
     dao = CompanyDAO(dbsession)
     tiker_name1 = uuid.uuid4().hex
     name1 = uuid.uuid4().hex
@@ -31,7 +28,7 @@ async def test_generate_ta_decisions(
     name2 = uuid.uuid4().hex
     period = "W"
 
-    user = await create_test_user(dbsession)
+    user, headers = user_token_headers.values()
 
     # create test companies
     await asyncio.gather(
@@ -48,6 +45,7 @@ async def test_generate_ta_decisions(
             "send_messages": "false",
             "send_test": "false",
         },
+        headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()[period]["UNKNOWN"])
@@ -93,24 +91,23 @@ async def test_generate_ta_decision(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
-    """
+    user, headers = user_token_headers.values()
 
-    :param fastapi_app: current application.
-    :param client: client for the app.
-    """
     dao = CompanyDAO(dbsession)
     tiker_name = uuid.uuid4().hex
     name = uuid.uuid4().hex
     period = "W"
 
-    user = await create_test_user(dbsession)
     await dao.create_company_model(tiker_name, name, "MOEX", user.id)
 
     print(f"\nstarted at {time.strftime('%a')}")
     url = fastapi_app.url_path_for("generate_ta_decision", tiker=tiker_name)
     response = await client.post(
-        url, params={"period": period, "type": "MOEX", "send_messages": "false"}
+        url,
+        params={"period": period, "type": "MOEX", "send_messages": "false"},
+        headers=headers,
     )
     print(f"finished at {time.strftime('%a')}")
     assert response.status_code == status.HTTP_200_OK

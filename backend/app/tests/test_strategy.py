@@ -237,7 +237,7 @@ async def test_update_strategies_in_company(
         )
 
     # Получаем созданную компанию и стратегии
-    retrieved_company = await company_dao.get_company_model_by_tiker(company_ticker)
+    retrieved_company = await company_dao.get_company_model_by_tiker(company_ticker, user.id)
     retrieved_strategies = []
     for strategy_name in strategy_names:
         strategy = await strategies_dao.get_strategy_model_by_name(strategy_name)

@@ -69,7 +69,7 @@ async def create_test_companies(
 
     await asyncio.gather(*tasks)
 
-    companies = await dao.get_all_companies()
+    companies = await dao.get_all_companies(user_id=user_id)
     return companies
 
 

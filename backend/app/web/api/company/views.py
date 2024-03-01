@@ -10,7 +10,7 @@ from app.web.api.company.scheme import (
 )
 from fastapi import APIRouter, Depends
 
-from app.web.deps import CurrentUser
+from app.web.deps import CurrentUser, check_owner_or_superuser
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -22,7 +22,9 @@ async def get_company_model(
     current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> CompanyModel:
-    return await company_dao.get_company_model(company_id)
+    exist_company = await company_dao.get_company_model(company_id)
+    await check_owner_or_superuser(exist_company.user_id, current_user)
+    return exist_company
 
 
 @router.get("/", response_model=List[CompanyModelDTO])
@@ -32,7 +34,7 @@ async def get_company_models(
     offset: int = 0,
     company_dao: CompanyDAO = Depends(),
 ) -> List[CompanyModel]:
-    return await company_dao.get_all_companies(limit=limit, offset=offset)
+    return await company_dao.get_all_companies(limit=limit, offset=offset, user_id=current_user.id)
 
 
 @router.post("/")
@@ -63,6 +65,7 @@ async def create_company_batch_models(
                 tiker=comp.tiker,
                 name=comp.name if comp.name else comp.tiker,
                 type=comp.type,
+                user=current_user,
             )
             for comp in new_company_list
         ],
@@ -76,6 +79,9 @@ async def partial_update_company_model(
     current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
+    exist_company = await company_dao.get_company_model(company_id)
+    await check_owner_or_superuser(exist_company.user_id, current_user)
+
     await company_dao.update_company_model(
         company_id,
         updated_company.model_dump(),
@@ -90,6 +96,9 @@ async def update_company_model(
     current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
+    exist_company = await company_dao.get_company_model(company_id)
+    await check_owner_or_superuser(exist_company.user_id, current_user)
+
     await company_dao.update_company_model(
         company_id,
         updated_company.model_dump(),
@@ -102,4 +111,7 @@ async def delete_company_model(
     current_user: CurrentUser,
     company_dao: CompanyDAO = Depends(),
 ) -> None:
+    exist_company = await company_dao.get_company_model(company_id)
+    await check_owner_or_superuser(exist_company.user_id, current_user)
+
     await company_dao.delete_company_model(company_id)
