@@ -228,7 +228,7 @@ class TAService:
             decision=decision.decision.name,
             k=decision.k,
             d=decision.d,
-            # last_price=decision.last_price
+            last_price=decision.last_price
         )
 
     def _fill_messages(self, decision, companies, period):  # noqa: WPS210
@@ -238,11 +238,11 @@ class TAService:
         result = f"Акции {decision} ({PERIOD_NAMES[period]})!\n"
         for dec in companies:
             tiker = dec.company.tiker
-            # price = round(dec.last_price, 2)
+            price = round(dec.last_price, 2)
             name = (
                 f"[{tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={tiker})"
             )
-            price_str = ""  # f" - цена: {price}"
+            price_str = f" - цена: {price}"
 
             # Сейчас не возвращается stop
             stop_str = ""  # f', стоп: {round(dec.stop, 2)}' if dec.stop else ''
