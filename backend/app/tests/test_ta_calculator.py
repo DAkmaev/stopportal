@@ -6,8 +6,11 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 from app.db.models.company import StopModel
-from app.tests.utils.common import (create_test_companies, create_test_company,
-                                    create_test_user)
+from app.tests.utils.common import (
+    create_test_companies,
+    create_test_company,
+    create_test_user,
+)
 from app.utils.ta.ta_calculator import TACalculator
 from app.web.api.ta.scheme import TADecisionDTO, TADecisionEnum
 from fastapi import FastAPI

@@ -92,8 +92,14 @@ async def create_test_briefcase_registry(
     company: CompanyModel = None,
 ) -> BriefcaseRegistryModel:
     briefcase_dao = BriefcaseDAO(dbsession)
-    company = company if company else await create_test_company(dbsession, user_id=user_id)
-    briefcase = briefcase if briefcase else await create_test_briefcase(dbsession, user_id=user_id)
+    company = (
+        company if company else await create_test_company(dbsession, user_id=user_id)
+    )
+    briefcase = (
+        briefcase
+        if briefcase
+        else await create_test_briefcase(dbsession, user_id=user_id)
+    )
 
     # Создаем новую запись briefcase_registry
     await briefcase_dao.create_briefcase_registry_model(
@@ -226,11 +232,11 @@ async def _get_test_user_headers(
         is_active=is_active,
     )
 
-    dao= UserDAO(dbsession)
+    dao = UserDAO(dbsession)
     user = await dao.get_user_by_name(name)
     headers = await get_headers(client, fastapi_app, name, password)
 
-    return {'user': user, 'headers': headers}
+    return {"user": user, "headers": headers}
 
 
 async def get_headers(

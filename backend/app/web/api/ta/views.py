@@ -4,16 +4,15 @@ from typing import Dict, List
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.services.ta_service import TAService
 from app.web.api.ta.scheme import TADecisionDTO
+from app.web.deps import CurrentUser
 from fastapi import APIRouter, Depends
 from starlette.responses import FileResponse
-
-from app.web.deps import CurrentUser
 
 router = APIRouter()
 
 
 @router.post("/")
-async def generate_ta_decisions(
+async def generate_ta_decisions(  # noqa: WPS211
     current_user: CurrentUser,
     period: str = "ALL",
     is_cron: bool = False,

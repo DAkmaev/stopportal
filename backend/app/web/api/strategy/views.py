@@ -3,9 +3,8 @@ from typing import List
 from app.db.dao.strategies import StrategiesDAO
 from app.db.models.company import StrategyModel
 from app.web.api.strategy.scheme import StrategiesDTO, StrategiesInputDTO
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.web.deps import CurrentUser, check_owner_or_superuser
+from fastapi import APIRouter, Depends
 
 router = APIRouter()
 

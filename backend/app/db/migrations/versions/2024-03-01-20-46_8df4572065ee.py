@@ -22,9 +22,15 @@ def upgrade() -> None:
     op.add_column("briefcases", sa.Column("user_id", sa.Integer(), nullable=True))
 
     # Create indexes
-    op.create_index(op.f("ix_companies_user_id"), "companies", ["user_id"], unique=False)
-    op.create_index(op.f("ix_strategies_user_id"), "strategies", ["user_id"], unique=False)
-    op.create_index(op.f("ix_briefcases_user_id"), "briefcases", ["user_id"], unique=False)
+    op.create_index(
+        op.f("ix_companies_user_id"), "companies", ["user_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_strategies_user_id"), "strategies", ["user_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_briefcases_user_id"), "briefcases", ["user_id"], unique=False
+    )
 
     # Create foreign keys
     if op.get_context().dialect.name != "sqlite":
@@ -49,4 +55,3 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_companies_user_id"), table_name="companies")
     op.drop_index(op.f("ix_strategies_user_id"), table_name="strategies")
     op.drop_index(op.f("ix_briefcases_user_id"), table_name="briefcases")
-

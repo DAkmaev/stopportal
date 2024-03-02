@@ -10,18 +10,21 @@ from app.db.models.briefcase import (
     RegistryOperationEnum,
 )
 from app.db.models.company import CompanyModel, StrategyModel
+from app.db.models.user import UserModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.models.user import UserModel
 
 
 class BriefcaseDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_briefcase_model(self, user_id: int, fill_up: float = None) -> BriefcaseModel:
+    async def create_briefcase_model(
+        self,
+        user_id: int,
+        fill_up: float = None,
+    ) -> BriefcaseModel:
         user = await self.session.get(UserModel, user_id)
         briefcase = BriefcaseModel(fill_up=fill_up, user=user)
         self.session.add(briefcase)
@@ -34,7 +37,10 @@ class BriefcaseDAO:
         offset: int = 0,
     ) -> List[BriefcaseModel]:
         raw_briefcases = await self.session.execute(
-            select(BriefcaseModel).where(BriefcaseModel.user_id == user_id).limit(limit).offset(offset),
+            select(BriefcaseModel)
+            .where(BriefcaseModel.user_id == user_id)
+            .limit(limit)
+            .offset(offset),
         )
         return list(raw_briefcases.scalars().fetchall())
 

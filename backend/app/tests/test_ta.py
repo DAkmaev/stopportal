@@ -6,12 +6,11 @@ from typing import Any
 import pytest
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.ta_decisions import TADecisionDAO
+from app.tests.utils.common import create_test_user
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.tests.utils.common import create_test_user
 
 
 @pytest.mark.anyio

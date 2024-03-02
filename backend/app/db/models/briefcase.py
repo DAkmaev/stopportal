@@ -3,11 +3,10 @@ from typing import Optional
 
 from app.db.base import Base
 from app.db.models.company import CompanyModel, StrategyModel
+from app.db.models.user import UserModel
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DECIMAL, TIMESTAMP, Integer
-
-from app.db.models.user import UserModel
 
 
 class CurrencyEnum(enum.Enum):
@@ -29,7 +28,11 @@ class BriefcaseModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True, nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"),
+        index=True,
+        nullable=True,
+    )
     user: Mapped[Optional["UserModel"]] = relationship()
 
 

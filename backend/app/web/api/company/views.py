@@ -8,9 +8,8 @@ from app.web.api.company.scheme import (
     CompanyModelInputDTO,
     CompanyModelPatchDTO,
 )
-from fastapi import APIRouter, Depends
-
 from app.web.deps import CurrentUser, check_owner_or_superuser
+from fastapi import APIRouter, Depends
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -34,7 +33,11 @@ async def get_company_models(
     offset: int = 0,
     company_dao: CompanyDAO = Depends(),
 ) -> List[CompanyModel]:
-    return await company_dao.get_all_companies(limit=limit, offset=offset, user_id=current_user.id)
+    return await company_dao.get_all_companies(
+        limit=limit,
+        offset=offset,
+        user_id=current_user.id,
+    )
 
 
 @router.post("/")

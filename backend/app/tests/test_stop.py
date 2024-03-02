@@ -26,7 +26,7 @@ async def test_stop_adding(
     response = await client.post(
         url,
         json={"company_id": company.id, "period": "D", "value": 100},
-        headers=headers
+        headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
 

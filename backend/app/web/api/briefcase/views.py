@@ -2,19 +2,15 @@ from datetime import datetime
 from typing import List
 
 from app.db.dao.briefcases import BriefcaseDAO
-from app.db.models.briefcase import (
-    BriefcaseModel,
-    BriefcaseRegistryModel,
-)
+from app.db.models.briefcase import BriefcaseModel, BriefcaseRegistryModel
 from app.web.api.briefcase.scheme import (
     BriefcaseDTO,
     BriefcaseInputDTO,
     BriefcaseRegistryDTO,
     BriefcaseRegistryInputDTO,
 )
-from fastapi import APIRouter, Depends, HTTPException
-
 from app.web.deps import CurrentUser, check_owner_or_superuser
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -38,7 +34,11 @@ async def get_briefcase_models(
     offset: int = 0,
     dao: BriefcaseDAO = Depends(),
 ) -> List[BriefcaseModel]:
-    return await dao.get_all_briefcases(user_id=current_user.id, limit=limit, offset=offset)
+    return await dao.get_all_briefcases(
+        user_id=current_user.id,
+        limit=limit,
+        offset=offset,
+    )
 
 
 @router.post("/")
@@ -47,7 +47,10 @@ async def create_briefcase_model(
     current_user: CurrentUser,
     dao: BriefcaseDAO = Depends(),
 ) -> None:
-    await dao.create_briefcase_model(user_id=current_user.id, fill_up=new_briefcase_object.fill_up)
+    await dao.create_briefcase_model(
+        user_id=current_user.id,
+        fill_up=new_briefcase_object.fill_up,
+    )
 
 
 @router.put("/{briefcase_id}")

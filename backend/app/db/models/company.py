@@ -1,11 +1,10 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from app.db.base import Base
+from app.db.models.user import UserModel
 from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import Float, String
-
-from .user import UserModel
 
 if TYPE_CHECKING:
     from .item import Item  # noqa: F401,WPS300
@@ -36,7 +35,11 @@ class CompanyModel(Base):
         lazy="selectin",
     )
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True, nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"),
+        index=True,
+        nullable=True,
+    )
     user: Mapped[Optional["UserModel"]] = relationship()
 
 
@@ -59,5 +62,9 @@ class StrategyModel(Base):
         back_populates="strategies",
     )
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), index=True, nullable=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"),
+        index=True,
+        nullable=True,
+    )
     user: Mapped[Optional["UserModel"]] = relationship()

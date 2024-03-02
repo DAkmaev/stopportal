@@ -27,7 +27,7 @@ async def test_creation(
         json={
             "tiker": tiker_name,
         },
-        headers=user_token_headers['headers'],
+        headers=user_token_headers["headers"],
     )
     assert response.status_code == status.HTTP_200_OK
     dao = CompanyDAO(dbsession)

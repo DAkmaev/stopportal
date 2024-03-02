@@ -1,9 +1,8 @@
 import pytest
 from app.db.dao.strategies import StrategiesDAO
+from app.tests.utils.common import create_test_user
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.tests.utils.common import create_test_user
 
 
 @pytest.mark.anyio
@@ -18,7 +17,9 @@ async def test_add_strategy_model(
 
     user = await create_test_user(dbsession)
     # Create a new strategy
-    await strategies_dao.create_strategy_model(name=NAME, description=DESCRIPTION, user_id=user.id)
+    await strategies_dao.create_strategy_model(
+        name=NAME, description=DESCRIPTION, user_id=user.id
+    )
 
     # Retrieve the created strategy
     strategy = await strategies_dao.get_strategy_model_by_name(NAME)
@@ -80,7 +81,9 @@ async def test_get_strategies_model(
     )
 
     # Получаем стратегию по идентификатору
-    retrieved_strategies = await strategies_dao.get_all_strategies_model(user_id=user.id)
+    retrieved_strategies = await strategies_dao.get_all_strategies_model(
+        user_id=user.id
+    )
 
     # Проверяем, что стратегия была успешно получена и имеет правильные параметры
     assert retrieved_strategies is not None
@@ -104,7 +107,9 @@ async def test_get_strategy_model_by_name(
     user = await create_test_user(dbsession)
 
     # Create a new strategy
-    await strategies_dao.create_strategy_model(name=NAME, description=DESCRIPTION, user_id=user.id)
+    await strategies_dao.create_strategy_model(
+        name=NAME, description=DESCRIPTION, user_id=user.id
+    )
 
     # Retrieve the created strategy
     strategy = await strategies_dao.get_strategy_model_by_name(NAME)
@@ -134,10 +139,14 @@ async def test_get_all_strategies_model(
     user = await create_test_user(dbsession)
 
     for name, description in zip(strategy_names, strategy_descriptions):
-        await strategies_dao.create_strategy_model(name=name, description=description, user_id=user.id)
+        await strategies_dao.create_strategy_model(
+            name=name, description=description, user_id=user.id
+        )
 
     # Получаем все стратегии
-    retrieved_strategies = await strategies_dao.get_all_strategies_model(user_id=user.id)
+    retrieved_strategies = await strategies_dao.get_all_strategies_model(
+        user_id=user.id
+    )
 
     # Проверяем, что количество полученных стратегий соответствует ограничению
     assert len(retrieved_strategies) == len(strategy_names)

@@ -7,7 +7,8 @@ from app.db.models.briefcase import CurrencyEnum, RegistryOperationEnum
 from app.tests.utils.common import (
     create_test_briefcase,
     create_test_briefcase_registry,
-    create_test_company, create_test_user,
+    create_test_company,
+    create_test_user,
 )
 from fastapi import FastAPI, status
 from httpx import AsyncClient
@@ -127,7 +128,7 @@ async def test_get_briefcase_registry(
     url = fastapi_app.url_path_for(
         "get_briefcase_registry",
         briefcase_id=test_registry.briefcase_id,
-        item_id=test_registry.id
+        item_id=test_registry.id,
     )
 
     response = await client.get(url, headers=headers)

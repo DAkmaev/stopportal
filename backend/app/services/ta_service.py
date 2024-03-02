@@ -40,7 +40,6 @@ class TAService:
         is_cron: bool = False,
         send_messages: bool = True,
         send_test: bool = False,
-
     ):
         logger.info("Start generating TA decisions...")
         companies = await self.company_dao.get_all_companies(user_id=user_id)
@@ -116,9 +115,11 @@ class TAService:
         user_id: int,
         period: str = "All",
         send_messages: bool = False,
-
     ) -> TADecisionDTO:
-        company = await self.company_dao.get_company_model_by_tiker(tiker=tiker, user_id=user_id)
+        company = await self.company_dao.get_company_model_by_tiker(
+            tiker=tiker,
+            user_id=user_id,
+        )
         decision_model = self.ta_calculator.get_company_ta_decisions(company, period)
 
         for per in decision_model.keys():
@@ -132,8 +133,15 @@ class TAService:
 
         return decision_model
 
-    async def history_stochs(self, tiker: str, user_id: int) -> dict:  # noqa: WPS231,WPS210,C901
-        company = await self.company_dao.get_company_model_by_tiker(tiker=tiker, user_id=user_id)
+    async def history_stochs(  # noqa:  C901,WPS210,WPS231
+        self,
+        tiker: str,
+        user_id: int,
+    ) -> dict:  # noqa: WPS231,WPS210,C901
+        company = await self.company_dao.get_company_model_by_tiker(
+            tiker=tiker,
+            user_id=user_id,
+        )
         df = self.ta_calculator.get_history_data(company, 3650, add_current=False)
         low_data = False
 

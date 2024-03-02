@@ -4,11 +4,10 @@ from app.db.dao.stops import StopsDAO
 from app.db.dao.strategies import StrategiesDAO
 from app.db.dependencies import get_db_session
 from app.db.models.company import CompanyModel
+from app.db.models.user import UserModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.models.user import UserModel
 
 
 class CompanyDAO:
@@ -17,7 +16,7 @@ class CompanyDAO:
         self.stop_dao = StopsDAO(session)
         self.strategy_dao = StrategiesDAO(session)
 
-    async def create_company_model(
+    async def create_company_model(  # noqa: WPS211
         self,
         tiker: str,
         name: str,
@@ -26,7 +25,10 @@ class CompanyDAO:
         strategies: list[dict] = None,
     ) -> CompanyModel:
         raw_company = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.tiker == tiker, CompanyModel.user_id == user_id),
+            select(CompanyModel).where(
+                CompanyModel.tiker == tiker,
+                CompanyModel.user_id == user_id,
+            ),
         )
         exist_company: CompanyModel = raw_company.scalars().one_or_none()
 
@@ -120,9 +122,16 @@ class CompanyDAO:
 
         return company.scalars().one_or_none()
 
-    async def get_company_model_by_tiker(self, tiker: str, user_id: int) -> CompanyModel:
+    async def get_company_model_by_tiker(
+        self,
+        tiker: str,
+        user_id: int,
+    ) -> CompanyModel:
         company = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.tiker == tiker, CompanyModel.user_id == user_id),
+            select(CompanyModel).where(
+                CompanyModel.tiker == tiker,
+                CompanyModel.user_id == user_id,
+            ),
         )
 
         return company.scalars().one_or_none()

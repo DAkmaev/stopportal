@@ -4,12 +4,11 @@ from typing import Any
 import pytest
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.strategies import StrategiesDAO
+from app.tests.utils.common import get_user_token_headers
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
-
-from app.tests.utils.common import get_user_token_headers
 
 
 @pytest.mark.anyio
@@ -99,7 +98,7 @@ async def test_create_strategy_model(
             "name": strategy_name,
             "description": "Test description",
         },
-        headers=user_token_headers['headers'],
+        headers=user_token_headers["headers"],
     )
 
     # Проверяем успешный ответ и наличие созданной стратегии в базе данных
@@ -138,13 +137,14 @@ async def test_update_strategy_model(
             "name": original_name,
             "description": original_description,
         },
-        headers=user_token_headers['headers'],
+        headers=user_token_headers["headers"],
     )
     strategy_id = original_response.json()["user_id"]
 
     # Отправляем PUT-запрос для обновления стратегии
     url = fastapi_app.url_path_for(
-        "update_strategy_model", strategy_id=strategy_id,
+        "update_strategy_model",
+        strategy_id=strategy_id,
     )
     response = await client.put(
         url,
@@ -152,7 +152,7 @@ async def test_update_strategy_model(
             "name": updated_name,
             "description": updated_description,
         },
-        headers=user_token_headers['headers'],
+        headers=user_token_headers["headers"],
     )
     assert response.status_code == status.HTTP_200_OK
 
@@ -187,13 +187,16 @@ async def test_delete_strategy_model(
             "name": strategy_name,
             "description": strategy_description,
         },
-        headers=user_token_headers['headers'],
+        headers=user_token_headers["headers"],
     )
     strategy_id = response.json()["user_id"]
 
     # Отправляем DELETE-запрос для удаления стратегии
     url = fastapi_app.url_path_for("delete_strategy_model", strategy_id=strategy_id)
-    response = await client.delete(url, headers=user_token_headers['headers'],)
+    response = await client.delete(
+        url,
+        headers=user_token_headers["headers"],
+    )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
     # Проверяем успешный ответ и отсутствие удаленной стратегии в базе данных
@@ -221,12 +224,15 @@ async def test_update_strategies_in_company(
     strategies_dao = StrategiesDAO(dbsession)
 
     await company_dao.create_company_model(
-        name=company_name, tiker=company_ticker, company_type=company_type, user_id=user.id
+        name=company_name,
+        tiker=company_ticker,
+        company_type=company_type,
+        user_id=user.id,
     )
 
     url = fastapi_app.url_path_for("create_strategy_model")
     for strategy_name in strategy_names:
-         await client.post(
+        await client.post(
             url,
             json={
                 "name": strategy_name,
@@ -236,7 +242,9 @@ async def test_update_strategies_in_company(
         )
 
     # Получаем созданную компанию и стратегии
-    retrieved_company = await company_dao.get_company_model_by_tiker(company_ticker, user.id)
+    retrieved_company = await company_dao.get_company_model_by_tiker(
+        company_ticker, user.id
+    )
     retrieved_strategies = []
     for strategy_name in strategy_names:
         strategy = await strategies_dao.get_strategy_model_by_name(strategy_name)
@@ -321,14 +329,12 @@ async def test_check_permissions_delete_strategy_model(
     original_user_date = await get_user_token_headers(client, fastapi_app, dbsession)
     new_user_data = await get_user_token_headers(client, fastapi_app, dbsession)
 
-    user_original = original_user_date['user']
-    user_new_headers = new_user_data['headers']
+    user_original = original_user_date["user"]
+    user_new_headers = new_user_data["headers"]
 
     strategy_dao = StrategiesDAO(dbsession)
     await strategy_dao.create_strategy_model(
-        name=strategy_name,
-        description=strategy_description,
-        user_id=user_original.id
+        name=strategy_name, description=strategy_description, user_id=user_original.id
     )
     strategy = await strategy_dao.get_strategy_model_by_name(strategy_name)
 

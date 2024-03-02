@@ -1,9 +1,8 @@
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
 from app.web.api.stop.scheme import StopDTO, StopInputDTO
-from fastapi import APIRouter, Depends
-
 from app.web.deps import CurrentUser, check_owner_or_superuser
+from fastapi import APIRouter, Depends
 
 router = APIRouter()
 
