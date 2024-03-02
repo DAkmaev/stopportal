@@ -60,7 +60,7 @@ class TADecisionDAO:
         decision: str,
         k: float = None,  # noqa:WPS111
         d: float = None,  # noqa:WPS111
-        last_price: float = None,
+        last_price: float = 0,
     ) -> TADecisionModel:
         if not decision_id:
             ta_decision = TADecisionModel(
