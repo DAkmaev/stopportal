@@ -83,7 +83,7 @@ async def test_update_stoch_decisions(
     assert ta_decision.decision == updated_decision
     assert ta_decision.k == 0.4
     assert ta_decision.d == 0.6
-    # assert ta_decision.last_price == 110.0
+    assert ta_decision.last_price == 110.0
 
 
 @pytest.mark.anyio
