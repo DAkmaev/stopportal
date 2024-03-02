@@ -228,7 +228,7 @@ class TAService:
             decision=decision.decision.name,
             k=decision.k,
             d=decision.d,
-            last_price=decision.last_price
+            last_price=decision.last_price,
         )
 
     def _fill_messages(self, decision, companies, period):  # noqa: WPS210
