@@ -52,6 +52,18 @@ class BriefcaseDAO:
 
         return briefcase
 
+    async def get_briefcase_model_by_user(self, user: UserModel) -> BriefcaseModel:
+        raw_briefcase = await self.session.execute(
+            select(BriefcaseModel).where(BriefcaseModel.user == user),
+        )
+
+        briefcase: CompanyModel = raw_briefcase.scalars().one_or_none()
+
+        if not briefcase:
+            raise HTTPException(status_code=404, detail="Briefcase not found")
+
+        return briefcase
+
     async def update_briefcase_model(
         self,
         briefcase_id: int,

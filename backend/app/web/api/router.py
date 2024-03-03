@@ -12,6 +12,7 @@ from app.web.api import (
     strategy,
     stop,
     briefcase,
+    cron,
 )
 
 api_router = APIRouter()
@@ -29,3 +30,4 @@ api_router.include_router(
 api_router.include_router(briefcase.router, prefix="/briefcase", tags=["briefcase"])
 api_router.include_router(login.router, prefix="/login", tags=["login"])
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(cron.router, prefix="/cron", tags=["cron"])

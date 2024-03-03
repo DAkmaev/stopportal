@@ -8,7 +8,6 @@ from app.tests.utils.common import (
     create_test_briefcase,
     create_test_briefcase_registry,
     create_test_company,
-    create_test_user,
 )
 from fastapi import FastAPI, status
 from httpx import AsyncClient

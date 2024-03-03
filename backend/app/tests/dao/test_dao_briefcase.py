@@ -49,6 +49,27 @@ async def test_get_briefcase_model(
 
 
 @pytest.mark.anyio
+async def test_get_briefcase_model_by_user(
+    fastapi_app: FastAPI,
+    dbsession: AsyncSession,
+) -> None:
+    FILL_UP = 100
+    briefcase_dao = BriefcaseDAO(dbsession)
+    user = await create_test_user(dbsession)
+
+    # Create a briefcase
+    await briefcase_dao.create_briefcase_model(fill_up=FILL_UP, user_id=user.id)
+    briefcases = await briefcase_dao.get_all_briefcases(user_id=user.id)
+    assert len(briefcases) == 1
+
+    # Get a briefcase model by User
+    existing_briefcase = await briefcase_dao.get_briefcase_model_by_user(user)
+    assert existing_briefcase is not None
+    assert existing_briefcase.id == briefcases[0].id
+    assert existing_briefcase.fill_up == briefcases[0].fill_up
+
+
+@pytest.mark.anyio
 async def test_get_all_briefcase_registry(dbsession: AsyncSession) -> None:
     briefcase_dao = BriefcaseDAO(dbsession)
     user = await create_test_user(dbsession)
