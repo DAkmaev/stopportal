@@ -6,8 +6,6 @@ from app.services.ta_service import TAService
 from app.web.api.ta.scheme import TADecisionDTO
 from fastapi import APIRouter, Depends
 from starlette.responses import FileResponse
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -47,9 +45,8 @@ async def generate_ta_decision(
 
 
 @router.get("/")
-async def get_stochs(stoch_dao: TADecisionDAO = Depends()) -> JSONResponse:
-    ta_data = await stoch_dao.get_ta_decision_models()
-    return JSONResponse(content=jsonable_encoder(ta_data))
+async def get_stochs(stoch_dao: TADecisionDAO = Depends()) -> List[TADecisionDTO]:
+    return await stoch_dao.get_ta_decision_models()
 
 
 @router.get("/history/{tiker}")
