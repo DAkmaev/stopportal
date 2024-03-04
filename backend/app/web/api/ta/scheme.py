@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TADecisionEnum(str, Enum):  # noqa: WPS600
@@ -27,9 +27,9 @@ class TACompanyDTO(BaseModel):
 class TADecisionDTO(BaseModel):
     company: TACompanyDTO
     decision: TADecisionEnum
-    last_price: Optional[float] = None
-    k: Optional[float] = None  # noqa: WPS111
-    d: Optional[float] = None  # noqa: WPS111
+    last_price: Optional[float] = Field(None, nullable=True)
+    k: Optional[float] = Field(None, nullable=True)  # noqa: WPS111
+    d: Optional[float] = Field(None, nullable=True)  # noqa: WPS111
     period: str
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None

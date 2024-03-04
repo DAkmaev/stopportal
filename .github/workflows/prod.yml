@@ -22,7 +22,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "deploy/docker-compose.yml,deploy/.env.prod"
+          source: "deploy/docker-compose.yml,deploy/.env.prod,backup_db.sh"
           target: "stopportal/prod"
           strip_components: 1
           overwrite: true
@@ -35,6 +35,11 @@ jobs:
           script: |
             cd stopportal/prod
             cp .env.prod .env
+            sudo chmod +x backup_db.sh
+            set -a
+            source .env
+            set +a
+            sudo sh backup_db.sh prod
             sudo docker compose -f docker-compose.yml -p prod pull
             sudo docker compose -f docker-compose.yml -p prod down
             sudo docker compose -f docker-compose.yml -p prod up -d

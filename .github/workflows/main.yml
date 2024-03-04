@@ -3,7 +3,7 @@ name: Main Stopportal workflow
 on:
   push:
     branches:
-      - logging
+      - lasr_price
       - main
 
 jobs:
