@@ -90,6 +90,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['token']),
     filter() {
       return this.caseSensitive
         ? (item, search, textKey) => item[textKey].indexOf(search) > -1
@@ -111,7 +112,6 @@ export default {
     this.fetchList()
   },
   methods: {
-    ...mapGetters(['token']),
     fetchList() {
       getData(endpoints.STRATEGIES, null, this.token).then(data => {
         this.list = data
@@ -127,7 +127,7 @@ export default {
       else this.editItem()
     },
     addItem() {
-      postData(endpoints.STRATEGIES, this.temp, { type: this.type }, this.token)
+      postData(endpoints.STRATEGIES, this.temp, null, this.token)
         .then(() => {
           this.$nextTick(() => {
             this.fetchList()
@@ -154,7 +154,7 @@ export default {
       this.dialog = true
     },
     editItem() {
-      putData(endpoints.STRATEGIES + this.temp.id, this.temp, this.token)
+      putData(endpoints.STRATEGIES + this.temp.id, this.temp, null, this.token)
         .then(() => {
           this.$nextTick(() => {
             this.fetchList()
@@ -167,7 +167,7 @@ export default {
     },
     handleDelete(id) {
       confirm('Вы точно хотите удалить?') &&
-      deleteData(endpoints.STRATEGIES + id, this.token)
+      deleteData(endpoints.STRATEGIES + id, null, this.token)
         .then(() => {
           this.active = []
           this.selected = []

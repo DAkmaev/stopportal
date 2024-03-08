@@ -28,6 +28,7 @@
 
 <script>
 import { endpoints, postData, deleteData, putData } from '@/api/invmos-back'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'CompanyStops',
@@ -56,7 +57,9 @@ export default {
       }
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters(['token'])
+  },
   watch: {
     open: function() {
       this.resetTemp()
@@ -108,15 +111,15 @@ export default {
 
       const tasks = []
       stops_remove_ids.forEach(id => {
-        tasks.push(deleteData(endpoints.STOPS + id))
+        tasks.push(deleteData(endpoints.STOPS + id, null, this.token))
       })
 
       stops_new.forEach(s => {
-        tasks.push(postData(endpoints.STOPS, s))
+        tasks.push(postData(endpoints.STOPS, s, null, this.token))
       })
 
       stops_updated.forEach(s => {
-        tasks.push(putData(endpoints.STOPS, s))
+        tasks.push(putData(endpoints.STOPS, s, null, this.token))
       })
 
       Promise.all(tasks)

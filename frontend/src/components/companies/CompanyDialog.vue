@@ -80,6 +80,7 @@
 
 <script>
 import { deleteData, getStrategies, endpoints, postData, putData } from '@/api/invmos-back'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'CompanyDialog',
@@ -136,7 +137,9 @@ export default {
       }
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters(['token'])
+  },
   watch: {
     open: function() {
       this.resetTemp()
@@ -151,7 +154,7 @@ export default {
   },
   methods: {
     fetchStrategies() {
-      getStrategies().then(strategies => {
+      getStrategies(this.token).then(strategies => {
         this.strategies = strategies
       })
     },
@@ -177,7 +180,7 @@ export default {
       else this.editItem()
     },
     addItem: function() {
-      postData(endpoints.COMPANIES, this.temp)
+      postData(endpoints.COMPANIES, this.temp, null, this.token)
         .then(async resp => {
           // const id = resp.id
           this.dialog = false
@@ -201,7 +204,7 @@ export default {
       this.$emit('dialog-cancel')
     },
     editItem() {
-      putData(endpoints.COMPANIES + this.temp.id, this.temp, false)
+      putData(endpoints.COMPANIES + this.temp.id, this.temp, false, this.token)
         .then(() => {
           this.$emit('added-company')
           this.dialog = false
@@ -212,7 +215,7 @@ export default {
     },
     handleDelete() {
       confirm('Вы точно хотите удалить?') &&
-      deleteData(endpoints.COMPANIES + this.temp.id).then(() => {
+      deleteData(endpoints.COMPANIES + this.temp.id, null, this.token).then(() => {
         this.active = []
         this.$emit('deleted-company')
         this.dialog = false

@@ -77,19 +77,19 @@ export async function getData(endpoint = '', params = {}, authToken = null, pars
 }
 
 export async function postData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
-  return requestWithBody('POST', endpoint, body, parseResponse, params)
+  return requestWithBody('POST', endpoint, body, parseResponse, params, authToken)
 }
 
 export async function putData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
-  return requestWithBody('PUT', endpoint, body, parseResponse, params)
+  return requestWithBody('PUT', endpoint, body, parseResponse, params, authToken)
 }
 
 export async function patchData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
-  return requestWithBody('PATCH', endpoint, body, parseResponse, params)
+  return requestWithBody('PATCH', endpoint, body, parseResponse, params, authToken)
 }
 
 export async function deleteData(endpoint = '', params = {}, authToken = null) {
-  return requestWithBody('DELETE', endpoint, {}, false, params)
+  return requestWithBody('DELETE', endpoint, {}, false, params, authToken)
 }
 
 export async function getCategoriesSimple(type, authToken = null) {

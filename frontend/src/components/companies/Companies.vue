@@ -164,6 +164,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['token']),
     // otrasliKeyMap() {
     //   return this.otrasli.reduce(function(map, obj) {
     //     map[obj.id] = obj
@@ -181,7 +182,6 @@ export default {
     this.fetchList()
   },
   methods: {
-    ...mapGetters(['token']),
     async fetchList() {
       // getCategoriesSimple('otrasli').then(otrasli => {
       //   this.otrasli = otrasli

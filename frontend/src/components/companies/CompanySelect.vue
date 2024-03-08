@@ -16,6 +16,7 @@
 
 <script>
 import { getData, endpoints } from '@/api/invmos-back'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'CompanySelect',
@@ -43,6 +44,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['token']),
     filteredList: function() {
       if (this.companies.length > 0 && (this.strategyIds.length > 0 || this.notStrategyIds.length > 0)) {
         return this.companies.filter(c => {
@@ -59,7 +61,7 @@ export default {
   },
   methods: {
     fetchList() {
-      getData(endpoints.COMPANIES, { fields: 'c.id,c.name,c.tiker,c.currency,c.issue_size,c.capitalization' }).then(data => {
+      getData(endpoints.COMPANIES, { fields: 'c.id,c.name,c.tiker,c.currency,c.issue_size,c.capitalization' }, this.token).then(data => {
         this.companies = data
       })
     },

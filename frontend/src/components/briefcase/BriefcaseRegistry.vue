@@ -265,8 +265,6 @@
 import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
 import { mapGetters } from 'vuex'
 
-// todo: переделать когда будет реализовано несколько портфелей
-const BRIEFCASE_ID = 1
 export default {
   name: 'BriefcaseRegistry',
   filters: {
@@ -296,6 +294,7 @@ export default {
         USD: { id: 'USD', name: '$' },
         EUR: { id: 'EUR', name: '€' }
       },
+      briefcaseId: null,
       strategies: [],
       companies: [],
       list: [],
@@ -358,6 +357,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['token']),
     selectedItem() {
       return this.selected && this.selected.length > 0 ? this.selected[0] : null
     },
@@ -393,12 +393,13 @@ export default {
     this.fetchList()
   },
   methods: {
-    ...mapGetters(['token']),
     async fetchList() {
+      const briefcases = await getData(endpoints.BRIEFCASE, null, this.token)
+      this.briefcaseId = briefcases[0].id
       const [data, strategies, companies] = await Promise.all([
-        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, {
-          dateFrom: this.dateFrom,
-          dateTo: this.dateTo
+        getData(`${endpoints.BRIEFCASE}/${this.briefcaseId}/registry/`, {
+          date_from: this.dateFrom,
+          date_to: this.dateTo
           // limit: this.itemsPerPage,
           // offset: (this.page - 1) * this.itemsPerPage
         }, this.token),
@@ -415,20 +416,6 @@ export default {
           this.fetchList()
         })
       })
-    },
-    saveCompanyBriefcase(item) {
-      if (item.count) {
-        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, null, this.token)
-          .then(() => {
-            this.fetchList()
-            console.log('Updated')
-          })
-      } else {
-        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, null, this.token).then(() => {
-          this.fetchList()
-          console.log('Deleted')
-        })
-      }
     },
     saveItem() {
       if (this.dialogMode === 'add') this.addItem()
@@ -447,7 +434,7 @@ export default {
       temp.count = temp.count ? temp.count : null
       temp.created_date = this.toLocalISOString(temp.created_date)
 
-      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/registry/`, temp, null, this.token)
+      postData(`${endpoints.BRIEFCASE}/${this.briefcaseId}/registry/`, temp, null, this.token)
         .then(() => {
           this.fetchList()
           this.dialog = false
@@ -470,7 +457,7 @@ export default {
       data.strategy = data.strategy && data.strategy.id ? data.strategy : null
       data.created_date = this.toLocalISOString(data.created_date)
 
-      putData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`, data, null, this.token)
+      putData(`${endpoints.BRIEFCASE}/${this.briefcaseId}/registry/${id}`, data, null, this.token)
         .then(() => {
           this.$nextTick(() => {
             this.fetchList()
@@ -484,7 +471,7 @@ export default {
     },
     handleDelete(id) {
       confirm('Вы точно хотите удалить?') &&
-      deleteData(`${endpoints.BRIEFCASE_REGISTRY}/${id}`, null, this.token)
+      deleteData(`${endpoints.BRIEFCASE}/${this.briefcaseId}/registry/${id}`, null, this.token)
         .then(() => {
           this.active = []
           this.selected = []
