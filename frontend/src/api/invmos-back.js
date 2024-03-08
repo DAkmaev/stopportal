@@ -30,6 +30,7 @@ async function requestWithBody(method, endpoint = '', body = {}, parseResponse =
     return true
   } catch (e) {
     console.error(e.message)
+    throw new Error(`Exception during sendint request to ${endpoint}`)
   }
 }
 
@@ -60,13 +61,18 @@ export async function getData(endpoint = '', params = {}, authToken = null, pars
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`
     }
-    const data = await fetch(url, {
+    const response = await fetch(url, {
       method: 'GET',
       headers: headers
     })
-    return parseJsonResponse ? await data.json() : await data.text()
+    if (response.status !== 200) {
+      console.error(response.statusMessage)
+      throw new Error(`Error gettting data ${endpoint}, params: ${params}`)
+    }
+    return parseJsonResponse ? await response.json() : await response.text()
   } catch (e) {
-    console.error(e.message)
+    console.error(e)
+    throw new Error(`Error gettting data ${endpoint}, params: ${params}, error: ${e.message}`)
   }
 }
 

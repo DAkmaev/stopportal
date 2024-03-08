@@ -65,7 +65,7 @@ class Settings(BaseSettings):
         if self.environment not in {"prod", "test"}:
             return URL.build(
                 scheme="sqlite+aiosqlite",
-                path=f"///{self.db_file}",
+                path=f"///..//{self.db_file}",
             )
 
         url_scheme = "postgresql+psycopg"
