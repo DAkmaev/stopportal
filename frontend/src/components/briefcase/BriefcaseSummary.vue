@@ -166,7 +166,6 @@
 
 <script>
 import { getData, getStrategies, endpoints } from '@/api/invmos-back'
-import { mapGetters } from 'vuex'
 
 export default {
   name: 'BriefcaseSummary',
@@ -234,9 +233,7 @@ export default {
       }
     }
   },
-  computed: {
-    ...mapGetters(['token'])
-  },
+  computed: {},
   created() {
     this.fetchList()
   },
@@ -244,7 +241,7 @@ export default {
     async fetchList() {
       const [strategies, companies] = await Promise.all([
         getStrategies(this.token),
-        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' }, this.token)
+        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
       ])
       this.strategies = strategies
       this.companies = companies

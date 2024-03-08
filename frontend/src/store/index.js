@@ -76,7 +76,7 @@ export default new Vuex.Store({
     },
     async actionGetUserProfile(context) {
       try {
-        const response = await getData(endpoints.ME, null, context.state.token)
+        const response = await getData(endpoints.ME, null)
         if (response) {
           context.commit('setUserProfile', response)
         }
@@ -101,7 +101,7 @@ export default new Vuex.Store({
         }
         if (token) {
           try {
-            const response = await getData(endpoints.ME, null, context.state.token)
+            const response = await getData(endpoints.ME, null)
             context.commit('setLoggedIn', true)
             context.commit('setUserProfile', response)
           } catch (error) {

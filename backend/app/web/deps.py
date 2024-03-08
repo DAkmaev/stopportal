@@ -24,32 +24,40 @@ async def get_current_user(
     session: AsyncSession = Depends(get_db_session),
     token: str = Depends(reusable_oauth2),
 ) -> UserModel:
-    try:
-        payload = jwt.decode(
-            token,
-            settings.secret_key,
-            algorithms=[settings.algorithm],
-        )
-        token_data = TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
-        )
-    try:
-        user = await session.get(UserModel, token_data.sub)
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Wrong token data",
-        )
+    token_data = validate_token(token)
+    user = await get_user_by_id(session, token_data.sub)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return user
+
+
+def validate_token(token: str) -> TokenPayload:
+    try:
+        payload = jwt.decode(
+            token,
+            settings.secret_key,
+            algorithms=[settings.algorithm],
+        )
+        return TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+
+
+async def get_user_by_id(session: AsyncSession, user_id: int) -> UserModel:
+    try:
+        return await session.get(UserModel, user_id)
+    except Exception as exception:
+        logger.error(exception)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong token data",
+        )
 
 
 CurrentUser = Annotated[UserModel, Depends(get_current_user)]

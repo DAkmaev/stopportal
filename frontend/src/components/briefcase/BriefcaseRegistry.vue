@@ -263,7 +263,6 @@
 
 <script>
 import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
-import { mapGetters } from 'vuex'
 
 export default {
   name: 'BriefcaseRegistry',
@@ -357,7 +356,6 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['token']),
     selectedItem() {
       return this.selected && this.selected.length > 0 ? this.selected[0] : null
     },
@@ -394,7 +392,7 @@ export default {
   },
   methods: {
     async fetchList() {
-      const briefcases = await getData(endpoints.BRIEFCASE, null, this.token)
+      const briefcases = await getData(endpoints.BRIEFCASE, null)
       this.briefcaseId = briefcases[0].id
       const [data, strategies, companies] = await Promise.all([
         getData(`${endpoints.BRIEFCASE}/${this.briefcaseId}/registry/`, {
@@ -402,9 +400,9 @@ export default {
           date_to: this.dateTo
           // limit: this.itemsPerPage,
           // offset: (this.page - 1) * this.itemsPerPage
-        }, this.token),
+        }),
         getStrategies(this.token),
-        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' }, this.token)
+        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
       ])
       this.strategies = strategies
       this.companies = companies
