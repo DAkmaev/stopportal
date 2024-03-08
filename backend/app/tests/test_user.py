@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 from app.db.dao.user import UserDAO
 from app.db.models.user import UserModel
@@ -87,12 +89,9 @@ async def test_get_user_me(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
-    user_token_headers: dict[str, str],
+    user_token_headers: dict[str, Any],
 ) -> None:
-    name = random_lower_string()
-    password = random_lower_string()
-    user = await create_test_user(dbsession, name=name, password=password)
-    headers = await get_headers(client, fastapi_app, name, password)
+    user, headers = user_token_headers.values()
 
     url = fastapi_app.url_path_for("read_user_me")
     response = await client.get(url, headers=headers)

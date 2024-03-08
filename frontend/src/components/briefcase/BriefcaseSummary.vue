@@ -2,11 +2,6 @@
   <div>
     <v-container fluid>
       <v-row class="justify">
-        <v-col>
-          <v-item-group>
-            <v-btn small dark fab color="primary" class="ms-2" @click="handleAdd"><v-icon>mdi-plus</v-icon></v-btn>
-          </v-item-group>
-        </v-col>
         <v-col cols="2">
           <v-menu
             ref="menuFrom"
@@ -165,106 +160,13 @@
           </v-data-table>
         </v-col>
       </v-row>
-      <v-dialog v-if="dialog" v-model="dialog" :eager="true" scrollable max-width="980px">
-        <v-card>
-          <v-card-title>
-            Добавление акций
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-form ref="addForm">
-                <v-row>
-                  <v-col cols="12" sm="6" md="6">
-                    <v-autocomplete
-                      v-model="temp.company.id"
-                      no-data-text="Нет данных"
-                      label="Выберите компанию"
-                      :items="companies"
-                      item-text="name"
-                      item-value="id"
-                      clearable
-                    />
-                  </v-col>
-
-                </v-row>
-                <v-row>
-                  <v-col cols="8" sm="4" md="4">
-                    <v-autocomplete
-                      v-model="temp.strategy.id"
-                      no-data-text="Нет данных"
-                      label="Выберите стратегии"
-                      :items="strategies"
-                      item-text="name"
-                      item-value="id"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="8" sm="4" md="4">
-                    <v-autocomplete
-                      v-model="temp.part_name"
-                      no-data-text="Нет данных"
-                      label="Выберите часть портфеля"
-                      :items="Object.values(parts)"
-                      item-text="name"
-                      item-value="id"
-                      clearable
-                    />
-                  </v-col>
-                  <v-col cols="8" sm="4" md="4">
-                    <v-autocomplete
-                      v-model="temp.type_document"
-                      no-data-text="Нет данных"
-                      label="Выберите тип документа"
-                      :items="Object.values(documentTypes)"
-                      item-text="name"
-                      item-value="id"
-                      clearable
-                    />
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="6" sm="3" md="3">
-                    <v-text-field
-                      v-model="temp.count"
-                      label="Количество акций"
-                      required
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="3" md="3">
-                    <v-text-field
-                      v-model="temp.dividends"
-                      label="Дивиденды / купоны"
-                      required
-                    />
-                  </v-col>
-                  <v-col cols="6" sm="3" md="3">
-                    <v-text-field
-                      v-model="temp.withdrawal"
-                      label="Вывод"
-                      required
-                    />
-                  </v-col>
-                </v-row>
-                <v-card-actions>
-                  <v-spacer />
-                  <v-btn text @click="dialog = false">Отмена</v-btn>
-                  <v-btn text color="primary" @click="addData">Сохранить</v-btn>
-                </v-card-actions>
-              </v-form>
-            </v-container>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
     </v-container>
   </div>
 </template>
 
 <script>
-import { getData, putData, getStrategies, endpoints, postData, deleteData } from '@/api/invmos-back'
-import { mapGetters } from 'vuex'
+import { getData, getStrategies, endpoints } from '@/api/invmos-back'
 
-// todo: переделать когда будет реализовано несколько портфелей
-const BRIEFCASE_ID = 1
 export default {
   name: 'BriefcaseSummary',
   filters: {
@@ -331,16 +233,15 @@ export default {
       }
     }
   },
+  computed: {},
   created() {
     this.fetchList()
   },
   methods: {
-    ...mapGetters(['token']),
     async fetchList() {
-      const [data, strategies, companies] = await Promise.all([
-        getData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, { dateFrom: this.dateFrom, dateTo: this.dateTo }, this.token),
+      const [strategies, companies] = await Promise.all([
         getStrategies(this.token),
-        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' }, this.token)
+        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
       ])
       this.strategies = strategies
       this.companies = companies
@@ -349,6 +250,7 @@ export default {
       // let sumCBend = 0
       // let sumDohodnost = 0
       // let sumDividends = 0
+      const data = []
       data.forEach(d => {
         const dohodnost = Math.round(((d.dividends || 0) + (d.cb_end || 0) - (d.cb_start || 0)) * 100, 2) / 100
         const dohodnost_perc = dohodnost ? Math.round(dohodnost / d.cb_start * 10000, 2) / 100 : null
@@ -377,48 +279,6 @@ export default {
           this.fetchList()
         })
       })
-    },
-    saveCompanyBriefcase(item) {
-      if (item.count) {
-        putData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, item, this.token)
-          .then(() => {
-            this.fetchList()
-            console.log('Updated')
-          })
-      } else {
-        deleteData(`${endpoints.BRIEFCASE_ITEMS}/${item.id}`, this.token).then(() => {
-          this.fetchList()
-          console.log('Deleted')
-        })
-      }
-    },
-    handleAdd() {
-      this.resetTemp()
-      this.dialog = true
-    },
-    addData() {
-      const temp = { ...this.temp }
-      if (!temp.strategy.id) {
-        temp.strategy = null
-      }
-
-      postData(`${endpoints.BRIEFCASE}/${BRIEFCASE_ID}/items/`, temp, this.token)
-        .then(() => {
-          this.dialog = false
-          this.fetchList()
-          console.log('Added')
-        })
-    },
-    resetTemp() {
-      this.temp = {
-        company: { id: undefined },
-        strategy: { id: undefined },
-        part_name: undefined,
-        type_document: undefined,
-        dividends: undefined,
-        withdrawal: undefined,
-        count: undefined
-      }
     }
   }
 }

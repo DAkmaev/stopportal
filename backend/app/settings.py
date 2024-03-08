@@ -34,10 +34,10 @@ class Settings(BaseSettings):
     # Current environment
     environment: str = "dev"
 
-    log_level: LogLevel = LogLevel.DEBUG
+    log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
-    db_file: Path = "./db.sqlite3"
+    db_file: Path = "../db.sqlite3"
     db_echo: bool = False
     postgres_server: str = "localhost"
     postgres_user: str = "stopportal_user"
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
         if self.environment not in {"prod", "test"}:
             return URL.build(
                 scheme="sqlite+aiosqlite",
-                path=f"///..//{self.db_file}",
+                path=f"///{self.db_file}",
             )
 
         url_scheme = "postgresql+psycopg"

@@ -1,11 +1,8 @@
 import pytest
 from app.core.security import verify_password
-from app.db.dao.companies import CompanyDAO
-from app.db.dao.stops import StopsDAO
-from app.db.dao.strategies import StrategiesDAO
 from app.db.dao.user import UserDAO
 from app.tests.utils.common import random_email, random_lower_string
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -1,10 +1,11 @@
 import uuid
+from typing import Any
 
 import pytest
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
 from app.db.models.company import CompanyModel, StopModel
-from app.tests.utils.common import create_test_company
+from app.tests.utils.common import create_test_company, create_test_user, get_headers
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,7 @@ async def test_creation(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests company instance creation."""
     url = fastapi_app.url_path_for("create_company_model")
@@ -25,6 +27,7 @@ async def test_creation(
         json={
             "tiker": tiker_name,
         },
+        headers=user_token_headers["headers"],
     )
     assert response.status_code == status.HTTP_200_OK
     dao = CompanyDAO(dbsession)
@@ -37,16 +40,19 @@ async def test_get_company_by_id(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Test retrieving a company by ID."""
-    # Создаем тестовую компанию в базе данных
-    company = await create_test_company(dbsession, True, True)
+    user, headers = user_token_headers.values()
 
-    # Формируем URL для запроса к API с учетом идентификатора созданной компании
-    url = fastapi_app.url_path_for("get_company_model", company_id=company.id)
+    # Создаем тестовую компанию в базе данных
+    company = await create_test_company(
+        dbsession, need_add_stop=True, need_add_strategy=True, user_id=user.id
+    )
 
     # Отправляем GET-запрос
-    response = await client.get(url)
+    url = fastapi_app.url_path_for("get_company_model", company_id=company.id)
+    response = await client.get(url, headers=headers)
 
     # Проверяем успешный ответ и соответствие данных полученным из базы
     assert response.status_code == status.HTTP_200_OK
@@ -63,12 +69,15 @@ async def test_getting(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests company instance retrieval."""
-    company = await create_test_company(dbsession, True, True)
+    user, headers = user_token_headers.values()
+
+    company = await create_test_company(dbsession, True, True, user_id=user.id)
 
     url = fastapi_app.url_path_for("get_company_models")
-    response = await client.get(url)
+    response = await client.get(url, headers=headers)
     companies = response.json()
 
     assert response.status_code == status.HTTP_200_OK
@@ -85,9 +94,13 @@ async def test_updating(
     fastapi_app: FastAPI,
     client: AsyncClient,
     dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
 ) -> None:
     """Tests company instance updating."""
-    company = await create_test_company(dbsession, True, True)
+
+    user, headers = user_token_headers.values()
+
+    company = await create_test_company(dbsession, True, True, user_id=user.id)
     assert len(company.stops) == 2
     assert len(company.strategies) == 2
 
@@ -100,6 +113,7 @@ async def test_updating(
             "type": "MOEX",
             "strategies": [{"id": 1}],
         },
+        headers=headers,
     )
 
     dao = CompanyDAO(dbsession)

@@ -1,8 +1,6 @@
 from fastapi.routing import APIRouter
 from app.web.api import (
     docs,
-    dummy,
-    echo,
     monitoring,
     login,
     auth,
@@ -14,13 +12,12 @@ from app.web.api import (
     strategy,
     stop,
     briefcase,
+    cron,
 )
 
 api_router = APIRouter()
 api_router.include_router(monitoring.router)
 api_router.include_router(docs.router)
-api_router.include_router(echo.router, prefix="/echo", tags=["echo"])
-api_router.include_router(dummy.router, prefix="/dummy", tags=["dummy"])
 api_router.include_router(ta.router, prefix="/ta", tags=["ta"])
 api_router.include_router(company.router, prefix="/companies", tags=["companies"])
 api_router.include_router(stop.router, prefix="/stops", tags=["stops"])
@@ -33,3 +30,4 @@ api_router.include_router(
 api_router.include_router(briefcase.router, prefix="/briefcase", tags=["briefcase"])
 api_router.include_router(login.router, prefix="/login", tags=["login"])
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(cron.router, prefix="/cron", tags=["cron"])

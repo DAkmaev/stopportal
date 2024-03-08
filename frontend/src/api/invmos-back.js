@@ -1,3 +1,5 @@
+import store from '@/store'
+
 function fillUrl(endpoint, params) {
   let url = `${process.env.VUE_APP_API_URL}/${endpoint}`
   if (params && Object.keys(params).length > 0) {
@@ -10,8 +12,9 @@ function fillUrl(endpoint, params) {
   return url
 }
 
-async function requestWithBody(method, endpoint = '', body = {}, parseResponse = true, params = {}, authToken = null) {
+async function requestWithBody(method, endpoint = '', body = {}, parseResponse = true, params = {}) {
   try {
+    const authToken = store.state.token
     const url = fillUrl(endpoint, params)
     const headers = { 'Content-Type': 'application/json' }
     if (authToken) {
@@ -54,8 +57,9 @@ export async function sendFormData(endpoint = '', body = {}, parseResponse = tru
   return data
 }
 
-export async function getData(endpoint = '', params = {}, authToken = null, parseJsonResponse = true) {
+export async function getData(endpoint = '', params = {}, parseJsonResponse = true) {
   try {
+    const authToken = store.state.token
     const url = fillUrl(endpoint, params)
     const headers = { 'Content-Type': 'application/json' }
     if (authToken) {
@@ -76,30 +80,30 @@ export async function getData(endpoint = '', params = {}, authToken = null, pars
   }
 }
 
-export async function postData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
+export async function postData(endpoint = '', body = {}, params = {}, parseResponse = true) {
   return requestWithBody('POST', endpoint, body, parseResponse, params)
 }
 
-export async function putData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
+export async function putData(endpoint = '', body = {}, params = {}, parseResponse = true) {
   return requestWithBody('PUT', endpoint, body, parseResponse, params)
 }
 
-export async function patchData(endpoint = '', body = {}, params = {}, authToken = null, parseResponse = true) {
+export async function patchData(endpoint = '', body = {}, params = {}, parseResponse = true) {
   return requestWithBody('PATCH', endpoint, body, parseResponse, params)
 }
 
-export async function deleteData(endpoint = '', params = {}, authToken = null) {
+export async function deleteData(endpoint = '', params = {}) {
   return requestWithBody('DELETE', endpoint, {}, false, params)
 }
 
-export async function getCategoriesSimple(type, authToken = null) {
+export async function getCategoriesSimple(type) {
   return await getData('categories-simple', {
     'type': type
-  }, authToken)
+  })
 }
 
-export async function getStrategies(authToken = null) {
-  return await getData(endpoints.STRATEGIES, {}, authToken)
+export async function getStrategies() {
+  return await getData(endpoints.STRATEGIES, {})
 }
 
 export const endpoints = Object.freeze({

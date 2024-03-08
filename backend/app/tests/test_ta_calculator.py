@@ -6,7 +6,11 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 from app.db.models.company import StopModel
-from app.tests.utils.common import create_test_companies, create_test_company
+from app.tests.utils.common import (
+    create_test_companies,
+    create_test_company,
+    create_test_user,
+)
 from app.utils.ta.ta_calculator import TACalculator
 from app.web.api.ta.scheme import TADecisionDTO, TADecisionEnum
 from fastapi import FastAPI
@@ -55,7 +59,7 @@ def report_time(test):
     print("\n")
     t0 = time.time()
     yield
-    print("Time needed for `%s' called: %.2fs" % (test, time.time() - t0))
+    print(f"Time needed for `{test}' called: {time.time() - t0}%")
 
 
 class MockMoexReader:
@@ -152,7 +156,8 @@ async def test_get_ta_decisions(
     period = "ALL"
 
     with report_time("Create companies"):
-        companies = await create_test_companies(dbsession, 10)
+        user = await create_test_user(dbsession)
+        companies = await create_test_companies(dbsession, 10, user.id)
 
     with (
         patch(

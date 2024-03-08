@@ -1,6 +1,7 @@
 import pytest
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.stops import StopsDAO
+from app.tests.utils.common import create_test_user
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,11 +19,16 @@ async def test_add_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company
@@ -51,18 +57,23 @@ async def test_delete_company_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company
     await company_stops_dao.add_stop_model(company.id, STOP_PERIOD, STOP_VALUE)
 
     # Retrieve the added stop
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     stop_models = company.stops
     assert len(stop_models) == 1
 
@@ -90,11 +101,16 @@ async def test_get_company_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company
@@ -128,11 +144,16 @@ async def test_update_company_stop_model(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company
@@ -172,11 +193,16 @@ async def test_get_company_stops_by_id(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company
@@ -206,18 +232,23 @@ async def test_add_stop_model_prevent_duplicate(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company with a specific period
     await company_stops_dao.add_stop_model(company.id, STOP_PERIOD, STOP_VALUE)
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
 
     # Attempt to add a stop model with the same period for the same company
     with pytest.raises(HTTPException) as exc_info:
@@ -244,11 +275,16 @@ async def test_update_stop_model_prevent_duplicate(
     company_dao = CompanyDAO(dbsession)
     company_stops_dao = StopsDAO(dbsession)
 
+    # Create test user
+    user = await create_test_user(dbsession)
+
     # Create a new company
-    await company_dao.create_company_model(tiker=TIKER, name=NAME, company_type="MOEX")
+    await company_dao.create_company_model(
+        tiker=TIKER, name=NAME, company_type="MOEX", user_id=user.id
+    )
 
     # Retrieve the created company
-    company = await company_dao.get_company_model_by_tiker(tiker=TIKER)
+    company = await company_dao.get_company_model_by_tiker(tiker=TIKER, user_id=user.id)
     assert company.name == NAME
 
     # Add a stop model for the company

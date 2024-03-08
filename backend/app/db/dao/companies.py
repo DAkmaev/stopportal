@@ -4,6 +4,7 @@ from app.db.dao.stops import StopsDAO
 from app.db.dao.strategies import StrategiesDAO
 from app.db.dependencies import get_db_session
 from app.db.models.company import CompanyModel
+from app.db.models.user import UserModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,15 +16,19 @@ class CompanyDAO:
         self.stop_dao = StopsDAO(session)
         self.strategy_dao = StrategiesDAO(session)
 
-    async def create_company_model(
+    async def create_company_model(  # noqa: WPS211
         self,
         tiker: str,
         name: str,
         company_type: str,
-        strategies: list[int] = None,
+        user_id: int,
+        strategies: list[dict] = None,
     ) -> CompanyModel:
         raw_company = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.tiker == tiker),
+            select(CompanyModel).where(
+                CompanyModel.tiker == tiker,
+                CompanyModel.user_id == user_id,
+            ),
         )
         exist_company: CompanyModel = raw_company.scalars().one_or_none()
 
@@ -33,7 +38,15 @@ class CompanyDAO:
                 detail=f"Компания {exist_company.tiker} уже существует",
             )
 
-        company = CompanyModel(tiker=tiker, name=name, type=company_type)
+        user = await self.session.get(UserModel, user_id)
+        company = CompanyModel(tiker=tiker, name=name, type=company_type, user=user)
+        if strategies:
+            ids = {strategy["id"] for strategy in strategies}
+            company.strategies = [
+                await self.strategy_dao.get_strategy_model(strategy_id)
+                for strategy_id in ids
+            ]
+
         self.session.add(company)
         return company
 
@@ -92,6 +105,7 @@ class CompanyDAO:
 
     async def get_all_companies(
         self,
+        user_id: int,
         limit: int = 10000,
         offset: int = 0,
     ) -> List[CompanyModel]:
@@ -108,9 +122,16 @@ class CompanyDAO:
 
         return company.scalars().one_or_none()
 
-    async def get_company_model_by_tiker(self, tiker: str) -> CompanyModel:
+    async def get_company_model_by_tiker(
+        self,
+        tiker: str,
+        user_id: int,
+    ) -> CompanyModel:
         company = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.tiker == tiker),
+            select(CompanyModel).where(
+                CompanyModel.tiker == tiker,
+                CompanyModel.user_id == user_id,
+            ),
         )
 
         return company.scalars().one_or_none()

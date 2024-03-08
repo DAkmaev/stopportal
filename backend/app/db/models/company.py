@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from app.db.base import Base
+from app.db.models.user import UserModel
 from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import Float, String
@@ -34,6 +35,13 @@ class CompanyModel(Base):
         lazy="selectin",
     )
 
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"),
+        index=True,
+        nullable=True,
+    )
+    user: Mapped[Optional["UserModel"]] = relationship()
+
 
 class StopModel(Base):
     __tablename__ = "companies_stop"
@@ -53,3 +61,10 @@ class StrategyModel(Base):
         secondary=association_table,
         back_populates="strategies",
     )
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"),
+        index=True,
+        nullable=True,
+    )
+    user: Mapped[Optional["UserModel"]] = relationship()

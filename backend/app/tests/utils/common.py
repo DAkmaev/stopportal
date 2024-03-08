@@ -2,13 +2,13 @@ import asyncio
 import random
 import string
 import uuid
+from typing import Any
 
 import pytest
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.user import UserDAO
 from app.db.models.briefcase import (
-    BriefcaseItemModel,
     BriefcaseModel,
     BriefcaseRegistryModel,
     RegistryOperationEnum,
@@ -27,11 +27,15 @@ async def create_test_company(
     need_add_strategy: bool = False,
     tiker_name: str = None,
     name: str = None,
+    user_id: int = None,
 ) -> CompanyModel:
     tiker_name = tiker_name if tiker_name else uuid.uuid4().hex
     name = name if name else uuid.uuid4().hex
+    if user_id is None:
+        user_id = (await create_test_user(dbsession)).id
+
     dao = CompanyDAO(dbsession)
-    company = await dao.create_company_model(tiker_name, name, "MOEX")
+    company = await dao.create_company_model(tiker_name, name, "MOEX", user_id)
 
     if need_add_stop:
         company.stops.append(StopModel(company_id=company.id, period="D", value=100))
@@ -52,6 +56,7 @@ async def create_test_company(
 async def create_test_companies(
     dbsession: AsyncSession,
     count: int,
+    user_id: int,
 ) -> list[CompanyModel]:
     dao = CompanyDAO(dbsession)
 
@@ -59,48 +64,42 @@ async def create_test_companies(
     for i in range(count):
         tiker_name: str = uuid.uuid4().hex
         name = uuid.uuid4().hex
-        tasks.append(dao.create_company_model(tiker_name, name, "MOEX"))
+        tasks.append(dao.create_company_model(tiker_name, name, "MOEX", user_id))
 
     await asyncio.gather(*tasks)
 
-    companies = await dao.get_all_companies()
+    companies = await dao.get_all_companies(user_id=user_id)
     return companies
 
 
 async def create_test_briefcase(
     dbsession: AsyncSession,
+    user_id: int,
+    fill_up: float = None,
 ) -> BriefcaseModel:
     dao = BriefcaseDAO(dbsession)
-    await dao.create_briefcase_model()
-    briefcases = await dao.get_all_briefcases()
+    await dao.create_briefcase_model(user_id=user_id, fill_up=fill_up)
+    briefcases = await dao.get_all_briefcases(user_id=user_id)
     assert briefcases
 
     return briefcases[-1]
 
 
-async def create_test_briefcase_item(
-    dbsession: AsyncSession,
-) -> BriefcaseItemModel:
-    company = await create_test_company(dbsession)
-    briefcase = await create_test_briefcase(dbsession)
-    dao = BriefcaseDAO(dbsession)
-    await dao.create_briefcase_item_model(
-        count=1, dividends=10, company_id=company.id, briefcase_id=briefcase.id
-    )
-    briefcase_items = await dao.get_all_briefcase_items()
-    assert len(briefcase_items) == 1
-
-    return briefcase_items[0]
-
-
 async def create_test_briefcase_registry(
     dbsession: AsyncSession,
+    user_id: int,
     briefcase: BriefcaseModel = None,
     company: CompanyModel = None,
 ) -> BriefcaseRegistryModel:
     briefcase_dao = BriefcaseDAO(dbsession)
-    company = company if company else await create_test_company(dbsession)
-    briefcase = briefcase if briefcase else await create_test_briefcase(dbsession)
+    company = (
+        company if company else await create_test_company(dbsession, user_id=user_id)
+    )
+    briefcase = (
+        briefcase
+        if briefcase
+        else await create_test_briefcase(dbsession, user_id=user_id)
+    )
 
     # Создаем новую запись briefcase_registry
     await briefcase_dao.create_briefcase_registry_model(
@@ -154,7 +153,7 @@ async def get_superuser_token_headers(
     name: str = None,
     email: str = None,
     password: str = None,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     return await _get_test_user_headers(
         client,
         fastapi_app,
@@ -173,7 +172,7 @@ async def get_user_token_headers(
     name: str = None,
     email: str = None,
     password: str = None,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     return await _get_test_user_headers(
         client,
         fastapi_app,
@@ -214,7 +213,7 @@ async def _get_test_user_headers(
     email: str = None,
     password: str = None,
     is_active: bool = True,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     name = (
         settings.first_superuser if is_superuser and not name else random_lower_string()
     )
@@ -233,7 +232,11 @@ async def _get_test_user_headers(
         is_active=is_active,
     )
 
-    return await get_headers(client, fastapi_app, name, password)
+    dao = UserDAO(dbsession)
+    user = await dao.get_user_by_name(name)
+    headers = await get_headers(client, fastapi_app, name, password)
+
+    return {"user": user, "headers": headers}
 
 
 async def get_headers(

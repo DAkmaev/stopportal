@@ -11,8 +11,13 @@ class StrategiesDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_strategy_model(self, name: str, description: str) -> StrategyModel:
-        strategy = StrategyModel(name=name, description=description)
+    async def create_strategy_model(
+        self,
+        name: str,
+        description: str,
+        user_id: int,
+    ) -> StrategyModel:
+        strategy = StrategyModel(name=name, description=description, user_id=user_id)
         self.session.add(strategy)
         return strategy
 
@@ -24,9 +29,9 @@ class StrategiesDAO:
 
         return strategy
 
-    async def get_all_strategies_model(self) -> List[StrategyModel]:
+    async def get_all_strategies_model(self, user_id: int) -> List[StrategyModel]:
         raw_strategies = await self.session.execute(
-            select(StrategyModel),
+            select(StrategyModel).where(StrategyModel.user_id == user_id),
         )
 
         return list(raw_strategies.scalars().fetchall())

@@ -119,7 +119,7 @@ async def superuser_token_headers(
     client: AsyncClient,
     fastapi_app: FastAPI,
     dbsession: AsyncSession,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     return await get_superuser_token_headers(client, fastapi_app, dbsession)
 
 
@@ -128,7 +128,7 @@ async def user_token_headers(
     client: AsyncClient,
     fastapi_app: FastAPI,
     dbsession: AsyncSession,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     return await get_user_token_headers(client, fastapi_app, dbsession)
 
 
