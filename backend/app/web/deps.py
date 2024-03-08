@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from app.db.dependencies import get_db_session
@@ -9,6 +10,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.api_v1_str}/login",
@@ -33,7 +36,15 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
-    user = await session.get(UserModel, token_data.sub)
+    try:
+        user = await session.get(UserModel, token_data.sub)
+    except Exception as e:
+        logger.error(e)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong token data",
+        )
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:

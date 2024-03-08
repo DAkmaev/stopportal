@@ -77,16 +77,6 @@ export default new Vuex.Store({
     async actionGetUserProfile(context) {
       try {
         const response = await getData(endpoints.ME, null, context.state.token)
-        // const response = {
-        //   data: {
-        //     name: 'username',
-        //     full_name: 'full name',
-        //     id: 1,
-        //     password: 'username@data.com',
-        //     is_active: true,
-        //     is_superuser: true
-        //   }
-        // }
         if (response) {
           context.commit('setUserProfile', response)
         }
@@ -112,16 +102,6 @@ export default new Vuex.Store({
         if (token) {
           try {
             const response = await getData(endpoints.ME, null, context.state.token)
-            // const response = {
-            //   data: {
-            //     name: 'username',
-            //     full_name: 'full name',
-            //     id: 1,
-            //     email: 'username@data.com',
-            //     is_active: true,
-            //     is_superuser: true
-            //   }
-            // }
             context.commit('setLoggedIn', true)
             context.commit('setUserProfile', response)
           } catch (error) {
