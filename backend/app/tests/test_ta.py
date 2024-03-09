@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.ta_decisions import TADecisionDAO
-from app.tests.utils.common import create_test_user
+from app.tests.utils.common import create_test_user, create_test_briefcase
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +28,7 @@ async def test_generate_ta_decisions(
     period = "W"
 
     user, headers = user_token_headers.values()
+    await create_test_briefcase(dbsession, user_id=user.id)
 
     # create test companies
     await asyncio.gather(
