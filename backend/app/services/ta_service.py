@@ -8,6 +8,7 @@ from app.db.dao.companies import CompanyDAO
 from app.db.dao.cron_job import CronJobRunDao
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.db.models.company import CompanyModel
+from app.db.models.user import UserModel
 from app.utils.ta.ta_calculator import TACalculator
 from app.utils.telegram.telegramm_client import send_tg_message
 from app.web.api.ta.scheme import TADecisionDTO
@@ -34,15 +35,14 @@ class TAService:
 
     async def generate_ta_decisions(  # noqa: WPS210,WPS211
         self,
-        briefcase_id: int,
-        user_id: int,
+        user: UserModel,
         period: str = "ALL",
-        is_cron: bool = False,
         send_messages: bool = True,
         send_test: bool = False,
     ):
         logger.info("Start generating TA decisions...")
-        companies = await self.company_dao.get_all_companies(user_id=user_id)
+        companies = await self.company_dao.get_all_companies(user_id=user.id)
+        # briefcase = await self.briefcase_dao.get_briefcase_model_by_user(user)
         companies_count = len(companies)
         logger.info(f"Got companies. Count: {companies_count}")
         result = {}

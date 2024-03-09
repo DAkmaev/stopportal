@@ -15,19 +15,13 @@ router = APIRouter()
 async def generate_ta_decisions(  # noqa: WPS211
     current_user: CurrentUser,
     period: str = "ALL",
-    is_cron: bool = False,
     send_messages: bool = True,
     send_test: bool = False,
     ta_service: TAService = Depends(),
 ) -> Dict[str, Dict[str, List[TADecisionDTO]]]:
-    # todo заменить на получение портфеля для user
-    briefcase_id = 1
-
     return await ta_service.generate_ta_decisions(
-        briefcase_id=briefcase_id,
-        user_id=current_user.id,
+        user=current_user,
         period=period,
-        is_cron=is_cron,
         send_messages=send_messages,
         send_test=send_test,
     )
