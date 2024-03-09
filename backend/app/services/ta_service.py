@@ -42,7 +42,7 @@ class TAService:
     ):
         logger.info("Start generating TA decisions...")
         companies = await self.company_dao.get_all_companies(user_id=user.id)
-        briefcase = await self.briefcase_dao.get_briefcase_model_by_user(user)
+        # briefcase = await self.briefcase_dao.get_briefcase_model_by_user(user)
         companies_count = len(companies)
         logger.info(f"Got companies. Count: {companies_count}")
         result = {}

@@ -1,7 +1,6 @@
 import os
 from typing import Dict, List
 
-from app.db.dao.briefcases import BriefcaseDAO
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.services.ta_service import TAService
 from app.web.api.ta.scheme import TADecisionDTO
