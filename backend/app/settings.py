@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     postgres_user: str = "stopportal_user"
     postgres_password: str = "stopportal_password"
     postgres_db: str = "stopportal"
+    postgres_port: int = 5432
 
     access_token_expire_minutes: int = 60 * 24 * 8
     api_v1_str: str = "/api"
@@ -70,7 +71,7 @@ class Settings(BaseSettings):
 
         url_scheme = "postgresql+psycopg"
         url_account = f"{self.postgres_user}:{self.postgres_password}"
-        url_db = f"{self.postgres_server}/{self.postgres_db}"
+        url_db = f"{self.postgres_server}:{self.postgres_port}/{self.postgres_db}"
         url_path = f"//{url_account}@{url_db}"
         return URL.build(scheme=url_scheme, path=url_path)
 

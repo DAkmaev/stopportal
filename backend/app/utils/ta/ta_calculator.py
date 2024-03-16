@@ -1,6 +1,7 @@
 import concurrent
 import datetime
 import logging
+import math
 from dataclasses import dataclass
 
 import pandas as pd
@@ -191,24 +192,24 @@ class TACalculator:
 
         return TADecision(decision=decision, df=stoch_df)
 
-    def _calculate_decision(  # noqa: WPS210
+    def _calculate_decision(
         self,
         company: CompanyModel,
         period: str,
         df: DataFrame,
-        last_price: float,
+        last_price: float | None,
     ):
-        # Для некоторых акций увеличиваем bottom_border
-        tikers_high_bottom = ["LKOH"]
-        bottom_border = 40 if company.tiker in tikers_high_bottom else 25
+        # Determine bottom_border based on company.tiker
+        bottom_border = 40 if company.tiker == "LKOH" else 25
 
-        # для продажи проверяем границы и разворот для всех периодов
+        # Calculate decision for the given period
         per_decision = self._get_period_decision(
             df,
             period,
             bottom_border=bottom_border,
         )
 
+        # Handle UNKNOWN decision
         if per_decision.decision == TADecisionEnum.UNKNOWN:
             return TADecisionDTO(
                 decision=per_decision.decision,
@@ -220,57 +221,44 @@ class TACalculator:
                 ),
             )
 
-        # для покупки проверяем другие периоды, они должны сопавсть, без границ
-        # месяц считается полностью по _get_period_decision, это остальные по другому
+        # Calculate decision for buying
         if period != "M" and per_decision.decision != TADecisionEnum.SELL:
-            need_buy = False
-            if period == "W":
-                decision_month = self._get_period_decision(
-                    df,
-                    "M",
-                    skip_check_borders=True,
-                )
-                decision_week = self._get_period_decision(df, "W", bottom_border=40)
-
-                need_buy = (
-                    decision_month.decision
-                    == decision_week.decision
-                    == TADecisionEnum.BUY
-                )
-
-            elif period == "D":
-                decision_day = self._get_period_decision(df, "D")
-                decision_week = self._get_period_decision(
-                    df,
-                    "W",
-                    skip_check_borders=True,
-                )
-                decision_month = self._get_period_decision(
-                    df,
-                    "M",
-                    skip_check_borders=True,
-                )
-
-                need_buy = (
-                    decision_day.decision
-                    == decision_week.decision
-                    == decision_month.decision
-                    == TADecisionEnum.BUY
-                )
-
+            need_buy = self._check_buy_decision(df, period)
             per_decision.decision = (
                 TADecisionEnum.BUY if need_buy else TADecisionEnum.RELAX
             )
 
+        # Prepare TADecisionDTO
         last_row = per_decision.df.iloc[-1]
         return TADecisionDTO(
             company=TACompanyDTO(id=company.id, name=company.name, tiker=company.tiker),
             decision=per_decision.decision,
             period=period,
-            k=last_row.k,
-            d=last_row.d,
+            k=None if math.isnan(last_row.k) else last_row.k,
+            d=None if math.isnan(last_row.d) else last_row.d,
             last_price=last_price,
         )
+
+    def _check_buy_decision(self, df: DataFrame, period: str) -> bool:
+        if period == "W":
+            decision_month = self._get_period_decision(df, "M", skip_check_borders=True)
+            decision_week = self._get_period_decision(df, "W", bottom_border=40)
+            return (
+                decision_month.decision == decision_week.decision == TADecisionEnum.BUY
+            )
+
+        elif period == "D":
+            decision_day = self._get_period_decision(df, "D")
+            decision_week = self._get_period_decision(df, "W", skip_check_borders=True)
+            decision_month = self._get_period_decision(df, "M", skip_check_borders=True)
+            return (
+                decision_day.decision
+                == decision_week.decision
+                == decision_month.decision
+                == TADecisionEnum.BUY
+            )
+
+        return False
 
     def _process_period(
         self,
@@ -289,23 +277,26 @@ class TACalculator:
                 ),
             )
 
-        last_price = df.iloc[-1]["CLOSE"]
-        stops_or_none = company.stops or []
-        stop = next(
-            (stop.value for stop in stops_or_none if stop.period == cur_period),
-            None,
-        )
+        last_price_value = df.iloc[-1]["CLOSE"]
+        last_price = None if math.isnan(last_price_value) else last_price_value
 
-        if stop is not None and last_price <= stop:
-            return TADecisionDTO(
-                company=TACompanyDTO(
-                    id=company.id,
-                    name=company.name,
-                    tiker=company.tiker,
-                ),
-                period=cur_period,
-                decision=TADecisionEnum.SELL,
-                last_price=last_price,
-                stop=stop,
+        if last_price:
+            stops_or_none = company.stops or []
+            stop = next(
+                (stop.value for stop in stops_or_none if stop.period == cur_period),
+                None,
             )
+
+            if stop is not None and last_price <= stop:
+                return TADecisionDTO(
+                    company=TACompanyDTO(
+                        id=company.id,
+                        name=company.name,
+                        tiker=company.tiker,
+                    ),
+                    period=cur_period,
+                    decision=TADecisionEnum.SELL,
+                    last_price=last_price,
+                    stop=stop,
+                )
         return self._calculate_decision(company, cur_period, df, last_price)
