@@ -2,8 +2,11 @@ import asyncio
 import time
 import uuid
 from typing import Any
+from unittest.mock import patch
 
 import pytest
+from pandas import DataFrame
+
 from app.db.dao.companies import CompanyDAO
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.tests.utils.common import create_test_user, create_test_briefcase
@@ -36,21 +39,26 @@ async def test_generate_ta_decisions(
         dao.create_company_model(tiker_name2, name2, "MOEX", user.id),
     )
 
-    url = fastapi_app.url_path_for("generate_ta_decisions")
-    response = await client.post(
-        url,
-        params={
-            "period": period,
-            "is_cron": "false",
-            "send_messages": "false",
-            "send_test": "false",
-        },
-        headers=headers,
-    )
-    assert response.status_code == status.HTTP_200_OK
-    assert len(response.json()[period]["UNKNOWN"])
-    assert response.json()["W"]["UNKNOWN"][0]["decision"] == "UNKNOWN"
-    assert response.json()["W"]["UNKNOWN"][0]["company"]["tiker"] == tiker_name1
+    with patch(
+        "app.utils.moex.moex_reader.MoexReader.get_company_history"
+    ) as mock_method:
+        mock_method.return_value = DataFrame()
+
+        url = fastapi_app.url_path_for("generate_ta_decisions")
+        response = await client.post(
+            url,
+            params={
+                "period": period,
+                "is_cron": "false",
+                "send_messages": "false",
+                "send_test": "false",
+            },
+            headers=headers,
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()[period]["UNKNOWN"])
+        assert response.json()["W"]["UNKNOWN"][0]["decision"] == "UNKNOWN"
+        assert response.json()["W"]["UNKNOWN"][0]["company"]["tiker"] == tiker_name1
 
 
 @pytest.mark.anyio
@@ -101,17 +109,21 @@ async def test_generate_ta_decision(
     period = "W"
 
     await dao.create_company_model(tiker_name, name, "MOEX", user.id)
+    with patch(
+        "app.utils.moex.moex_reader.MoexReader.get_company_history"
+    ) as mock_method:
+        mock_method.return_value = DataFrame()
 
-    print(f"\nstarted at {time.strftime('%a')}")
-    url = fastapi_app.url_path_for("generate_ta_decision", tiker=tiker_name)
-    response = await client.post(
-        url,
-        params={"period": period, "type": "MOEX", "send_messages": "false"},
-        headers=headers,
-    )
-    print(f"finished at {time.strftime('%a')}")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()[period]["decision"] == "UNKNOWN"
+        print(f"\nstarted at {time.strftime('%a')}")
+        url = fastapi_app.url_path_for("generate_ta_decision", tiker=tiker_name)
+        response = await client.post(
+            url,
+            params={"period": period, "type": "MOEX", "send_messages": "false"},
+            headers=headers,
+        )
+        print(f"finished at {time.strftime('%a')}")
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()[period]["decision"] == "UNKNOWN"
 
 
 # @pytest.mark.anyio

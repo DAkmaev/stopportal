@@ -5,6 +5,8 @@ from unittest.mock import patch
 
 import pandas as pd
 import pytest
+from pandas import DataFrame
+
 from app.db.models.company import StopModel
 from app.tests.utils.common import (
     create_test_companies,
@@ -116,13 +118,18 @@ async def test_get_stoch_decisions_no_data(dbsession: AsyncSession):
     # Создаем тестовую компанию и
     company = await create_test_company(dbsession)
 
-    # Simulate the case where there's no data available
-    decisions = calculator.get_company_ta_decisions(company, period)
+    with patch(
+        "app.utils.moex.moex_reader.MoexReader.get_company_history"
+    ) as mock_method:
+        mock_method.return_value = DataFrame()
 
-    assert isinstance(decisions, dict)
-    assert isinstance(decisions[period], TADecisionDTO)
-    assert decisions[period].decision == TADecisionEnum.UNKNOWN
-    assert decisions[period].company.tiker == company.tiker
+        # Simulate the case where there's no data available
+        decisions = calculator.get_company_ta_decisions(company, period)
+
+        assert isinstance(decisions, dict)
+        assert isinstance(decisions[period], TADecisionDTO)
+        assert decisions[period].decision == TADecisionEnum.UNKNOWN
+        assert decisions[period].company.tiker == company.tiker
 
 
 @pytest.mark.anyio
