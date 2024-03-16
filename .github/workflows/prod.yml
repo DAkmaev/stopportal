@@ -15,6 +15,7 @@ jobs:
           sparse-checkout: |
             deploy/docker-compose.yml
             deploy/.env.prod
+            deploy/backup_db.sh
           sparse-checkout-cone-mode: false
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
@@ -22,10 +23,23 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          source: "deploy/docker-compose.yml,deploy/.env.prod"
+          source: "deploy/docker-compose.yml,deploy/.env.prod,deploy/backup_db.sh"
           target: "stopportal/prod"
           strip_components: 1
           overwrite: true
+      - name: Backup database
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd stopportal/prod
+            cp .env.prod .env
+            set -a
+            source .env
+            set +a
+            sudo sh ./backup_db.sh $environment
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
