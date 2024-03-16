@@ -131,7 +131,6 @@ class TACalculator:
             df.ta.stoch(append=True)
             df.ta.macd(append=True)
 
-
             return df[
                 [
                     "STOCHk_14_3_3",
