@@ -129,9 +129,20 @@ class TACalculator:
             df.fillna(0, inplace=True)
             df.ta.adx(append=True)
             df.ta.stoch(append=True)
+            df.ta.macd(append=True)
+
 
             return df[
-                ["STOCHk_14_3_3", "STOCHd_14_3_3", "ADX_14", "DMP_14", "DMN_14"]
+                [
+                    "STOCHk_14_3_3",
+                    "STOCHd_14_3_3",
+                    "ADX_14",
+                    "DMP_14",
+                    "DMN_14",
+                    "MACD_12_26_9",
+                    "MACDh_12_26_9",
+                    "MACDs_12_26_9",
+                ]
             ].rename(
                 columns={
                     "STOCHk_14_3_3": "k",
@@ -139,9 +150,11 @@ class TACalculator:
                     "ADX_14": "adx",
                     "DMP_14": "dmp",
                     "DMN_14": "dmn",
+                    "MACD_12_26_9": "macd",
+                    "MACDh_12_26_9": "macd_h",
+                    "MACDs_12_26_9": "macd_s",
                 },
             )
-
         except Exception as ex:
             logger.error(ex)
             return DataFrame()

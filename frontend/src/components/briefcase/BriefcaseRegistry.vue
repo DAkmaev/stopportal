@@ -402,7 +402,7 @@ export default {
           // offset: (this.page - 1) * this.itemsPerPage
         }),
         getStrategies(this.token),
-        getData(endpoints.COMPANIES, { fields: 'c.id,c.name' })
+        getData(endpoints.COMPANIES, { fields: 'c.id,c.name', limit: 1000 })
       ])
       this.strategies = strategies
       this.companies = companies
