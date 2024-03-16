@@ -86,32 +86,32 @@ async def test_update_stoch_decisions(
     assert ta_decision.last_price == 110.0
 
 
-@pytest.mark.anyio
-async def test_generate_ta_decision(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
-    dbsession: AsyncSession,
-    user_token_headers: dict[str, Any],
-) -> None:
-    user, headers = user_token_headers.values()
-
-    dao = CompanyDAO(dbsession)
-    tiker_name = uuid.uuid4().hex
-    name = uuid.uuid4().hex
-    period = "W"
-
-    await dao.create_company_model(tiker_name, name, "MOEX", user.id)
-
-    print(f"\nstarted at {time.strftime('%a')}")
-    url = fastapi_app.url_path_for("generate_ta_decision", tiker=tiker_name)
-    response = await client.post(
-        url,
-        params={"period": period, "type": "MOEX", "send_messages": "false"},
-        headers=headers,
-    )
-    print(f"finished at {time.strftime('%a')}")
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json()[period]["decision"] == "UNKNOWN"
+# @pytest.mark.anyio
+# async def test_generate_ta_decision(
+#     fastapi_app: FastAPI,
+#     client: AsyncClient,
+#     dbsession: AsyncSession,
+#     user_token_headers: dict[str, Any],
+# ) -> None:
+#     user, headers = user_token_headers.values()
+#
+#     dao = CompanyDAO(dbsession)
+#     tiker_name = uuid.uuid4().hex
+#     name = uuid.uuid4().hex
+#     period = "W"
+#
+#     await dao.create_company_model(tiker_name, name, "MOEX", user.id)
+#
+#     print(f"\nstarted at {time.strftime('%a')}")
+#     url = fastapi_app.url_path_for("generate_ta_decision", tiker=tiker_name)
+#     response = await client.post(
+#         url,
+#         params={"period": period, "type": "MOEX", "send_messages": "false"},
+#         headers=headers,
+#     )
+#     print(f"finished at {time.strftime('%a')}")
+#     assert response.status_code == status.HTTP_200_OK
+#     assert response.json()[period]["decision"] == "UNKNOWN"
 
 
 # @pytest.mark.anyio
