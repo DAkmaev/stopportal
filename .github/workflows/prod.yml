@@ -45,6 +45,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd stopportal/prod
+            cp .env.prod .env
             sudo docker compose -f docker-compose.yml -p prod pull
             sudo docker compose -f docker-compose.yml -p prod down
             sudo docker compose -f docker-compose.yml -p prod up -d
