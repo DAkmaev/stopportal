@@ -109,7 +109,7 @@ class TACalculator:
         period: str,
     ):
         decisions = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             tasks = [
                 executor.submit(self.get_company_ta_decisions, company, period)
                 for company in companies
