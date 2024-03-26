@@ -56,6 +56,8 @@ class Settings(BaseSettings):
     bot_token: str = ""
     chat_id: str = ""
 
+    redis_url: str = ""
+
     @property
     def db_url(self) -> URL:
         """

@@ -9,8 +9,34 @@ services:
     env_file: .env
     links:
       - db
+      - queue
     networks:
       - app-network
+
+  worker:
+    build:
+      context: ../backend
+    container_name: stopportal-celeryworker
+    image: stopportal-celeryworker:latest
+    restart: always
+    env_file: .env
+    links:
+      - db
+      - queue
+    networks:
+      - app-network
+
+  flower:
+    image: mher/flower:2.0
+    env_file:
+      - .env
+    command:
+      - celery --broker=redis://queue:6379 flower --port=5555
+    ports:
+      - "5555:5555"
+    links:
+      - queue
+      - db
 
   migrator:
     image: stopportal-backend:latest
@@ -57,6 +83,11 @@ services:
       - dg_data:/var/lib/postgresql/data
     networks:
       - app-network
+
+  queue:
+    image: redis:7
+    ports:
+      - "6379:6379"
 
 volumes:
   static:

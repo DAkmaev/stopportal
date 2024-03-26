@@ -6,6 +6,17 @@ services:
       - .env
     links:
       - db
+      - queue
+    networks:
+      - app-network
+
+  worker:
+    image: dakmaev/stopportal-celeryworker:latest
+    env_file:
+      - .env
+    links:
+      - db
+      - queue
     networks:
       - app-network
 
@@ -15,8 +26,6 @@ services:
       - .env
     restart: on-failure
     command: alembic upgrade head
-#    command: >
-#      /bin/bash -c 'pg_dump -U "$POSTGRES_USER" -h "$POSTGRES_SERVER" -d "$POSTGRES_DB" > /path/to/backup.sql && alembic upgrade head'
     links:
       - db
     networks:
@@ -49,6 +58,11 @@ services:
       - .env
     volumes:
       - dg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  queue:
+    image: redis:7
     networks:
       - app-network
 
