@@ -60,15 +60,19 @@ class Settings(BaseSettings):
 
     @property
     def db_url(self) -> URL:
-        """
-        Assemble database URL from settings.
+        return self.generate_url()
 
-        :return: database URL.
-        """
+    @property
+    def db_sync_url(self) -> URL:
+        return self.generate_url(False)
+
+    def generate_url(self, is_async: bool = True):
         if self.environment not in {"prod", "test"}:
+            scheme = "sqlite+aiosqlite" if is_async else "sqlite"
+            path = f"///{self.db_file}" if is_async else f"///backend/{self.db_file}"
             return URL.build(
-                scheme="sqlite+aiosqlite",
-                path=f"///{self.db_file}",
+                scheme=scheme,
+                path=path,
             )
 
         url_scheme = "postgresql+psycopg"
