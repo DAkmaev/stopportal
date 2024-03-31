@@ -8,13 +8,14 @@ from starlette.requests import Request
 from app.settings import settings
 
 
-def get_sync_db_session() -> sessionmaker[Session]:
-    sync_engine = create_engine(str(settings.db_url), echo=True)
-    return sessionmaker(
+def get_sync_db_session():
+    sync_engine = create_engine(str(settings.db_sync_url), echo=True)
+    sync_session = sessionmaker(
         autocommit=False,
         autoflush=False,
         bind=sync_engine,
     )
+    return sync_session()
 
 async def get_db_session(request: Request = None) -> AsyncGenerator[AsyncSession, None]:
     """
