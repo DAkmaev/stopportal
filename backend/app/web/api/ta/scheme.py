@@ -33,4 +33,3 @@ class TADecisionDTO(BaseModel):
     period: TAPeriodEnum
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None
-

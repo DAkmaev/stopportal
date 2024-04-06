@@ -78,8 +78,7 @@ class Settings(BaseSettings):
         url_scheme = "postgresql+psycopg" if is_async else "postgresql"
         url_account = f"{self.postgres_user}:{self.postgres_password}"
         url_db = f"{self.postgres_server}:{self.postgres_port}/{self.postgres_db}"
-        url_path = f"//{url_account}@{url_db}"
-        return URL.build(scheme=url_scheme, path=url_path)
+        return URL.build(scheme=url_scheme, path=f"//{url_account}@{url_db}")
 
     model_config = SettingsConfigDict(
         env_file=".env",

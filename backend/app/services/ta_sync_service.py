@@ -1,14 +1,13 @@
 import logging
 from collections import defaultdict
-from typing import List, Sequence
-
-from sqlalchemy import select, update
+from typing import List
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models.company import CompanyModel
 from app.db.models.ta_decision import TADecisionModel
-from app.schemas.Ta import TADecisionDTO
-from app.utils.ta.ta_sync_calculator import TACalculator, TADecision
+from app.schemas.ta import TADecisionDTO
+from app.utils.ta.ta_sync_calculator import TACalculator
 from app.utils.telegram.telegramm_sync_client import send_sync_tg_message
 
 # from app.web.api.ta.scheme import TADecisionDTO
@@ -16,7 +15,12 @@ from app.utils.telegram.telegramm_sync_client import send_sync_tg_message
 logger = logging.getLogger(__name__)
 
 PERIOD_NAMES = {"M": "месяц", "D": "день", "W": "неделя"}
-DECISION_NAMES = {"SELL": "продавать", "BUY": "покупать", "RELAX": "ничего не делать", "UNKNOWN": "неизвестный статус"}
+DECISION_NAMES = {
+    "SELL": "продавать",
+    "BUY": "покупать",
+    "RELAX": "ничего не делать",
+    "UNKNOWN": "неизвестный статус",
+}
 
 
 class TAService:
@@ -26,20 +30,10 @@ class TAService:
     ):
         self.session = session
 
-    def _get_company(self, tiker: str, user_id: int) -> CompanyModel:
-        company_statement = (
-            select(CompanyModel)
-            .where(CompanyModel.tiker == tiker, CompanyModel.user_id == user_id)
-        )
-        return self.session.execute(company_statement).scalars().one_or_none()
-
     def update_ta_model(self, ta_decision: TADecisionDTO):
-        ta_exist_statement = (
-            select(TADecisionModel)
-            .where(
-                TADecisionModel.company_id == ta_decision.company.id,
-                TADecisionModel.period == ta_decision.period,
-                )
+        ta_exist_statement = select(TADecisionModel).where(
+            TADecisionModel.company_id == ta_decision.company.id,
+            TADecisionModel.period == ta_decision.period,
         )
         exist_ta = self.session.execute(ta_exist_statement).scalars().one_or_none()
 
@@ -59,44 +53,77 @@ class TAService:
             )
             self.session.add(new_ta)
 
-    def generate_ta_decision(self, tiker: str, user_id: int, period: str) -> dict[str, TADecisionDTO]:
+    def generate_ta_decision(
+        self,
+        tiker: str,
+        user_id: int,
+        period: str,
+    ) -> dict[str, TADecisionDTO]:
         company = self._get_company(tiker, user_id)
         ta_calculator = TACalculator()
-        decisions = ta_calculator.get_company_ta_decisions(company, period)
-
-        return decisions
+        return ta_calculator.get_company_ta_decisions(company, period)
 
     def send_tg_messages(self, td_decisions: list[TADecisionDTO]):
-        if len(td_decisions) > 0:
+        if td_decisions > 0:
             for ts_decision in td_decisions:
                 self._send_tg_message(ts_decision)
 
-    def send_bulk_tg_messages(self, ta_decisions: list[TADecisionDTO], send_test_message: bool = False):
-        if len(ta_decisions) > 0:
-            grouped_data = defaultdict(lambda: defaultdict(list))
-            for obj in ta_decisions:
-                grouped_data[obj.decision][obj.period].append(obj)
-            result_dict = dict(grouped_data)
+    def send_bulk_tg_messages(
+        self,
+        ta_decisions: list[TADecisionDTO],
+        send_test_message: bool = False,
+    ):
+        if not ta_decisions:
+            return
 
-            for decision_name in result_dict.keys():
-                if send_test_message or decision_name in ["BUY", "SELL"]:
-                    for period_name in result_dict[decision_name].keys():
-                        decisions = result_dict[decision_name][period_name]
-                        send_sync_tg_message(self._fill_messages(
-                            decision_name=decision_name,
-                            decisions=decisions,
-                            period=period_name,
-                        ))
+        grouped_data = self._group_decisions_by_decision_and_period(ta_decisions)
+
+        for decision_name, periods in grouped_data.items():
+            if not send_test_message and decision_name not in {"BUY", "SELL"}:
+                continue
+
+            for period_name, decisions in periods.items():
+                self._send_decision_messages(decision_name, period_name, decisions)
 
     def update_ta_models(self, td_decisions: list[TADecisionDTO]):
-        if len(td_decisions) > 0:
+        if td_decisions:
             for ts_decision in td_decisions:
                 self.update_ta_model(ts_decision)
+
+    def _get_company(self, tiker: str, user_id: int) -> CompanyModel:
+        company_statement = select(CompanyModel).where(
+            CompanyModel.tiker == tiker,
+            CompanyModel.user_id == user_id,
+        )
+        return self.session.execute(company_statement).scalars().one_or_none()
+
+    def _group_decisions_by_decision_and_period(
+        self,
+        ta_decisions: List[TADecisionDTO],
+    ) -> dict:
+        grouped_data = defaultdict(lambda: defaultdict(list))
+        for obj in ta_decisions:
+            grouped_data[obj.decision][obj.period].append(obj)
+        return dict(grouped_data)
+
+    def _send_decision_messages(
+        self,
+        decision_name: str,
+        period_name: str,
+        decisions: List[TADecisionDTO],
+    ):
+        messages = self._fill_messages(
+            decision_name=decision_name,
+            decisions=decisions,
+            period=period_name,
+        )
+        send_sync_tg_message(messages)
 
     def _send_tg_message(self, data: TADecisionDTO):
         decision = data.decision
         period = PERIOD_NAMES[data.period]
-        name = f"[{data.company.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={data.company.tiker})"
+        tiker = data.company.tiker
+        name = f"[{tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={tiker})"
         message = f"Акции {name} ({period}) - {decision.name}"
         send_sync_tg_message(message)
 

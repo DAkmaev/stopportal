@@ -1,10 +1,9 @@
 import logging
-
 from pydantic import TypeAdapter
 
 from app.core.celery import celery_app
 from app.db.dependencies import get_sync_db_session
-from app.schemas.Ta import TADecisionDTO
+from app.schemas.ta import TADecisionDTO
 from app.services.ta_sync_service import TAService
 
 logger = logging.getLogger(__name__)
@@ -31,11 +30,8 @@ def generate_decision(
             ta_service.update_ta_models(decisions.values())
             db.commit()
 
-
-        logger.info(f'Завершена генерация TA для {tiker} для пользователя {user_id}')
-        result_json = [dec.model_dump_json() for dec in decisions.values()]
-
-        return result_json
+        logger.info(f"Завершена генерация TA для {tiker} для пользователя {user_id}")
+        return [dec.model_dump_json() for dec in decisions.values()]
 
 
 @celery_app.task
@@ -46,8 +42,7 @@ def ta_generate_task(
     send_message: bool = False,
     update_db: bool = False,
 ):
-    result = generate_decision(tiker, user_id, period, send_message, update_db)
-    return result
+    return generate_decision(tiker, user_id, period, send_message, update_db)
 
 
 @celery_app.task
@@ -68,8 +63,12 @@ def ta_final_task(
     update_db: bool,
     send_test_message: bool,
 ):
-    logger.info(f'Завершена генерация TA для пользователя {user_id}')
-    ta_decisions = [TypeAdapter(TADecisionDTO).validate_json(ta_json) for sublist in results for ta_json in sublist]
+    logger.info(f"Завершена генерация TA для пользователя {user_id}")
+    ta_decisions = [
+        TypeAdapter(TADecisionDTO).validate_json(ta_json)
+        for sublist in results
+        for ta_json in sublist
+    ]
 
     with get_sync_db_session() as db:
         ta_service = TAService(db)

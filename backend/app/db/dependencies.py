@@ -1,11 +1,10 @@
 from typing import AsyncGenerator
 
+from app.settings import settings
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from starlette.requests import Request
-
-from app.settings import settings
 
 
 def get_sync_db_session():
@@ -32,4 +31,3 @@ async def get_db_session(request: Request = None) -> AsyncGenerator[AsyncSession
     finally:
         await session.commit()
         await session.close()
-

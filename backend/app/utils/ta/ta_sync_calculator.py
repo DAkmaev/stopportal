@@ -6,12 +6,11 @@ from dataclasses import dataclass
 import pandas as pd
 import pandas_ta as ta  # noqa: F401
 from app.db.models.company import CompanyModel
-from pandas import DataFrame
-
-from app.schemas.Company import CompanyTypeEnum
-from app.schemas.Ta import TADecisionDTO, TADecisionEnum, TACompanyDTO
+from app.schemas.company import CompanyTypeEnum
+from app.schemas.ta import TACompanyDTO, TADecisionDTO, TADecisionEnum
 from app.utils.moex.moex_reader import MoexReader
 from app.utils.yahoo.yahoo_reader import YahooReader
+from pandas import DataFrame
 
 pd.options.mode.chained_assignment = None
 

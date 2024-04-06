@@ -8,17 +8,17 @@ services:
     networks:
       - app-network
 
-  worker:
-    image: stopportal-celeryworker:latest
-    restart: always
-    env_file: .env
-    deploy:
-      mode: replicated
-      replicas: 6
-    links:
-      - queue
-    networks:
-      - app-network
+#  worker:
+#    image: stopportal-celeryworker:latest
+#    restart: always
+#    env_file: .env
+#    deploy:
+#      mode: replicated
+#      replicas: 6
+#    links:
+#      - queue
+#    networks:
+#      - app-network
 
   flower:
     image: mher/flower:2.0

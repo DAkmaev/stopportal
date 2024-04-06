@@ -1,10 +1,9 @@
 from fastapi.routing import APIRouter
-from app.web.api import (
+from app.web.api import (  # noqa: WPS235
     docs,
     monitoring,
     login,
     auth,
-    # dummy,
     ta,
     company,
     cron_job_run,
