@@ -20,6 +20,17 @@ services:
     networks:
       - app-network
 
+  flower:
+    image: mher/flower:2.0
+    command: celery --broker=redis://queue:6379 flower
+    ports:
+      - "5555:5555"
+    links:
+      - queue
+      - db
+    networks:
+      - app-network
+
   migrator:
     image: dakmaev/stopportal-backend:latest
     env_file:

@@ -2,22 +2,17 @@ FROM python:3.11
 
 WORKDIR /app/
 
-RUN pip install poetry alembic pydantic-settings yarl aiosqlite psycopg
+RUN pip install poetry alembic pydantic-settings
 
+COPY ./pyproject.toml /app/
+COPY ./worker-start.sh /app/
 
-### Copy poetry.lock* in case it doesn't exist in the repo
-#COPY ./pyproject.toml ./poetry.lock /app
-
-#COPY ./app/ /app
-COPY ./ /app
-ENV PYTHONPATH=/app
+COPY ./app /app/app
+ENV PYTHONPATH=/app/
 
 RUN poetry install
 
-ENV PYTHONPATH=/app
+RUN chmod +x worker-start.sh
 
-COPY ./app/worker-start.sh /worker-start.sh
-
-RUN chmod +x /worker-start.sh
-
-CMD ["bash", "/worker-start.sh"]
+CMD ["bash", "worker-start.sh"]
+# ENTRYPOINT bash

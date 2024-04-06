@@ -5,4 +5,32 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+    networks:
+      - app-network
+
+  worker:
+    image: stopportal-celeryworker:latest
+    restart: always
+    env_file: .env
+    deploy:
+      mode: replicated
+      replicas: 6
+    links:
+      - queue
+    networks:
+      - app-network
+
+  flower:
+    image: mher/flower:2.0
+    command: celery flower --broker=redis://queue:6379
+    ports:
+      - "5555:5555"
+    links:
+      - queue
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 

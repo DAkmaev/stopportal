@@ -17,6 +17,7 @@ def get_sync_db_session():
     )
     return sync_session()
 
+
 async def get_db_session(request: Request = None) -> AsyncGenerator[AsyncSession, None]:
     """
     Create and get database session.

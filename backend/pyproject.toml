@@ -35,6 +35,10 @@ pandas-ta = "^0.3.14b0"
 psycopg = "^3.1.17"
 celery = {extras = ["redis"], version = "^5.3.6"}
 asgiref = "^3.8.1"
+psycopg2-binary = "^2.9.9"
+psycopg-binary = "^3.1.18"
+psycopg-c = "^3.1.18"
+pandas = "^2.2.1"
 
 
 [tool.poetry.dev-dependencies]

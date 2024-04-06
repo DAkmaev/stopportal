@@ -34,13 +34,3 @@ class TADecisionDTO(BaseModel):
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None
 
-
-class TAMessage(BaseModel):
-    tiker: str
-    user_id: int
-    period: TAPeriodEnum
-
-
-class TAMessageResponse(BaseModel):
-    id: str
-    status: str

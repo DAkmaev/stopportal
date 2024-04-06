@@ -1,6 +1,13 @@
+import logging
+
+from pydantic import TypeAdapter
+
 from app.core.celery import celery_app
 from app.db.dependencies import get_sync_db_session
+from app.schemas.Ta import TADecisionDTO
 from app.services.ta_sync_service import TAService
+
+logger = logging.getLogger(__name__)
 
 
 def generate_decision(
@@ -8,19 +15,27 @@ def generate_decision(
     user_id,
     period,
     send_message,
+    update_db,
 ):
     with get_sync_db_session() as db:
         ta_service = TAService(db)
-        ta_service.generate_ta_decision(
+        decisions = ta_service.generate_ta_decision(
             tiker=tiker,
             user_id=user_id,
             period=period,
-            send_message=send_message,
         )
+        if send_message:
+            ta_service.send_tg_messages(decisions.values())
 
-        db.commit()
+        if update_db:
+            ta_service.update_ta_models(decisions.values())
+            db.commit()
 
-        return f'Generated decision for {tiker}!'
+
+        logger.info(f'Завершена генерация TA для {tiker} для пользователя {user_id}')
+        result_json = [dec.model_dump_json() for dec in decisions.values()]
+
+        return result_json
 
 
 @celery_app.task
@@ -28,18 +43,42 @@ def ta_generate_task(
     tiker: str,
     user_id: int,
     period: str,
-    send_message: bool,
+    send_message: bool = False,
+    update_db: bool = False,
 ):
-    result = generate_decision(tiker, user_id, period, send_message)
+    result = generate_decision(tiker, user_id, period, send_message, update_db)
     return result
 
 
 @celery_app.task
-def ta_generate_tasks(
+def ta_task(
+    tiker: str,
     user_id: int,
     period: str,
     send_message: bool,
 ):
-    result = generate_decisions(user_id, period, send_message)
-    return result
+    return f"Execute task for {tiker}!"
 
+
+@celery_app.task
+def ta_final_task(
+    results: list,
+    user_id: int,
+    send_message: bool,
+    update_db: bool,
+    send_test_message: bool,
+):
+    logger.info(f'Завершена генерация TA для пользователя {user_id}')
+    ta_decisions = [TypeAdapter(TADecisionDTO).validate_json(ta_json) for sublist in results for ta_json in sublist]
+
+    with get_sync_db_session() as db:
+        ta_service = TAService(db)
+
+        if update_db:
+            for ta_decision in ta_decisions:
+                ta_service.update_ta_model(ta_decision)
+
+            db.commit()
+
+        if send_message:
+            ta_service.send_bulk_tg_messages(ta_decisions, send_test_message)
