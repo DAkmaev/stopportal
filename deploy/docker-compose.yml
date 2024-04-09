@@ -6,6 +6,31 @@ services:
       - .env
     links:
       - db
+      - queue
+    networks:
+      - app-network
+
+  worker:
+    image: dakmaev/stopportal-celeryworker:latest
+    env_file:
+      - .env
+    links:
+      - db
+      - queue
+    deploy:
+      mode: replicated
+      replicas: 5
+    networks:
+      - app-network
+
+  flower:
+    image: mher/flower:2.0
+    command: ["celery", "--broker=redis://queue:6379", "flower"]
+    ports:
+      - "5555:5555"
+    links:
+      - queue
+      - db
     networks:
       - app-network
 
@@ -15,8 +40,6 @@ services:
       - .env
     restart: on-failure
     command: alembic upgrade head
-#    command: >
-#      /bin/bash -c 'pg_dump -U "$POSTGRES_USER" -h "$POSTGRES_SERVER" -d "$POSTGRES_DB" > /path/to/backup.sql && alembic upgrade head'
     links:
       - db
     networks:
@@ -45,10 +68,16 @@ services:
 
   db:
     image: postgres:16
+    command: -c 'max_connections=300'
     env_file:
       - .env
     volumes:
       - dg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  queue:
+    image: redis:7
     networks:
       - app-network
 

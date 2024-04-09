@@ -55,9 +55,16 @@ jobs:
     needs:
       - deploy
     steps:
-      - name: Send message
+      - name: Send success message
         uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
           message: "PROD - Деплой успешно выполнен!"
+      - name: Send failure message
+        uses: appleboy/telegram-action@master
+        if: failure()
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "PROD - Ошибка во время деплоя!"

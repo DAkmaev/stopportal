@@ -1,5 +1,12 @@
 version: "3.9"
 services:
+  queue:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
   backend:
     build:
       context: ../backend
@@ -8,6 +15,32 @@ services:
     restart: always
     env_file: .env
     links:
+      - db
+      - queue
+    networks:
+      - app-network
+
+  worker:
+    build:
+      context: ../backend
+      dockerfile: ../backend/Dockerfile-celeryworker
+    container_name: stopportal-celeryworker
+    image: stopportal-celeryworker:latest
+    restart: always
+    env_file: .env
+    links:
+      - db
+      - queue
+    networks:
+      - app-network
+
+  flower:
+    image: mher/flower:2.0
+    command: celery --broker=redis://queue:6379 flower
+    ports:
+      - "5555:5555"
+    links:
+      - queue
       - db
     networks:
       - app-network
@@ -50,6 +83,7 @@ services:
   db:
     image: postgres:16
     container_name: stopportal-db
+    command: -c 'max_connections=300'
     env_file: .env
     ports:
       - "5432:5432"

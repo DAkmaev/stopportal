@@ -1,4 +1,3 @@
-import concurrent
 import datetime
 import logging
 import math
@@ -7,10 +6,10 @@ from dataclasses import dataclass
 import pandas as pd
 import pandas_ta as ta  # noqa: F401
 from app.db.models.company import CompanyModel
+from app.schemas.company import CompanyTypeEnum
+from app.schemas.ta import TACompanyDTO, TADecisionDTO, TADecisionEnum
 from app.utils.moex.moex_reader import MoexReader
 from app.utils.yahoo.yahoo_reader import YahooReader
-from app.web.api.company.scheme import CompanyTypeEnum
-from app.web.api.ta.scheme import TACompanyDTO, TADecisionDTO, TADecisionEnum
 from pandas import DataFrame
 
 pd.options.mode.chained_assignment = None
@@ -90,7 +89,7 @@ class TACalculator:
         results = {}
 
         for cur_period in ("M", "W", "D"):
-            if period in {cur_period, "ALL"}:
+            if period in {cur_period, "All"}:
                 logger.debug(
                     f"Start getting period decisions for {company.name}, {cur_period}",
                 )
@@ -102,27 +101,6 @@ class TACalculator:
         results_count = len(results)
         logger.debug(f"Return company_ta_decisions results count {results_count}")
         return results
-
-    async def get_companies_ta_decisions(
-        self,
-        companies: list[CompanyModel],
-        period: str,
-    ):
-        decisions = []
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            tasks = [
-                executor.submit(self.get_company_ta_decisions, company, period)
-                for company in companies
-            ]
-
-            decisions = [task.result() for task in tasks]
-
-        # for company in companies:
-        #     logger.info(f'Get companies_ta_decisions for {company.name}, {period}')
-        #     decisions.append(self.get_company_ta_decisions(company, period))
-        decisions_count = len(decisions)
-        logger.debug(f"Got companies_ta_decisions. Count: {decisions_count}")
-        return decisions
 
     # Вынесено в отдельный метод для тестирования
     def _generate_ta_df(self, df: DataFrame):

@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
-    db_file: Path = "../db.sqlite3"
+    db_file: Path = "db.sqlite3"
     db_echo: bool = False
     postgres_server: str = "localhost"
     postgres_user: str = "stopportal_user"
@@ -56,24 +56,29 @@ class Settings(BaseSettings):
     bot_token: str = ""
     chat_id: str = ""
 
+    redis_url: str = ""
+
     @property
     def db_url(self) -> URL:
-        """
-        Assemble database URL from settings.
+        return self.generate_url()
 
-        :return: database URL.
-        """
+    @property
+    def db_sync_url(self) -> URL:
+        return self.generate_url(False)
+
+    def generate_url(self, is_async: bool = True):
         if self.environment not in {"prod", "test"}:
+            scheme = "sqlite+aiosqlite" if is_async else "sqlite"
+            path = f"///../{self.db_file}" if is_async else f"///backend/{self.db_file}"
             return URL.build(
-                scheme="sqlite+aiosqlite",
-                path=f"///{self.db_file}",
+                scheme=scheme,
+                path=path,
             )
 
-        url_scheme = "postgresql+psycopg"
+        url_scheme = "postgresql+psycopg" if is_async else "postgresql"
         url_account = f"{self.postgres_user}:{self.postgres_password}"
         url_db = f"{self.postgres_server}:{self.postgres_port}/{self.postgres_db}"
-        url_path = f"//{url_account}@{url_db}"
-        return URL.build(scheme=url_scheme, path=url_path)
+        return URL.build(scheme=url_scheme, path=f"//{url_account}@{url_db}")
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -4,12 +4,15 @@ WORKDIR /app/
 
 RUN pip install poetry alembic pydantic-settings
 
-COPY ./app /app/app
 COPY ./pyproject.toml /app/
+COPY ./worker-start.sh /app/
 
+COPY ./app /app/app
 ENV PYTHONPATH=/app/
 
 RUN poetry install
 
-#ENTRYPOINT bash
-CMD ["poetry", "run", "uvicorn", "app.web.application:get_app", "--host", "0.0.0.0", "--port", "80"]
+RUN chmod +x worker-start.sh
+
+CMD ["bash", "worker-start.sh"]
+# ENTRYPOINT bash
