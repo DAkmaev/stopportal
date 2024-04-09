@@ -35,10 +35,19 @@ class TADecisionDTO(BaseModel):
     # d_previous: Optional[float] = None
 
 
-class TAMessage(BaseModel):
+class TAGenerateMessage(BaseModel):
     tiker: str
     user_id: int
     period: TAPeriodEnum
+    send_message: bool = False
+    update_db: bool = False
+
+
+class TAFinalMessage(BaseModel):
+    user_id: int
+    send_message: bool
+    update_db: bool
+    send_test_message: bool
 
 
 class TAMessageResponse(BaseModel):

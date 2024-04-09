@@ -1,69 +1,51 @@
 import logging
-from pydantic import TypeAdapter
 
 from app.core.celery import celery_app
 from app.db.dependencies import get_sync_db_session
-from app.schemas.ta import TADecisionDTO
+from app.schemas.ta import TADecisionDTO, TAFinalMessage, TAGenerateMessage
 from app.services.ta_sync_service import TAService
+from app.utils.telegram.telegramm_sync_client import send_sync_tg_message
+from pydantic import TypeAdapter
 
 logger = logging.getLogger(__name__)
 
 
 def generate_decision(
-    tiker,
-    user_id,
-    period,
-    send_message,
-    update_db,
+    message: TAGenerateMessage,
 ):
     with get_sync_db_session() as db:
         ta_service = TAService(db)
         decisions = ta_service.generate_ta_decision(
-            tiker=tiker,
-            user_id=user_id,
-            period=period,
+            tiker=message.tiker,
+            user_id=message.user_id,
+            period=message.period,
         )
-        if send_message:
+        if message.send_message:
             ta_service.send_tg_messages(decisions.values())
 
-        if update_db:
+        if message.update_db:
             ta_service.update_ta_models(decisions.values())
             db.commit()
 
-        logger.info(f"Завершена генерация TA для {tiker} для пользователя {user_id}")
+        logger.info(
+            f"Завершена генерация TA для {message.tiker} для пользователя {message.user_id}",
+        )
         return [dec.model_dump_json() for dec in decisions.values()]
 
 
 @celery_app.task
 def ta_generate_task(
-    tiker: str,
-    user_id: int,
-    period: str,
-    send_message: bool = False,
-    update_db: bool = False,
+    message: TAGenerateMessage,
 ):
-    return generate_decision(tiker, user_id, period, send_message, update_db)
+    return generate_decision(message)
 
 
 @celery_app.task
-def ta_task(
-    tiker: str,
-    user_id: int,
-    period: str,
-    send_message: bool,
-):
-    return f"Execute task for {tiker}!"
-
-
-@celery_app.task
-def ta_final_task(
+def ta_final_task(  # noqa:  WPS210
     results: list,
-    user_id: int,
-    send_message: bool,
-    update_db: bool,
-    send_test_message: bool,
+    params: TAFinalMessage,
 ):
-    logger.info(f"Завершена генерация TA для пользователя {user_id}")
+    logger.info(f"Завершена генерация TA для пользователя {params.user_id}")
     ta_decisions = [
         TypeAdapter(TADecisionDTO).validate_json(ta_json)
         for sublist in results
@@ -73,11 +55,23 @@ def ta_final_task(
     with get_sync_db_session() as db:
         ta_service = TAService(db)
 
-        if update_db:
+        if params.update_db:
             for ta_decision in ta_decisions:
                 ta_service.update_ta_model(ta_decision)
 
             db.commit()
 
-        if send_message:
-            ta_service.send_bulk_tg_messages(ta_decisions, send_test_message)
+        if params.send_message:
+            messages = ta_service.generate_bulk_tg_messages(
+                ta_decisions,
+                params.send_test_message,
+            )
+            for message in messages:
+                send_telegram_task(message)
+
+
+@celery_app.task
+def send_telegram_task(
+    message: str,
+):
+    send_sync_tg_message(message)

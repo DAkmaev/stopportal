@@ -17,12 +17,15 @@ services:
     links:
       - db
       - queue
+    deploy:
+      mode: replicated
+      replicas: 5
     networks:
       - app-network
 
   flower:
     image: mher/flower:2.0
-    command: celery --broker=redis://queue:6379 flower
+    command: ["celery", "--broker=redis://queue:6379", "flower"]
     ports:
       - "5555:5555"
     links:
@@ -65,6 +68,7 @@ services:
 
   db:
     image: postgres:16
+    command: -c 'max_connections=300'
     env_file:
       - .env
     volumes:

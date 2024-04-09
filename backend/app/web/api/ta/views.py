@@ -1,11 +1,11 @@
 from typing import List
 
-from app.db.dao.companies import CompanyDAO
 from app.db.dao.ta_decisions import TADecisionDAO
+from app.db.dependencies import get_sync_db_session
 from app.schemas.ta import TADecisionDTO, TAMessageResponse, TAMessageStatus
+from app.services.ta_bulk_service import TABulkService
 from app.web.deps import CurrentUser
-from app.worker import ta_final_task, ta_generate_task
-from celery import group
+from app.worker import ta_generate_task
 from celery.result import AsyncResult
 from fastapi import APIRouter, Depends
 
@@ -38,24 +38,16 @@ async def generate_ta_decisions(  # noqa: WPS211
     send_messages: bool = True,
     update_db: bool = True,
     send_test_message: bool = False,
-    company_dao: CompanyDAO = Depends(),
 ) -> TAMessageResponse:
-    companies = await company_dao.get_all_companies(current_user.id)
-
-    task_group = group(
-        ta_generate_task.s(company.tiker, current_user.id, period)
-        for company in companies
-    )
-    task_chain = task_group | ta_final_task.s(
-        current_user.id,
-        send_messages,
-        update_db,
-        send_test_message,
-    )
-
-    result = task_chain.apply_async()
-
-    return TAMessageResponse(id=result.id, status=result.status)
+    with get_sync_db_session() as db:
+        ta_bulk_service = TABulkService(db)
+        return ta_bulk_service.generate_ta_decisions(
+            user_id=current_user.id,
+            period=period,
+            send_messages=send_messages,
+            update_db=update_db,
+            send_test_message=send_test_message,
+        )
 
 
 @router.get("/task/{task_id}")
@@ -63,7 +55,7 @@ def get_task_status(task_id: str) -> TAMessageStatus:
     task_result = AsyncResult(task_id)
     return TAMessageStatus(
         id=task_id,
-        status=task_result.status,
+        status=str(task_result.status),
         result=task_result.result,
     )
 

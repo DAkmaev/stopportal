@@ -10,8 +10,6 @@ from app.schemas.ta import TADecisionDTO
 from app.utils.ta.ta_sync_calculator import TACalculator
 from app.utils.telegram.telegramm_sync_client import send_sync_tg_message
 
-# from app.web.api.ta.scheme import TADecisionDTO
-
 logger = logging.getLogger(__name__)
 
 PERIOD_NAMES = {"M": "месяц", "D": "день", "W": "неделя"}
@@ -64,26 +62,34 @@ class TAService:
         return ta_calculator.get_company_ta_decisions(company, period)
 
     def send_tg_messages(self, td_decisions: list[TADecisionDTO]):
-        if td_decisions > 0:
+        if td_decisions:
             for ts_decision in td_decisions:
                 self._send_tg_message(ts_decision)
 
-    def send_bulk_tg_messages(
+    def generate_bulk_tg_messages(  # noqa:  WPS210
         self,
         ta_decisions: list[TADecisionDTO],
         send_test_message: bool = False,
     ):
         if not ta_decisions:
-            return
+            return []
 
-        grouped_data = self._group_decisions_by_decision_and_period(ta_decisions)
-
-        for decision_name, periods in grouped_data.items():
+        messages = []
+        group_decisions = self._group_decisions_by_decision_and_period(ta_decisions)
+        for decision_name, periods in group_decisions.items():
             if not send_test_message and decision_name not in {"BUY", "SELL"}:
                 continue
 
             for period_name, decisions in periods.items():
-                self._send_decision_messages(decision_name, period_name, decisions)
+                messages.append(
+                    self._generate_decision_message(
+                        decision_name,
+                        period_name,
+                        decisions,
+                    ),
+                )
+
+        return messages
 
     def update_ta_models(self, td_decisions: list[TADecisionDTO]):
         if td_decisions:
@@ -106,18 +112,17 @@ class TAService:
             grouped_data[obj.decision][obj.period].append(obj)
         return dict(grouped_data)
 
-    def _send_decision_messages(
+    def _generate_decision_message(
         self,
         decision_name: str,
         period_name: str,
         decisions: List[TADecisionDTO],
     ):
-        messages = self._fill_messages(
+        return self._fill_messages(
             decision_name=decision_name,
             decisions=decisions,
             period=period_name,
         )
-        send_sync_tg_message(messages)
 
     def _send_tg_message(self, data: TADecisionDTO):
         decision = data.decision
