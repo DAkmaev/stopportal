@@ -33,12 +33,13 @@ aiohttp = "^3.8.6"
 python-multipart = "^0.0.6"
 pandas-ta = "^0.3.14b0"
 psycopg = "^3.1.17"
+docutils = "0.21"
 celery = {extras = ["redis"], version = "^5.3.6"}
+pandas = "^2.2.2"
 asgiref = "^3.8.1"
+psycopg-c = "^3.1.18"
 psycopg2-binary = "^2.9.9"
 psycopg-binary = "^3.1.18"
-psycopg-c = "^3.1.18"
-pandas = "^2.2.1"
 
 
 [tool.poetry.dev-dependencies]
