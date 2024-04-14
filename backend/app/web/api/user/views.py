@@ -2,7 +2,7 @@ from typing import List
 
 from app.db.dao.user import UserDAO
 from app.db.models.user import UserModel
-from app.web.api.auth.schema import UserModelDTO, UserModelInputDTO
+from app.schemas.user import UserModelDTO, UserModelInputDTO
 from app.web.deps import CurrentUser
 from fastapi import APIRouter, Depends
 

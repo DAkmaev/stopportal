@@ -1,7 +1,7 @@
 from typing import Any
 
 from app.db.dao.login import LoginDAO
-from app.web.api.auth.schema import UserModelDTO
+from app.schemas.user import UserModelDTO
 from app.web.api.login.schema import Token
 from app.web.deps import CurrentAdminUser, CurrentUser
 from fastapi import APIRouter

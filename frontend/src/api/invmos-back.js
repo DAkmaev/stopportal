@@ -140,5 +140,5 @@ export const endpoints = Object.freeze({
   STRATEGIES_MIH: 'strategies/mih',
   STRATEGIES_MIH_DETAILS: 'strategies/mih/details',
   LOGIN: 'login',
-  ME: 'auth/me'
+  ME: 'user/me'
 })

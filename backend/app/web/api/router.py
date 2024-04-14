@@ -3,7 +3,7 @@ from app.web.api import (  # noqa: WPS235
     docs,
     monitoring,
     login,
-    auth,
+    user,
     ta,
     company,
     cron_job_run,
@@ -26,7 +26,6 @@ api_router.include_router(
 )
 api_router.include_router(briefcase.router, prefix="/briefcase", tags=["briefcase"])
 api_router.include_router(login.router, prefix="/login", tags=["login"])
-api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(user.router, prefix="/user", tags=["user"])
 api_router.include_router(cron.router, prefix="/cron", tags=["cron"])
-# api_router.include_router(dummy.router, prefix="/dummy", tags=["dummy"])
 api_router.include_router(ta.router, prefix="/ta", tags=["ta"])
