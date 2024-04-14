@@ -35,16 +35,20 @@ def generate_decision(
 
 @celery_app.task
 def ta_generate_task(
-    message: TAGenerateMessage,
+    message_json: str,
 ):
-    return generate_decision(message)
+    ta_message: TAGenerateMessage = TypeAdapter(TAGenerateMessage).validate_json(
+        message_json,
+    )
+    return generate_decision(ta_message)
 
 
 @celery_app.task
 def ta_final_task(  # noqa:  WPS210
     results: list,
-    params: TAFinalMessage,
+    params_json: str,
 ):
+    params: TAFinalMessage = TypeAdapter(TAFinalMessage).validate_json(params_json)
     logger.info(f"Завершена генерация TA для пользователя {params.user_id}")
     ta_decisions = [
         TypeAdapter(TADecisionDTO).validate_json(ta_json)
@@ -67,7 +71,7 @@ def ta_final_task(  # noqa:  WPS210
                 params.send_test_message,
             )
             for message in messages:
-                send_telegram_task(message)
+                send_telegram_task.delay(message)
 
 
 @celery_app.task

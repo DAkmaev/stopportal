@@ -2,7 +2,12 @@ from typing import List
 
 from app.db.dao.ta_decisions import TADecisionDAO
 from app.db.dependencies import get_sync_db_session
-from app.schemas.ta import TADecisionDTO, TAMessageResponse, TAMessageStatus
+from app.schemas.ta import (
+    TADecisionDTO,
+    TAMessageResponse,
+    TAMessageStatus,
+    TAGenerateMessage,
+)
 from app.services.ta_bulk_service import TABulkService
 from app.web.deps import CurrentUser
 from app.worker import ta_generate_task
@@ -22,11 +27,13 @@ async def generate_ta_decision(
 ) -> TAMessageResponse:
     user_id = current_user.id
     result = ta_generate_task.delay(
-        tiker,
-        user_id,
-        period,
-        send_messages,
-        update_db,
+        TAGenerateMessage(
+            tiker=tiker,
+            user_id=user_id,
+            period=period,
+            send_message=send_messages,
+            update_db=update_db,
+        ).model_dump_json(),
     )
     return TAMessageResponse(id=result.task_id, status=result.status)
 

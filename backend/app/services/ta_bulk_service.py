@@ -41,7 +41,7 @@ class TABulkService:
                     period=TAPeriodEnum(period),
                     update_db=False,
                     send_message=False,
-                ),
+                ).model_dump_json(),
             )
             for company in companies
         )
@@ -51,7 +51,7 @@ class TABulkService:
                 send_test_message=send_test_message,
                 update_db=update_db,
                 send_message=send_messages,
-            ),
+            ).model_dump_json(),
         )
 
         result = task_chain.apply_async()
