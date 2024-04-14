@@ -172,3 +172,11 @@ For running tests on your local machine.
 ```bash
 pytest -vv .
 ```
+
+## Local debug
+Create Virtual env
+```bash
+python -m venv venv
+source venv/bin/activate
+
+```
