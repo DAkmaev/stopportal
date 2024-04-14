@@ -27,7 +27,7 @@ services:
     image: mher/flower:2.0
     command: ["celery", "--broker=redis://queue:6379", "flower"]
     ports:
-      - "5555:5555"
+      - "5556:5555"
     links:
       - queue
       - db
@@ -73,6 +73,8 @@ services:
       - .env
     volumes:
       - dg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     networks:
       - app-network
 
