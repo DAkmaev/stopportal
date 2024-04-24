@@ -12,7 +12,7 @@ from pydantic import TypeAdapter
 logger = logging.getLogger(__name__)
 
 
-def generate_decision(
+def generate_decision(  # noqa: WPS210
     message: TAGenerateMessage,
 ):
     with get_sync_db_session() as db:

@@ -1,11 +1,8 @@
 import logging
 from collections import defaultdict
 from typing import List
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from app.db.models.company import CompanyModel
-from app.db.models.ta_decision import TADecisionModel
 from app.schemas.ta import TADecisionDTO
 from app.utils.ta.ta_sync_calculator import TACalculator
 from app.utils.telegram.telegramm_sync_client import send_sync_tg_message
