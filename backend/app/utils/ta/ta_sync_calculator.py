@@ -77,7 +77,7 @@ class TACalculator:
                 add_current=add_current,
             )
             if company.type == CompanyTypeEnum.MOEX
-            else YahooReader.get_company_history(start=start, tiker=company.tiker)
+            else YahooReader.get_company_history(self, start=start, tiker=company.tiker)
         )
 
     def get_company_ta_decisions(
