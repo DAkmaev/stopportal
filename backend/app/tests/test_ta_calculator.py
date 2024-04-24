@@ -113,7 +113,9 @@ async def test_calculate_decision(sample_dataframe, dbsession: AsyncSession):
 
 @pytest.mark.anyio
 @patch("app.utils.moex.moex_reader.MoexReader.get_company_history")
-async def test_get_stoch_decisions_no_data(mock_get_company_history, dbsession: AsyncSession):
+async def test_get_stoch_decisions_no_data(
+    mock_get_company_history, dbsession: AsyncSession
+):
     mock_get_company_history.return_value = DataFrame()
 
     calculator = TACalculator()
@@ -133,7 +135,9 @@ async def test_get_stoch_decisions_no_data(mock_get_company_history, dbsession: 
 
 @pytest.mark.anyio
 @patch("app.utils.moex.moex_reader.MoexReader.get_company_history")
-async def test_get_stoch_decisions_with_stop(mock_get_company_history, sample_dataframe, dbsession: AsyncSession):
+async def test_get_stoch_decisions_with_stop(
+    mock_get_company_history, sample_dataframe, dbsession: AsyncSession
+):
     mock_get_company_history.return_value = sample_dataframe
 
     calculator = TACalculator()

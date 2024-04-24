@@ -53,6 +53,7 @@ def test_send_telegram_task(mock_send_sync_tg_message):
 #     assert mock_ta_service.generate_ta_decision.call_args[0][
 #                0] == mock_company_dao.get_company.return_value  # Check if generate_ta_decision is called with the correct company
 
+
 @patch("app.worker.TypeAdapter")
 @patch("app.worker.generate_decision")
 def test_ta_generate_task(mock_generate_decision, mock_type_adapter):
