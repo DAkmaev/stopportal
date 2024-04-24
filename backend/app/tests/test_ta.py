@@ -2,7 +2,7 @@ import asyncio
 import time
 import uuid
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 from pandas import DataFrame
@@ -14,6 +14,8 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
+from app.worker import send_telegram_task
 
 
 # todo починить тест
