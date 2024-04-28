@@ -12,6 +12,7 @@ from app.db.models.briefcase import (
     BriefcaseModel,
     BriefcaseRegistryModel,
     RegistryOperationEnum,
+    BriefcaseShareModel,
 )
 from app.db.models.company import CompanyModel, StopModel, StrategyModel
 from app.db.models.user import UserModel
@@ -90,6 +91,10 @@ async def create_test_briefcase_registry(
     user_id: int,
     briefcase: BriefcaseModel = None,
     company: CompanyModel = None,
+    operation: RegistryOperationEnum = RegistryOperationEnum.BUY,
+    count: int | None = 10,
+    price: float | None = 100.0,
+    amount: float = 1000.0,
 ) -> BriefcaseRegistryModel:
     briefcase_dao = BriefcaseDAO(dbsession)
     company = (
@@ -103,17 +108,47 @@ async def create_test_briefcase_registry(
 
     # Создаем новую запись briefcase_registry
     await briefcase_dao.create_briefcase_registry_model(
-        count=10,
-        amount=100.0,
+        count=count,
+        amount=amount,
+        price=price,
         company_id=company.id,
         briefcase_id=briefcase.id,
-        operation=RegistryOperationEnum.BUY,
+        operation=operation,
     )
 
     registry_items = await briefcase_dao.get_all_briefcase_registry(briefcase.id)
     assert registry_items
 
     return registry_items[-1]
+
+
+async def create_test_briefcase_share(
+    dbsession: AsyncSession,
+    user_id: int,
+    briefcase: BriefcaseModel = None,
+    company: CompanyModel = None,
+) -> BriefcaseShareModel:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    company = (
+        company if company else await create_test_company(dbsession, user_id=user_id)
+    )
+    briefcase = (
+        briefcase
+        if briefcase
+        else await create_test_briefcase(dbsession, user_id=user_id)
+    )
+
+    # Создаем новую запись briefcase_share
+    await briefcase_dao.create_briefcase_share_model(
+        count=100,
+        company_id=company.id,
+        briefcase_id=briefcase.id,
+    )
+
+    shares = await briefcase_dao.get_all_briefcase_shares(briefcase.id)
+    assert shares
+
+    return shares[-1]
 
 
 async def create_test_user(

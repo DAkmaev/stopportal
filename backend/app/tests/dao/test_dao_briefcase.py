@@ -8,6 +8,7 @@ from app.tests.utils.common import (
     create_test_briefcase_registry,
     create_test_company,
     create_test_user,
+    create_test_briefcase_share,
 )
 from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -212,5 +213,126 @@ async def test_delete_briefcase_registry_model(dbsession: AsyncSession) -> None:
     # Проверяем, что запись была удалена
     with pytest.raises(HTTPException) as exception:
         await briefcase_dao.get_briefcase_registry_model(registry.id)
+
+    assert exception.value.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_get_all_briefcase_share(dbsession: AsyncSession) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    user = await create_test_user(dbsession)
+
+    company1 = await create_test_company(dbsession, user_id=user.id)
+    company2 = await create_test_company(dbsession, user_id=user.id)
+    briefcase = await create_test_briefcase(dbsession, user_id=user.id)
+
+    # Создаем несколько записей briefcase_share
+    share1 = await briefcase_dao.create_briefcase_share_model(
+        count=100,
+        company_id=company1.id,
+        briefcase_id=briefcase.id,
+    )
+    share2 = await briefcase_dao.create_briefcase_share_model(
+        count=200,
+        company_id=company2.id,
+        briefcase_id=briefcase.id,
+    )
+
+    # Получаем все записи briefcase_share
+    briefcase_shares = await briefcase_dao.get_all_briefcase_shares(briefcase.id)
+
+    # Проверяем, что количество записей соответствует ожидаемому
+    assert len(briefcase_shares) == 2
+    assert briefcase_shares[0].count == share1.count
+    assert briefcase_shares[1].count == share2.count
+
+    # Очищаем тестовые данные
+    await briefcase_dao.delete_briefcase_share_model(share1.id)
+    await briefcase_dao.delete_briefcase_share_model(share2.id)
+
+
+@pytest.mark.anyio
+async def test_get_briefcase_share_model(dbsession: AsyncSession) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    user = await create_test_user(dbsession)
+    share = await create_test_briefcase_share(dbsession, user_id=user.id)
+
+    # Получаем запись briefcase_share по ID
+    retrieved_share = await briefcase_dao.get_briefcase_share_model(share.id)
+
+    # Проверяем соответствие полученной записи и исходной
+    assert retrieved_share is not None
+    assert retrieved_share.id == share.id
+
+    # Очищаем тестовые данные
+    await briefcase_dao.delete_briefcase_share_model(share.id)
+
+
+@pytest.mark.anyio
+async def test_get_briefcase_share_model_by_company(dbsession: AsyncSession) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    user = await create_test_user(dbsession)
+
+    company1 = await create_test_company(dbsession, user_id=user.id)
+    company2 = await create_test_company(dbsession, user_id=user.id)
+    briefcase = await create_test_briefcase(dbsession, user_id=user.id)
+
+    share = await create_test_briefcase_share(
+        dbsession,
+        user_id=user.id,
+        briefcase=briefcase,
+        company=company1,
+    )
+
+    retrieved_share1 = await briefcase_dao.get_briefcase_share_model_by_company(
+        briefcase_id=briefcase.id,
+        company_id=company1.id,
+    )
+
+    assert retrieved_share1 is not None
+    assert retrieved_share1.id == share.id
+
+    retrieved_share2 = await briefcase_dao.get_briefcase_share_model_by_company(
+        briefcase_id=briefcase.id,
+        company_id=company2.id,
+    )
+
+    assert retrieved_share2 is None
+
+
+@pytest.mark.anyio
+async def test_update_briefcase_share_model(dbsession: AsyncSession) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    user = await create_test_user(dbsession)
+
+    share = await create_test_briefcase_share(dbsession, user_id=user.id)
+
+    # Обновляем запись briefcase_share
+    updated_fields = {"count": 150}
+    updated_share = await briefcase_dao.update_briefcase_share_model(
+        share.id, updated_fields
+    )
+
+    # Проверяем, что поля были обновлены
+    assert updated_share.count == updated_fields["count"]
+
+    # Очищаем тестовые данные
+    await briefcase_dao.delete_briefcase_share_model(share.id)
+
+
+@pytest.mark.anyio
+async def test_delete_briefcase_share_model(dbsession: AsyncSession) -> None:
+    briefcase_dao = BriefcaseDAO(dbsession)
+    user = await create_test_user(dbsession)
+    share = await create_test_briefcase_share(dbsession, user_id=user.id)
+
+    # Удаляем запись briefcase_share
+    await briefcase_dao.delete_briefcase_share_model(share.id)
+    # Только для закрытия сессии
+    await briefcase_dao.get_all_briefcase_shares(share.briefcase_id)
+
+    # Проверяем, что запись была удалена
+    with pytest.raises(HTTPException) as exception:
+        await briefcase_dao.get_briefcase_share_model(share.id)
 
     assert exception.value.status_code == 404

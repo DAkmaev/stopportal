@@ -3,6 +3,7 @@ from typing import List
 
 from app.db.dao.briefcases import BriefcaseDAO
 from app.db.models.briefcase import BriefcaseModel, BriefcaseRegistryModel
+from app.services.briefcase_service import BriefcaseService
 from app.web.api.briefcase.scheme import (
     BriefcaseDTO,
     BriefcaseInputDTO,
@@ -126,6 +127,7 @@ async def create_briefcase_registry_model(
     current_user: CurrentUser,
     new_item: BriefcaseRegistryInputDTO,  # Assuming you have a DTO for creating items
     dao: BriefcaseDAO = Depends(),
+    brief_service: BriefcaseService = Depends(),
 ) -> None:
     exist_briefcase = await dao.get_briefcase_model(briefcase_id)
     await check_owner_or_superuser(exist_briefcase.user_id, current_user)
@@ -141,15 +143,20 @@ async def create_briefcase_registry_model(
         price=new_item.price,
         currency=new_item.currency,
     )
+    await brief_service.recalculate_share(
+        company_id=new_item.company.id,
+        briefcase_id=briefcase_id,
+    )
 
 
 @router.put("/{briefcase_id}/registry/{item_id}")
-async def update_briefcase_registry(
+async def update_briefcase_registry(  # noqa:  WPS211
     briefcase_id: int,
     item_id: int,
     current_user: CurrentUser,
     updated_item: BriefcaseRegistryInputDTO,
     dao: BriefcaseDAO = Depends(),
+    brief_service: BriefcaseService = Depends(),
 ) -> None:
     exist_briefcase = await dao.get_briefcase_model(briefcase_id)
     await check_owner_or_superuser(exist_briefcase.user_id, current_user)
@@ -166,6 +173,11 @@ async def update_briefcase_registry(
         updated_fields=updated_item.model_dump(),
     )
 
+    await brief_service.recalculate_share(
+        company_id=exist_item.company_id,
+        briefcase_id=briefcase_id,
+    )
+
 
 @router.delete("/{briefcase_id}/registry/{item_id}", status_code=204)
 async def delete_briefcase_registry(
@@ -173,6 +185,7 @@ async def delete_briefcase_registry(
     item_id: int,
     current_user: CurrentUser,
     dao: BriefcaseDAO = Depends(),
+    brief_service: BriefcaseService = Depends(),
 ) -> None:
     exist_briefcase = await dao.get_briefcase_model(briefcase_id)
     await check_owner_or_superuser(exist_briefcase.user_id, current_user)
@@ -185,3 +198,7 @@ async def delete_briefcase_registry(
         )
 
     await dao.delete_briefcase_registry_model(item_id)
+    await brief_service.recalculate_share(
+        company_id=exist_item.company_id,
+        briefcase_id=briefcase_id,
+    )

@@ -4,7 +4,7 @@ from typing import Optional
 from app.db.base import Base
 from app.db.models.company import CompanyModel, StrategyModel
 from app.db.models.user import UserModel
-from sqlalchemy import Enum, ForeignKey
+from sqlalchemy import Enum, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DECIMAL, TIMESTAMP, Integer
 
@@ -46,7 +46,7 @@ class BriefcaseRegistryModel(Base):
     currency: Mapped[str] = mapped_column(Enum(CurrencyEnum), default=CurrencyEnum.RUB)
     operation: Mapped[str] = mapped_column(Enum(RegistryOperationEnum))
     count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    amount: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)
+    amount: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)  # Сумма сделки
     price: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
 
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
@@ -57,3 +57,25 @@ class BriefcaseRegistryModel(Base):
 
     briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
     briefcase: Mapped["BriefcaseModel"] = relationship(lazy="selectin")
+
+
+class BriefcaseShareModel(Base):
+    """Model for BriefcaseShare."""
+
+    __tablename__ = "briefcase_shares"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    created: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP)
+    last_updated: Mapped[TIMESTAMP] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.current_timestamp(),
+    )
+
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
+    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
+
+    briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
+    briefcase: Mapped["BriefcaseModel"] = relationship(lazy="selectin")
+
+    count: Mapped[int] = mapped_column(nullable=True)

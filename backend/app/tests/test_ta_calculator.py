@@ -1,10 +1,12 @@
 import contextlib
 import time
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pandas as pd
 import pytest
+from httpx import AsyncClient
 from pandas import DataFrame
 
 from app.db.models.company import StopModel

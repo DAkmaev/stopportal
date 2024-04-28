@@ -186,8 +186,8 @@ async def test_update_briefcase_registry(
     test_registry = await create_test_briefcase_registry(dbsession, user_id=user.id)
 
     # Update data for the registry
-    updated_count = 10
-    updated_amount = 100.0
+    updated_count = 20
+    updated_amount = 2000.0
     operation = RegistryOperationEnum.SELL
     currency = CurrencyEnum.USD
 

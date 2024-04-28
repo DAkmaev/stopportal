@@ -1,7 +1,7 @@
 from unittest.mock import patch, MagicMock
 
-from app.db.dao.sync.ta_company_sync import TACompanySyncDAO
-from app.db.dao.sync.ta_decisions_sync import TADecisionSyncDAO
+from app.db.dao.sync.company_sync import TACompanySyncDAO
+from app.db.dao.sync.decisions_sync import TADecisionSyncDAO
 from app.db.models.company import CompanyModel
 from app.db.models.ta_decision import TADecisionModel
 from app.schemas.ta import TAGenerateMessage
