@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 
-async def update_registry_field(  # noqa: WPS231, WPS211
+async def update_model_fields(  # noqa: WPS231, WPS211
     session,
     model,
     field_name,

@@ -1,8 +1,9 @@
 import logging
 
 from app.core.celery import celery_app
-from app.db.dao.sync.ta_company_sync import TACompanySyncDAO
-from app.db.dao.sync.ta_decisions_sync import TADecisionSyncDAO
+from app.db.dao.sync.briefcase_sync import BriefcaseSyncDAO
+from app.db.dao.sync.company_sync import TACompanySyncDAO
+from app.db.dao.sync.decisions_sync import TADecisionSyncDAO
 from app.db.dependencies import get_sync_db_session
 from app.schemas.ta import TADecisionDTO, TAFinalMessage, TAGenerateMessage
 from app.services.ta_sync_service import TAService
@@ -61,21 +62,25 @@ def ta_final_task(  # noqa:  WPS210
     ]
 
     ta_service = TAService()
-    if params.update_db:
-        with get_sync_db_session() as db:
+    with get_sync_db_session() as db:
+        if params.update_db:
             dao = TADecisionSyncDAO(db)
             for ta_decision in ta_decisions:
                 dao.update_ta_model(ta_decision)
 
             db.commit()
 
-    if params.send_message:
-        messages = ta_service.generate_bulk_tg_messages(
-            ta_decisions,
-            params.send_test_message,
-        )
-        for message in messages:
-            send_telegram_task.delay(message)
+        if params.send_message:
+            brief_dao = BriefcaseSyncDAO(db)
+            briefcase = brief_dao.get_briefcase_model_by_user_id(params.user_id)
+            shares = brief_dao.get_all_briefcase_shares(briefcase.id)
+            messages = ta_service.generate_bulk_tg_messages(
+                ta_decisions,
+                params.send_test_message,
+                shares,
+            )
+            for message in messages:
+                send_telegram_task.delay(message)
 
 
 @celery_app.task

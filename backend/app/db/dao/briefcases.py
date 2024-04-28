@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import List
 
-from app.db.dao.common import update_registry_field
+from app.db.dao.common import update_model_fields
 from app.db.dependencies import get_db_session
 from app.db.models.briefcase import (
     BriefcaseModel,
     BriefcaseRegistryModel,
     CurrencyEnum,
     RegistryOperationEnum,
+    BriefcaseShareModel,
 )
 from app.db.models.company import CompanyModel, StrategyModel
 from app.db.models.user import UserModel
@@ -80,6 +81,7 @@ class BriefcaseDAO:
     async def get_all_briefcase_registry(  # noqa:  WPS211
         self,
         briefcase_id: int,
+        company_id: int = None,
         limit: int = 100,
         offset: int = 0,
         date_from: datetime = None,
@@ -92,6 +94,9 @@ class BriefcaseDAO:
 
         if date_to:
             query = query.where(BriefcaseRegistryModel.created_date < date_to)
+
+        if company_id:
+            query = query.where(BriefcaseRegistryModel.company_id == company_id)
 
         raw_briefcase_registry = await self.session.execute(
             query.limit(limit)
@@ -113,11 +118,11 @@ class BriefcaseDAO:
 
     async def create_briefcase_registry_model(  # noqa:  WPS211
         self,
-        count: int,
         amount: float,
         company_id: int,
         briefcase_id: int,
         operation: RegistryOperationEnum,
+        count: int = None,
         strategy_id: int = None,
         price: float = None,
         currency: CurrencyEnum = CurrencyEnum.RUB,
@@ -160,7 +165,7 @@ class BriefcaseDAO:
         if not registry_item:
             raise HTTPException(status_code=404, detail="Запись не найдена")
 
-        await update_registry_field(
+        await update_model_fields(
             self.session,
             CompanyModel,
             "company",
@@ -168,7 +173,7 @@ class BriefcaseDAO:
             registry_item,
             "Компания не найдена",
         )
-        await update_registry_field(
+        await update_model_fields(
             self.session,
             StrategyModel,
             "strategy",
@@ -187,3 +192,79 @@ class BriefcaseDAO:
     async def delete_briefcase_registry_model(self, registry_id: int) -> None:
         registry_item = await self.get_briefcase_registry_model(registry_id)
         await self.session.delete(registry_item)
+
+    # Briefcase shares
+    async def get_all_briefcase_shares(
+        self,
+        briefcase_id: int,
+    ) -> List[BriefcaseShareModel]:
+        query = select(BriefcaseShareModel).filter_by(briefcase_id=briefcase_id)
+        raw_data = await self.session.execute(query)
+        return list(raw_data.scalars().fetchall())
+
+    async def get_briefcase_share_model(
+        self,
+        share_id: int,
+    ) -> BriefcaseShareModel:
+        share = await self.session.get(BriefcaseShareModel, share_id)
+
+        if not share:
+            raise HTTPException(status_code=404, detail="Briefcase share not found")
+
+        return share
+
+    async def get_briefcase_share_model_by_company(
+        self,
+        briefcase_id: int,
+        company_id: int,
+    ) -> BriefcaseShareModel:
+        query = select(BriefcaseShareModel).filter_by(
+            briefcase_id=briefcase_id,
+            company_id=company_id,
+        )
+        raw_data = await self.session.execute(query)
+        return raw_data.scalars().one_or_none()
+
+    async def create_briefcase_share_model(
+        self,
+        count: int,
+        company_id: int,
+        briefcase_id: int,
+        created: datetime = datetime.now(),
+    ) -> BriefcaseRegistryModel:
+        briefcase = await self.session.get(BriefcaseModel, briefcase_id)
+        if not briefcase:
+            raise HTTPException(status_code=404, detail="Портфель не найдена")
+
+        company = await self.session.get(CompanyModel, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Компания не найдена")
+
+        share = BriefcaseShareModel(
+            count=count,
+            company=company,
+            briefcase=briefcase,
+            created=created,
+        )
+
+        self.session.add(share)
+        return share
+
+    async def update_briefcase_share_model(
+        self,
+        share_id: int,
+        updated_fields: dict,
+    ) -> BriefcaseRegistryModel:
+        share = await self.get_briefcase_share_model(share_id)
+        if not share:
+            raise HTTPException(status_code=404, detail="Запись не найдена")
+
+        for field, value in updated_fields.items():
+            if field in share.__dict__ and value is not None:
+                setattr(share, field, value)
+
+        return share
+
+    async def delete_briefcase_share_model(self, share_id: int) -> None:
+        share = await self.get_briefcase_share_model(share_id)
+        await self.session.delete(share)
