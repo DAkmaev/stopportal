@@ -17,8 +17,6 @@ from app.tests.utils.common import (
 
 @pytest.mark.anyio
 async def test_recalculate_share(
-    fastapi_app: FastAPI,
-    client: AsyncClient,
     dbsession: AsyncSession,
     user_token_headers: dict[str, Any],
 ) -> None:

@@ -4,7 +4,7 @@ from typing import List
 
 from app.db.models.briefcase import BriefcaseShareModel
 from app.db.models.company import CompanyModel
-from app.schemas.ta import TADecisionDTO
+from app.schemas.ta import TADecisionDTO, TADecisionEnum
 from app.utils.ta.ta_sync_calculator import TACalculator
 from app.utils.telegram.telegramm_sync_client import send_sync_tg_message
 
@@ -43,25 +43,30 @@ class TAService:
             return []
 
         messages = []
-        share_company_ids = [share.company_id for share in shares]
+        share_company_ids = [share.company_id for share in shares] if shares else []
         group_decisions = self._group_decisions_by_decision_and_period(ta_decisions)
         for decision_name, periods in group_decisions.items():
-            if not send_test_message and decision_name not in {"BUY", "SELL"}:
+            if not send_test_message and decision_name not in {  # noqa: WPS337
+                TADecisionEnum.BUY,
+                TADecisionEnum.SELL,
+            }:
                 continue
 
             for period_name, decisions in periods.items():
                 decisions_filtered = [
                     dec
                     for dec in decisions
-                    if dec.company.id in share_company_ids or decision_name != "SELL"
+                    if dec.company.id in share_company_ids
+                    or decision_name != TADecisionEnum.SELL
                 ]
-                messages.append(
-                    self._generate_decision_message(
-                        decision_name,
-                        period_name,
-                        decisions_filtered,
-                    ),
-                )
+                if decisions_filtered:
+                    messages.append(
+                        self._generate_decision_message(
+                            decision_name,
+                            period_name,
+                            decisions_filtered,
+                        ),
+                    )
 
         return messages
 
