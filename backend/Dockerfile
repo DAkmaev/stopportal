@@ -6,6 +6,7 @@ RUN pip install poetry alembic pydantic-settings
 
 COPY ./app /app/app
 COPY ./pyproject.toml /app/
+COPY ./alembic.ini /app/
 
 ENV PYTHONPATH=/app/
 
