@@ -6,28 +6,28 @@ on:
       - main
 
 jobs:
-#  pytest:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v4
-#
-#    - name: Setup python
-#      uses: actions/setup-python@v5
-#      with:
-#        python-version: 3.11
-#
-#    - name: Install poetry
-#      uses: Gr1N/setup-poetry@v8
-#
-#    - name: Install dependencies
-#      working-directory: backend
-#      run: poetry install
-#
-#    - name: Run pytest check
-#      working-directory: backend
-#      run: poetry run pytest -vv .
-#      env:
-#        BACKEND_HOST: "0.0.0.0"
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install poetry
+      uses: Gr1N/setup-poetry@v8
+
+    - name: Install dependencies
+      working-directory: backend
+      run: poetry install
+
+    - name: Run pytest check
+      working-directory: backend
+      run: poetry run pytest -vv .
+      env:
+        BACKEND_HOST: "0.0.0.0"
   black:
     runs-on: ubuntu-latest
     steps:
