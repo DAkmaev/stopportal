@@ -22,10 +22,10 @@ app = FastAPI(
 )
 
 
-@app.on_event("startup")
-async def on_startup():
-    logger.info("Startup block")
-    await init_db()
+# @app.on_event("startup")
+# async def on_startup():
+#     logger.info("Startup block")
+#     await init_db()
 
 
 # @app.post("/heroes/")
