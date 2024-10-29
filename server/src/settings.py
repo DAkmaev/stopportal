@@ -28,10 +28,10 @@ class Settings(BaseSettings):
     db_name: str = "stopportal2"
     db_port: int = 5433
 
-    # access_token_expire_minutes: int = 60 * 24 * 8
-    # api_v1_str: str = "/api"
-    # algorithm: str = "HS256"
-    # secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
+    access_token_expire_minutes: int = 60 * 24 * 8
+    api_v1_str: str = "/api"
+    algorithm: str = "HS256"
+    secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
 
     @property
     def db_url(self) -> str:
