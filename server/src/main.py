@@ -22,18 +22,19 @@ app = FastAPI(
 )
 
 
-# @app.on_event("startup")
-# async def on_startup():
-#     logger.info("Startup block")
-#     await init_db()
+@app.on_event("startup")
+async def on_startup():
+    logger.info("Startup block")
+    await init_db(app)
 
 
-# @app.post("/heroes/")
-# def create_hero(hero: Hero, session: SessionDep) -> Hero:
-#     session.add(hero)
-#     session.commit()
-#     session.refresh(hero)
-#     return hero
+@app.post("/heroes/")
+async def create_hero(
+        session: AsyncSession = Depends(get_session),
+) -> HeroModel:
+    hero = HeroModel(name="aaaa2", secret_name="bbb3")
+    session.add(hero)
+    return hero
 
 
 @app.get("/heroes/")

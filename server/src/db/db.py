@@ -1,32 +1,36 @@
 import logging
-import os
+from typing import AsyncGenerator
 
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel
+from fastapi import FastAPI
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
+from starlette.requests import Request
 
 from server.src.settings import Settings
 
 settings = Settings()
 connect_url = str(settings.db_url)
 
-engine = create_async_engine(connect_url, echo=True, future=True)
 
-
-# def init_db():
-#     SQLModel.metadata.create_all(engine)
-
-async def init_db():
+async def init_db(app: FastAPI):
     logging.debug("Startup scripts - init_db")
+    engine = create_async_engine(str(settings.db_url), echo=False)
+    session_factory = async_sessionmaker(
+        engine,
+        expire_on_commit=False,
+    )
+    app.state.db_engine = engine
+    app.state.db_session_factory = session_factory
     # async with engine.begin() as conn:
     #     await conn.run_sync(SQLModel.metadata.drop_all)
     #     await conn.run_sync(SQLModel.metadata.create_all)
 
 
-async def get_session() -> AsyncSession:
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
-    async with async_session() as session:
+async def get_session(request: Request = None) -> AsyncGenerator[AsyncSession, None]:
+    session: AsyncSession = request.app.state.db_session_factory()
+
+    try:  # noqa: WPS501
         yield session
+    finally:
+        await session.commit()
+        await session.close()
