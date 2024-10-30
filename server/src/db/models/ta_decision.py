@@ -2,7 +2,7 @@ from datetime import datetime
 
 from sqlmodel import SQLModel, Field, Relationship
 
-from src.db.models.company import CompanyModel
+from server.src.db.models.company import CompanyModel
 
 
 class TADecisionModel(SQLModel, table=True):

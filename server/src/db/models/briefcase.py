@@ -3,8 +3,8 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlmodel import Field, Relationship, SQLModel, Enum, Column
-from src.db.models.company import CompanyModel, StrategyModel
-from src.db.models.user import UserModel
+from server.src.db.models.company import CompanyModel, StrategyModel
+from server.src.db.models.user import UserModel
 
 
 class CurrencyEnum(enum.Enum):

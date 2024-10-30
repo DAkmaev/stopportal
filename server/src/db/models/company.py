@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel, Relationship
 
-from src.db.models.user import UserModel
+from server.src.db.models.user import UserModel
 
 
 class CompanyStrategy(SQLModel, table=True):

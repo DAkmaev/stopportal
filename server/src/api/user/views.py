@@ -18,7 +18,7 @@ async def read_user_me(current_user: CurrentUser) -> UserModelDTO:
 
 
 @router.get("/{user_id}", response_model=UserModelDTO)
-async def get_user_model(
+async def get_user(
     user_id: int,
     user_dao: UserDAO = Depends(),
 ) -> UserModel:
@@ -26,7 +26,7 @@ async def get_user_model(
 
 
 @router.get("/", response_model=List[UserModelDTO])
-async def get_user_models(
+async def get_user(
     limit: int = 10,
     offset: int = 0,
     user_dao: UserDAO = Depends(),
@@ -35,7 +35,7 @@ async def get_user_models(
 
 
 @router.post("/")
-async def create_user_model(
+async def create_user(
     new_user_object: UserModelInputDTO,
     user_dao: UserDAO = Depends(),
 ) -> None:

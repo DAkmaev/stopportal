@@ -1,9 +1,9 @@
 from typing import Any
 
-from app.db.dao.login import LoginDAO
-from src.schemas.user import UserModelDTO
-from src.schemas.login import Token
-from src.auth import CurrentAdminUser, CurrentUser
+from server.src.db.dao.login import LoginDAO
+from server.src.schemas.user import UserModelDTO
+from server.src.schemas.login import Token
+from server.src.auth import CurrentAdminUser, CurrentUser
 from fastapi import APIRouter
 from fastapi.param_functions import Depends
 from fastapi.security import OAuth2PasswordRequestForm

@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     db_server: str = "localhost"
     db_user: str = "stopportal_user"
     db_password: str = "stopportal_password"
-    db_name: str = "stopportal2"
+    db_name: str = "stopportal"
     db_port: int = 5433
 
     access_token_expire_minutes: int = 60 * 24 * 8
@@ -38,8 +38,8 @@ class Settings(BaseSettings):
         return self.generate_url()
 
     def generate_url(self):
-        if self.environment not in {"prod", "test"}:
-            return f"sqlite+aiosqlite:///{self.local_db_file}"
+        # if self.environment not in {"prod", "test"}:
+        #     return f"sqlite+aiosqlite:///{self.local_db_file}"
 
         url_scheme = "postgresql+psycopg"
         url_account = f"{self.db_user}:{self.db_password}"
