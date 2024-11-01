@@ -8,7 +8,7 @@ def load_all_models() -> None:
     package_dir = Path(__file__).resolve().parent
     modules = pkgutil.walk_packages(
         path=[str(package_dir)],
-        prefix="src.db.models.",
+        prefix="server.src.db.models.",
     )
     for module in modules:
         print(f"-------{module.name}")

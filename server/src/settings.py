@@ -38,8 +38,8 @@ class Settings(BaseSettings):
         return self.generate_url()
 
     def generate_url(self):
-        # if self.environment not in {"prod", "test"}:
-        #     return f"sqlite+aiosqlite:///{self.local_db_file}"
+        if self.environment not in {"prod", "test"}:
+            return f"sqlite+aiosqlite:///{self.local_db_file}"
 
         url_scheme = "postgresql+psycopg"
         url_account = f"{self.db_user}:{self.db_password}"

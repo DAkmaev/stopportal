@@ -8,9 +8,9 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
-from src import settings
-from src.db.models import load_all_models
-from src.settings import settings
+from server.src import settings
+from server.src.db.models import load_all_models
+from server.src.settings import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
