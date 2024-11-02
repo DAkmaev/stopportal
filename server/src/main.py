@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from server.src.settings import settings
@@ -12,16 +13,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger("stopportal")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("App startup")
+    await init_db(app)
+    yield
+    logger.info("App shutdown")
 
 app = FastAPI(
-    logging=logging,
+    logging=logging, lifespan=lifespan,
 )
 
 
-@app.on_event("startup")
-async def on_startup():
-    logger.info("Startup block")
-    await init_db(app)
+# @app.on_event("startup")
+# async def on_startup():
+#     logger.info("Startup block")
+#     await init_db(app)
 
 # Main router for the API.
 app.include_router(router=api_router, prefix="/api")

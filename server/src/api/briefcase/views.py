@@ -29,7 +29,7 @@ async def get_briefcase(
 
 
 @router.get("/", response_model=List[BriefcaseDTO])
-async def get_briefcase(
+async def get_briefcases(
     current_user: CurrentUser,
     limit: int = 100,
     offset: int = 0,

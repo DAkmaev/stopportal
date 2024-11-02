@@ -20,6 +20,7 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+SUPER_USER = "super_admin"
 
 async def create_test_company(
     dbsession: AsyncSession,
@@ -248,27 +249,23 @@ async def _get_test_user_headers(
     password: str = None,
     is_active: bool = True,
 ) -> dict[str, Any]:
-    name = (
-        settings.first_superuser if is_superuser and not name else random_lower_string()
+    user_name = (
+        SUPER_USER if is_superuser and not name else random_lower_string()
     )
     email = email if email else random_email()
-    password = (
-        settings.first_superuser_password
-        if is_superuser and not password
-        else random_lower_string()
-    )
+    user_password = password if password else random_lower_string()
     await create_test_user(
         dbsession,
         is_superuser=is_superuser,
-        name=name,
+        name=user_name,
         email=email,
-        password=password,
+        password=user_password,
         is_active=is_active,
     )
 
     dao = UserDAO(dbsession)
-    user = await dao.get_user_by_name(name)
-    headers = await get_headers(client, fastapi_app, name, password)
+    user = await dao.get_user_by_name(user_name)
+    headers = await get_headers(client, fastapi_app, user_name, user_password)
 
     return {"user": user, "headers": headers}
 

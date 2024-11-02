@@ -125,7 +125,7 @@ async def test_get_briefcase_registry(
 
     # Test retrieving the created registry
     url = fastapi_app.url_path_for(
-        "get_briefcase",
+        "get_briefcase_registry",
         briefcase_id=test_registry.briefcase_id,
         item_id=test_registry.id,
     )

@@ -1,11 +1,11 @@
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
-from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 from server.tests.utils.common import create_test_user
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_create_hero(
         fastapi_app: FastAPI,
         client: AsyncClient,

@@ -29,7 +29,7 @@ async def get_strategy(
 
 
 @router.post("/")
-async def create_strategy_model(
+async def create_strategy(
     new_strategy_object: StrategiesInputDTO,
     current_user: CurrentUser,
     dao: StrategiesDAO = Depends(),
@@ -42,7 +42,7 @@ async def create_strategy_model(
 
 
 @router.put("/{strategy_id}")
-async def update_strategy_model(
+async def update_strategy(
     strategy_id: int,
     updated_strategy: StrategiesInputDTO,
     current_user: CurrentUser,
@@ -59,7 +59,7 @@ async def update_strategy_model(
 
 
 @router.delete("/{strategy_id}", status_code=204)
-async def delete_strategy_model(
+async def delete_strategy(
     strategy_id: int,
     current_user: CurrentUser,
     dao: StrategiesDAO = Depends(),

@@ -20,7 +20,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
     :yield: new engine.
     """
-    from app.db.models import load_all_models  # noqa: WPS433
+    from server.src.db.models import load_all_models  # noqa: WPS433
 
     load_all_models()
 
@@ -47,7 +47,7 @@ async def dbsession(
     trans = await connection.begin()
 
     session_maker = async_sessionmaker(
-        connection,
+        bind=connection,
         expire_on_commit=False,
     )
     session = session_maker()

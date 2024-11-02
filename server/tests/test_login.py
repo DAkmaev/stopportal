@@ -94,4 +94,4 @@ async def test_use_admin_access_token(
     response_admin = await client.post(url, headers=superuser_token_headers["headers"])
     result = response_admin.json()
     assert response_admin.status_code == 200
-    assert result["name"] == "admin"
+    assert result["name"] == "super_admin"

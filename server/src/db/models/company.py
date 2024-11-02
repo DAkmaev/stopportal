@@ -50,5 +50,5 @@ class StrategyModel(SQLModel, table=True):
         link_model=CompanyStrategy
     )
 
-    user_id: int = Field(foreign_key="user.id", index=True)
-    user: UserModel = Relationship()
+    user_id: int | None = Field(foreign_key="user.id", index=True)
+    user: UserModel | None = Relationship()
