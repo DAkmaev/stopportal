@@ -4,7 +4,7 @@ from functools import reduce
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from server.src.db.dao.briefcases import BriefcaseDAO
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.db.models.briefcase import RegistryOperationEnum
 
 logger = logging.getLogger(__name__)

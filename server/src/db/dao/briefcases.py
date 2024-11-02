@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 
 from server.src.db.dao.common import update_model_fields
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.db.models.briefcase import (
     BriefcaseModel,
     BriefcaseRegistryModel,

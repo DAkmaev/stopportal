@@ -1,4 +1,4 @@
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.db.models.company import CompanyModel, StopModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select

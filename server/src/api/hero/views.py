@@ -10,7 +10,7 @@ from server.src.db.models.hero import HeroModel
 router = APIRouter()
 
 
-@router.get("/heroes")
+@router.get("/")
 async def read_heroes(
         session: AsyncSession = Depends(get_session),
         offset: int = 0,
@@ -21,7 +21,7 @@ async def read_heroes(
     return heroes
 
 
-@router.post("/heroes/")
+@router.post("/")
 async def create_hero(
         hero: HeroModel,
         session: AsyncSession = Depends(get_session),

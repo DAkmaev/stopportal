@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from server.src.db.dao.stops import StopsDAO
 from server.src.db.dao.strategies import StrategiesDAO
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.db.models.company import CompanyModel
 from server.src.db.models.user import UserModel
 from fastapi import Depends, HTTPException

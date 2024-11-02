@@ -2,7 +2,7 @@ from datetime import timedelta
 
 
 from server.src.db.dao.user import UserDAO
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.settings import settings
 from server.src.schemas.login import Token
 from fastapi import Depends, HTTPException

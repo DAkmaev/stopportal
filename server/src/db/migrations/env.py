@@ -8,7 +8,6 @@ from sqlmodel import SQLModel
 
 from alembic import context
 
-from server.src import settings
 from server.src.db.models import load_all_models
 from server.src.settings import settings
 

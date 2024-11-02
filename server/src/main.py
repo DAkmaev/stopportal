@@ -12,6 +12,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("stopportal")
 
+
 app = FastAPI(
     logging=logging,
 )
@@ -24,3 +25,4 @@ async def on_startup():
 
 # Main router for the API.
 app.include_router(router=api_router, prefix="/api")
+

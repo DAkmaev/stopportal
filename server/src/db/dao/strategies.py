@@ -1,6 +1,6 @@
 from typing import List
 
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.db.models.company import StrategyModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select

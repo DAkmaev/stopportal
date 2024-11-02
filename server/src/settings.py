@@ -21,7 +21,8 @@ class Settings(BaseSettings):
     log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
-    local_db_file: Path = "database.db"
+    db_file: Path = "database.db"
+    db_test_file: Path = "database_test.db"
     db_server: str = "localhost"
     db_user: str = "stopportal_user"
     db_password: str = "stopportal_password"
@@ -37,9 +38,13 @@ class Settings(BaseSettings):
     def db_url(self) -> str:
         return self.generate_url()
 
+    @property
+    def db_test_url(self) -> str:
+        return f"sqlite+aiosqlite:///{self.db_test_file}"
+
     def generate_url(self):
         if self.environment not in {"prod", "test"}:
-            return f"sqlite+aiosqlite:///{self.local_db_file}"
+            return f"sqlite+aiosqlite:///{self.db_file}"
 
         url_scheme = "postgresql+psycopg"
         url_account = f"{self.db_user}:{self.db_password}"

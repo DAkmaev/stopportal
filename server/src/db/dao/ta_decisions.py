@@ -1,6 +1,6 @@
 from typing import List
 
-from server.src.auth import get_session
+from server.src.db.db import get_session
 from server.src.db.models.company import CompanyModel
 from server.src.db.models.ta_decision import TADecisionModel
 from fastapi import Depends, HTTPException
