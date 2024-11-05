@@ -6,7 +6,7 @@ Create Virtual env and install requirements.
 cd worker
 python3 -m venv .venv
 source .venv/bin/activate
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Local start

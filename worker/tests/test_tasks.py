@@ -1,4 +1,4 @@
-from worker.src.tasks import add_task
+from worker.src.task_test import add_task
 
 
 def test_add_task(celery_app):
