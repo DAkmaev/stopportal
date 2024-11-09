@@ -3,44 +3,33 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-
-class TADecisionEnum(str, Enum):  # noqa: WPS600
-    BUY = "BUY"
-    SELL = "SELL"
-    RELAX = "RELAX"
-    UNKNOWN = "UNKNOWN"
+from worker.src.dto.enums import DecisionEnum, PeriodEnum
+from worker.src.dto.company import CompanyDTO
 
 
-class TAPeriodEnum(str, Enum):  # noqa: WPS600
-    DAY = "D"
-    WEEK = "W"
-    MONTH = "M"
-    ALL = "All"
-
-
-class TACompanyDTO(BaseModel):
-    id: int
-    name: str
+class DecisionDTO(BaseModel):
     tiker: str
-
-
-class TADecisionDTO(BaseModel):
-    company: TACompanyDTO
-    decision: TADecisionEnum
+    decision: DecisionEnum
     last_price: Optional[float] = None
     k: Optional[float] = None  # noqa: WPS111
     d: Optional[float] = None  # noqa: WPS111
-    period: TAPeriodEnum
+    period: PeriodEnum
     # k_previous: Optional[float] = None
     # d_previous: Optional[float] = None
 
 
-class TAGenerateMessage(BaseModel):
-    tiker: str
+class TAStartGenerateMessage(BaseModel):
     user_id: int
-    period: TAPeriodEnum
-    send_message: bool = False
+    period: PeriodEnum
     update_db: bool = False
+    send_message: bool = False
+    send_test_message: bool = False
+    companies: list[CompanyDTO]
+
+
+class TAGenerateMessage(BaseModel):
+    period: PeriodEnum
+    company: CompanyDTO
 
 
 class TAFinalMessage(BaseModel):

@@ -11,7 +11,7 @@ pip install -r requirements.txt
 
 ## Local start
 ```bash
-celery -A src.tasks worker --loglevel=info
+celery -A src.task_test worker --loglevel=info
 
 celery -A src.tasks --loglevel=info -Q run_calculation,ta_calculation,ta_final
 ```

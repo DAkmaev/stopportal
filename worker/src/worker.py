@@ -7,4 +7,4 @@ logger = logging.getLogger(__name__)
 
 app = Celery('tasks')
 
-app.config_from_object(settings)
+app.config_from_object(settings.Settings())
