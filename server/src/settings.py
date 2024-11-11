@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
 
+    broker_url: str = "redis://localhost:6379/0"
+
     @property
     def db_url(self) -> str:
         return self.generate_url()

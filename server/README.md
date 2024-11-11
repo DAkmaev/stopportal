@@ -9,10 +9,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Rum server
+Rum server dev
 ```bash
 fastapi dev src/main.py
 ```
+
+Run server prod
+```bash
+fastapi prod src/main.py
+```
+
 
 ## Migrations
 

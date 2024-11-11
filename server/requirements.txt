@@ -47,3 +47,5 @@ bcrypt==4.2.0
 
 pytest==8.3.3
 pytest_asyncio==0.24.0
+celery==5.4.0
+redis==5.2.0

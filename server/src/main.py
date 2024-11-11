@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+import uvicorn
 from server.src.settings import settings
 from server.src.api.router import api_router
 from server.src.db.db import init_db
@@ -33,3 +34,6 @@ app = FastAPI(
 # Main router for the API.
 app.include_router(router=api_router, prefix="/api")
 
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host='0.0.0.0', port=8000)

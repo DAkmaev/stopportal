@@ -13,7 +13,7 @@ from worker.src.worker import app
 logger = logging.getLogger(__name__)
 
 
-@app.task(queue='run_calculation')
+@app.task(name='start_generate_task') #, queue='run_calculation')
 def start_generate_task(
         message_json: str,
 ):
@@ -45,7 +45,7 @@ def start_generate_task(
     return TAMessageResponse(id=result.id, status=result.status)
 
 
-@app.task(queue='ta_calculation')
+@app.task #(queue='ta_calculation')
 def ta_generate_task(
         message_json: str,
         user_id: int,

@@ -1,7 +1,7 @@
 import logging
 from celery import Celery
 
-from worker import settings
+from worker.src import settings
 
 logger = logging.getLogger(__name__)
 
