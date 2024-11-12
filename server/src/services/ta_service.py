@@ -2,10 +2,9 @@ import logging
 from collections import defaultdict
 from typing import List
 
-from worker.src.dto.company import CompanyDTO
-from worker.src.dto.ta import DecisionDTO, DecisionEnum, TAGenerateMessage
-from worker.src.utils.ta.ta_calculator import TACalculator
-from worker.src.utils.telegram.telegramm_client import send_sync_tg_message
+from server.src.schemas.company import CompanyDTO
+from server.src.schemas.ta import DecisionDTO
+from server.src.utils.ta.ta_calculator import TACalculator
 
 logger = logging.getLogger(__name__)
 

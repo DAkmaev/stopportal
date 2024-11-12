@@ -7,9 +7,9 @@ import pandas as pd
 import pytest
 from pandas import DataFrame
 
-from worker.src.dto.company import CompanyStop
-from worker.src.utils.ta.ta_calculator import TACalculator
-from worker.src.dto.ta import DecisionEnum, CompanyDTO, DecisionDTO
+from src.schemas.company import CompanyStop
+from src.utils.ta.ta_calculator import TACalculator
+from src.schemas.ta import DecisionEnum, CompanyDTO, DecisionDTO
 
 
 @pytest.fixture
@@ -103,7 +103,7 @@ def test_calculate_decision(sample_dataframe):
     assert decision.tiker == company.tiker
 
 
-@patch("worker.src.utils.moex.moex_reader.MoexReader.get_company_history")
+@patch("src.utils.moex.moex_reader.MoexReader.get_company_history")
 def test_get_stoch_decisions_no_data(
     mock_get_company_history,
 ):
@@ -123,7 +123,7 @@ def test_get_stoch_decisions_no_data(
     assert decisions[period].tiker == company.tiker
 
 
-@patch("worker.src.utils.moex.moex_reader.MoexReader.get_company_history")
+@patch("src.utils.moex.moex_reader.MoexReader.get_company_history")
 def test_get_stoch_decisions_with_stop(
     mock_get_company_history, sample_dataframe,
 ):

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from worker.src.dto.enums import CompanyTypeEnum, PeriodEnum
+from server.src.schemas.enums import PeriodEnum, CompanyTypeEnum
 
 
 class CompanyStop(BaseModel):

@@ -1,5 +1,5 @@
 import httpx
-from worker.src.settings import settings
+from server.src.settings import settings
 
 
 def send_sync_tg_message(message: str):

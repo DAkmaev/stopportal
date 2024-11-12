@@ -1,10 +1,14 @@
 import logging
 
-from server.src.schemas.ta import TAStartGenerateMessage, TAPeriodEnum
+from celery.result import AsyncResult
+from pydantic import TypeAdapter
+
+from server.src.schemas.ta import TAStartGenerateMessage, PeriodEnum, TAMessageResponse, TAMessageStatus
 from fastapi import APIRouter, Depends
 
-from server.src.worker import app as celery_app
+from server.src.worker.worker import celery_app
 from server.src.auth import CurrentUser
+from server.src.worker.tasks import start_generate_task
 
 router = APIRouter()
 
@@ -17,12 +21,31 @@ router = APIRouter()
 @router.post("/")
 async def run_generate_ts_decisions(
         current_user: CurrentUser,
-):
+) -> TAMessageResponse:
     message = TAStartGenerateMessage(
         user_id=current_user.id,
-        period=TAPeriodEnum.DAY,
+        period=PeriodEnum.DAY,
         companies=[]
     )
     payload_str = str(message.model_dump_json())
-    result = celery_app.send_task('worker.src.tasks.start_generate_task', args=[payload_str]) #, queue='run_calculation')
-    logging.info(f"Result: {str(result)}")
+    result = start_generate_task.delay(payload_str)
+
+    res_message = TAMessageResponse(id=result.id, status=result.status)
+    logging.info(f"********* Result: {res_message}")
+
+    return res_message
+
+
+@router.get("/{task_id}")
+def get_task_status(task_id: str) -> TAMessageStatus:
+    task = start_generate_task.AsyncResult(task_id)
+
+    response = TAMessageStatus(id=task.id, status=task.status, result=task.result)
+    logging.info(f"********* Result2: {str(response)}")
+
+    return response
+    # return TAMessageStatus(
+    #     id=task_id,
+    #     status=str(task_result.status),
+    #     result=task_result.result,
+    # )

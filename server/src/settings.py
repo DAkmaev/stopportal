@@ -34,7 +34,14 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
 
-    broker_url: str = "redis://localhost:6379/0"
+    # Celery
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_backend_url: str = "redis://localhost:6379/1"
+
+
+    # Telegram
+    chat_id: str = ''
+    bot_token: str = ''
 
     @property
     def db_url(self) -> str:
