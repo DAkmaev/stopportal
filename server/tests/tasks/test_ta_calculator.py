@@ -7,14 +7,14 @@ import pandas as pd
 import pytest
 from pandas import DataFrame
 
-from src.schemas.company import CompanyStop
-from src.utils.ta.ta_calculator import TACalculator
-from src.schemas.ta import DecisionEnum, CompanyDTO, DecisionDTO
+from server.src.schemas.company import CompanyStop
+from server.src.utils.ta.ta_calculator import TACalculator
+from server.src.schemas.ta import DecisionEnum, CompanyDTO, DecisionDTO
 
 
 @pytest.fixture
 def sample_dataframe():
-    file_path = Path(__file__).parent / "data/mocked_data.csv"
+    file_path = Path(__file__).parent.parent / "data/mocked_data.csv"
     df = pd.read_csv(file_path)
     df["DATE"] = pd.to_datetime(df["DATE"])  # Convert DATE column to datetime
     df.set_index("DATE", inplace=True)  # Set DATE as the index
@@ -27,7 +27,7 @@ def sample_dataframe():
 
 @pytest.fixture
 def sample_lkoh_dataframe():
-    file_path = Path(__file__).parent / "data/mocked_lkoh_history.csv"
+    file_path = Path(__file__).parent.parent / "data/mocked_lkoh_history.csv"
     df = pd.read_csv(file_path)
     df["DATE"] = pd.to_datetime(df["DATE"])  # Convert DATE column to datetime
     df.set_index("DATE", inplace=True)  # Set DATE as the index
@@ -40,7 +40,7 @@ def sample_lkoh_dataframe():
 
 @pytest.fixture
 def sample_stoch_dataframe():
-    file_path = Path(__file__).parent / "data/mocked_stoch_data.csv"
+    file_path = Path(__file__).parent.parent / "data/mocked_stoch_data.csv"
     df = pd.read_csv(file_path)
     df["DATE"] = pd.to_datetime(df["DATE"])  # Convert DATE column to datetime
     df.set_index("DATE", inplace=True)  # Set DATE as the index
@@ -103,7 +103,7 @@ def test_calculate_decision(sample_dataframe):
     assert decision.tiker == company.tiker
 
 
-@patch("src.utils.moex.moex_reader.MoexReader.get_company_history")
+@patch("server.src.utils.moex.moex_reader.MoexReader.get_company_history")
 def test_get_stoch_decisions_no_data(
     mock_get_company_history,
 ):
@@ -123,7 +123,7 @@ def test_get_stoch_decisions_no_data(
     assert decisions[period].tiker == company.tiker
 
 
-@patch("src.utils.moex.moex_reader.MoexReader.get_company_history")
+@patch("server.src.utils.moex.moex_reader.MoexReader.get_company_history")
 def test_get_stoch_decisions_with_stop(
     mock_get_company_history, sample_dataframe,
 ):

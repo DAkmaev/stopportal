@@ -1,9 +1,9 @@
 from unittest.mock import patch
 
-from src.schemas.company import CompanyDTO
-from src.schemas.enums import PeriodEnum, DecisionEnum
-from src.schemas.ta import TAStartGenerateMessage, TAFinalMessage, TAGenerateMessage, DecisionDTO
-from src.worker.tasks import start_generate_task, ta_generate_task, ta_final_task, send_telegram_task
+from server.src.schemas.company import CompanyDTO
+from server.src.schemas.enums import PeriodEnum, DecisionEnum
+from server.src.schemas.ta import TAStartGenerateMessage, TAFinalMessage, TAGenerateMessage, DecisionDTO
+from server.src.worker.tasks import start_generate_task, ta_generate_task, ta_final_task, send_telegram_task
 
 
 def test_start_generate_task(celery_local_app):
@@ -37,7 +37,7 @@ def test_ta_generate_task(celery_local_app):
     assert decision.decision == DecisionEnum.UNKNOWN
 
 
-@patch("src.worker.tasks.send_sync_tg_message")
+@patch("server.src.worker.tasks.send_sync_tg_message")
 def test_final_task(celery_app):
     payload_obj = TAFinalMessage(
         user_id=1,
@@ -62,7 +62,7 @@ def test_final_task(celery_app):
     assert result.successful()
 
 
-@patch("src.worker.tasks.send_sync_tg_message")
+@patch("server.src.worker.tasks.send_sync_tg_message")
 def test_send_telegram_task(
         mock_send_sync_tg_message,
         celery_app,
