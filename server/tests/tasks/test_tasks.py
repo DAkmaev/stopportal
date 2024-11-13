@@ -1,5 +1,7 @@
 from unittest.mock import patch
 
+import pytest
+
 from server.src.schemas.company import CompanyDTO
 from server.src.schemas.enums import PeriodEnum, DecisionEnum
 from server.src.schemas.ta import (
@@ -16,6 +18,7 @@ from server.src.worker.tasks import (
 )
 
 
+@pytest.mark.integrations
 def test_start_generate_task(celery_local_app):
     payload_obj = TAStartGenerateMessage(
         user_id=1,
@@ -52,6 +55,7 @@ def test_ta_generate_task(celery_local_app):
     assert decision.decision == DecisionEnum.UNKNOWN
 
 
+@pytest.mark.integrations
 @patch("server.src.worker.tasks.send_sync_tg_message")
 def test_final_task(celery_app):
     payload_obj = TAFinalMessage(
@@ -86,8 +90,8 @@ def test_final_task(celery_app):
 
 @patch("server.src.worker.tasks.send_sync_tg_message")
 def test_send_telegram_task(
-    mock_send_sync_tg_message,
-    celery_app,
+        mock_send_sync_tg_message,
+        celery_app,
 ):
     mock_send_sync_tg_message.return_value = ""
     payload_str = "Test message"
