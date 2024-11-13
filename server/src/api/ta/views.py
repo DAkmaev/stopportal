@@ -33,8 +33,9 @@ async def run_generate_ts_decisions(
 @router.get("/{task_id}")
 def get_task_status(task_id: str) -> TAMessageStatus:
     task = start_generate_task.AsyncResult(task_id)
+    logging.info(f"********* Get task result: {str(task)}")
 
     response = TAMessageStatus(id=task.id, status=task.status, result=task.result)
-    logging.info(f"********* Get task status result: {str(response)}")
+    logging.info(f"********* Get task message: {str(response)}")
 
     return response

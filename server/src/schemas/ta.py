@@ -46,4 +46,4 @@ class TAMessageResponse(BaseModel):
 class TAMessageStatus(TAMessageResponse):
     id: str
     status: str
-    result: str
+    result: Optional[str] = None
