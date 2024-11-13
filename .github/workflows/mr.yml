@@ -22,7 +22,7 @@ jobs:
 
     - name: Run pytest check
       working-directory: server
-      run: pytest -vv Fix-m "not integrations"
+      run: pytest -vv -m "not integrations"
 
   black:
     runs-on: ubuntu-latest

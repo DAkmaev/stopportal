@@ -90,8 +90,8 @@ def test_final_task(celery_app):
 
 @patch("server.src.worker.tasks.send_sync_tg_message")
 def test_send_telegram_task(
-        mock_send_sync_tg_message,
-        celery_app,
+    mock_send_sync_tg_message,
+    celery_app,
 ):
     mock_send_sync_tg_message.return_value = ""
     payload_str = "Test message"
