@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 SUPER_USER = "super_admin"
 
+
 async def create_test_company(
     dbsession: AsyncSession,
     need_add_stop: bool = False,
@@ -249,9 +250,7 @@ async def _get_test_user_headers(
     password: str = None,
     is_active: bool = True,
 ) -> dict[str, Any]:
-    user_name = (
-        SUPER_USER if is_superuser and not name else random_lower_string()
-    )
+    user_name = SUPER_USER if is_superuser and not name else random_lower_string()
     email = email if email else random_email()
     user_password = password if password else random_lower_string()
     await create_test_user(

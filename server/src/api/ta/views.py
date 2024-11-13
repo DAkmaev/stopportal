@@ -3,7 +3,12 @@ import logging
 from celery.result import AsyncResult
 from pydantic import TypeAdapter
 
-from server.src.schemas.ta import TAStartGenerateMessage, PeriodEnum, TAMessageResponse, TAMessageStatus
+from server.src.schemas.ta import (
+    TAStartGenerateMessage,
+    PeriodEnum,
+    TAMessageResponse,
+    TAMessageStatus,
+)
 from fastapi import APIRouter, Depends
 
 from server.src.worker.worker import celery_app
@@ -20,12 +25,10 @@ router = APIRouter()
 
 @router.post("/")
 async def run_generate_ts_decisions(
-        current_user: CurrentUser,
+    current_user: CurrentUser,
 ) -> TAMessageResponse:
     message = TAStartGenerateMessage(
-        user_id=current_user.id,
-        period=PeriodEnum.DAY,
-        companies=[]
+        user_id=current_user.id, period=PeriodEnum.DAY, companies=[]
     )
     payload_str = str(message.model_dump_json())
     result = start_generate_task.delay(payload_str)

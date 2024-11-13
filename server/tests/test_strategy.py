@@ -35,9 +35,7 @@ async def test_get_strategy_model(
     assert created_strategy is not None
 
     # Отправляем GET-запрос для получения стратегии по ID
-    url = fastapi_app.url_path_for(
-        "get_strategy", strategy_id=created_strategy.id
-    )
+    url = fastapi_app.url_path_for("get_strategy", strategy_id=created_strategy.id)
     response = await client.get(url, headers=headers)
     retrieved_strategy = response.json()
 

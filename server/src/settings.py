@@ -38,10 +38,9 @@ class Settings(BaseSettings):
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_backend_url: str = "redis://localhost:6379/1"
 
-
     # Telegram
-    chat_id: str = ''
-    bot_token: str = ''
+    chat_id: str = ""
+    bot_token: str = ""
 
     @property
     def db_url(self) -> str:

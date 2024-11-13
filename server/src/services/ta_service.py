@@ -54,7 +54,7 @@ class TAService:
                 #     for dec in decisions
                 #     if dec.company.has_shares or decision_name != DecisionEnum.SELL
                 # ]
-                #if decisions_filtered:
+                # if decisions_filtered:
                 if decisions:
                     messages.append(
                         self._generate_decision_message(
@@ -65,7 +65,6 @@ class TAService:
                     )
 
         return messages
-
 
     def _group_decisions_by_decision_and_period(
         self,
@@ -102,9 +101,7 @@ class TAService:
 
         result = f"Акции - {DECISION_NAMES[decision_name]} ({PERIOD_NAMES[period]})!\n"
         for dec in decisions:
-            name = (
-                f"[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})"
-            )
+            name = f"[{dec.tiker}](https://www.moex.com/ru/issue.aspx?board=TQBR&code={dec.tiker})"
             price = round(dec.last_price, 2) if dec.last_price else None
             price_str = f" - цена: {price}" if price else ""
 

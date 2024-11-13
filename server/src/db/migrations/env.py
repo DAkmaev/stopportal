@@ -71,8 +71,8 @@ async def run_async_migrations() -> None:
     """
 
     conf = config.get_section(config.config_ini_section, {})
-    if 'sqlalchemy.url' not in conf:
-        conf['sqlalchemy.url'] = settings.db_url
+    if "sqlalchemy.url" not in conf:
+        conf["sqlalchemy.url"] = settings.db_url
 
     connectable = async_engine_from_config(
         conf,

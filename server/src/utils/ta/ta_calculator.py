@@ -200,9 +200,7 @@ class TACalculator:
         # Calculate decision for buying
         if period != "M" and per_decision.decision != DecisionEnum.SELL:
             need_buy = self._check_buy_decision(df, period)
-            per_decision.decision = (
-                DecisionEnum.BUY if need_buy else DecisionEnum.RELAX
-            )
+            per_decision.decision = DecisionEnum.BUY if need_buy else DecisionEnum.RELAX
 
         # Prepare TADecisionDTO
         last_row = per_decision.df.iloc[-1]
@@ -219,9 +217,7 @@ class TACalculator:
         if period == "W":
             decision_month = self._get_period_decision(df, "M", skip_check_borders=True)
             decision_week = self._get_period_decision(df, "W", bottom_border=40)
-            return (
-                decision_month.decision == decision_week.decision == DecisionEnum.BUY
-            )
+            return decision_month.decision == decision_week.decision == DecisionEnum.BUY
 
         elif period == "D":
             decision_day = self._get_period_decision(df, "D")

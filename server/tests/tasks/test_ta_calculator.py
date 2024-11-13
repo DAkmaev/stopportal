@@ -83,9 +83,7 @@ def test_calculate_decision(sample_dataframe):
     last_price = 130.0
 
     company = CompanyDTO(
-        name='Test',
-        tiker='TST',
-        stops=[CompanyStop(period=period, value=120.0)]
+        name="Test", tiker="TST", stops=[CompanyStop(period=period, value=120.0)]
     )
 
     decision = calculator._calculate_decision(
@@ -112,7 +110,7 @@ def test_get_stoch_decisions_no_data(
     calculator = TACalculator()
     period = "D"
 
-    company = CompanyDTO(name='Test', tiker='TST')
+    company = CompanyDTO(name="Test", tiker="TST")
 
     # Simulate the case where there's no data available
     decisions = calculator.get_company_ta_decisions(company, period)
@@ -125,7 +123,8 @@ def test_get_stoch_decisions_no_data(
 
 @patch("server.src.utils.moex.moex_reader.MoexReader.get_company_history")
 def test_get_stoch_decisions_with_stop(
-    mock_get_company_history, sample_dataframe,
+    mock_get_company_history,
+    sample_dataframe,
 ):
     mock_get_company_history.return_value = sample_dataframe
 
@@ -134,9 +133,7 @@ def test_get_stoch_decisions_with_stop(
     value = 120.0
 
     company = CompanyDTO(
-        name='Test',
-        tiker='TST',
-        stops=[CompanyStop(period=period, value=value)]
+        name="Test", tiker="TST", stops=[CompanyStop(period=period, value=value)]
     )
 
     decisions = calculator.get_company_ta_decisions(company, period)

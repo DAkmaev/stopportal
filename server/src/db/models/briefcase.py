@@ -37,8 +37,12 @@ class BriefcaseRegistryModel(SQLModel, table=True):
 
     id: int = Field(primary_key=True, default=None)
     created_date: datetime = Field()
-    currency: CurrencyEnum = Field(sa_column=Column(Enum(CurrencyEnum), default=CurrencyEnum.RUB))
-    operation: RegistryOperationEnum = Field(sa_column=Column(Enum(RegistryOperationEnum)))
+    currency: CurrencyEnum = Field(
+        sa_column=Column(Enum(CurrencyEnum), default=CurrencyEnum.RUB)
+    )
+    operation: RegistryOperationEnum = Field(
+        sa_column=Column(Enum(RegistryOperationEnum))
+    )
     count: int | None = Field(nullable=True)
     amount: Decimal = Field(nullable=True)  # Сумма сделки
     price: Decimal | None = Field(nullable=True)
@@ -50,7 +54,9 @@ class BriefcaseRegistryModel(SQLModel, table=True):
     strategy: StrategyModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
     briefcase_id: int = Field(foreign_key="briefcases.id")
-    briefcase: BriefcaseModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+    briefcase: BriefcaseModel = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class BriefcaseShareModel(SQLModel, table=True):
@@ -69,6 +75,8 @@ class BriefcaseShareModel(SQLModel, table=True):
     company: CompanyModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
     briefcase_id: int = Field(foreign_key="briefcases.id")
-    briefcase: BriefcaseModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+    briefcase: BriefcaseModel = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
     count: int = Field(nullable=True)

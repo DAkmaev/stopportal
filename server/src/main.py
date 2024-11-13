@@ -10,9 +10,10 @@ from server.src.db.db import init_db
 logging.basicConfig(
     level=logging.getLevelName(settings.log_level.value),
     format="%(levelname)s:     %(message)s",  # noqa: WPS323
-    #format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",  # noqa: WPS323
+    # format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",  # noqa: WPS323
 )
 logger = logging.getLogger("stopportal")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,8 +22,10 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("App shutdown")
 
+
 app = FastAPI(
-    logging=logging, lifespan=lifespan,
+    logging=logging,
+    lifespan=lifespan,
 )
 
 

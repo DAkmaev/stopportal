@@ -10,6 +10,7 @@ from server.src.api import (  # noqa: WPS235
     briefcase,
     ta,
 )
+
 api_router = APIRouter()
 api_router.include_router(monitoring.router)
 api_router.include_router(hero.router, prefix="/heroes", tags=["hero"])

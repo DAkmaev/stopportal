@@ -4,10 +4,14 @@ from server.src.db.models.user import UserModel
 
 
 class CompanyStrategy(SQLModel, table=True):
-    __tablename__ = 'companies_strategies'
+    __tablename__ = "companies_strategies"
 
-    company_id: int | None = Field(default=None, foreign_key="companies.id", primary_key=True)
-    strategy_id: int | None = Field(default=None, foreign_key="strategies.id", primary_key=True)
+    company_id: int | None = Field(
+        default=None, foreign_key="companies.id", primary_key=True
+    )
+    strategy_id: int | None = Field(
+        default=None, foreign_key="strategies.id", primary_key=True
+    )
 
 
 class CompanyModel(SQLModel, table=True):
@@ -17,12 +21,14 @@ class CompanyModel(SQLModel, table=True):
     name: str = Field(index=True, unique=True, nullable=True)
     tiker: str = Field(index=True, unique=True)
     type: str = Field(default="MOEX", nullable=True)
-    stops: list["StopModel"] = Relationship(sa_relationship_kwargs={"lazy": "selectin"}, cascade_delete=True)
+    stops: list["StopModel"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}, cascade_delete=True
+    )
 
     strategies: list["StrategyModel"] = Relationship(
         back_populates="companies",
         link_model=CompanyStrategy,
-        sa_relationship_kwargs={"lazy": "selectin"}
+        sa_relationship_kwargs={"lazy": "selectin"},
     )
 
     user_id: int = Field(foreign_key="user.id", index=True)
@@ -46,8 +52,7 @@ class StrategyModel(SQLModel, table=True):
     description: str = Field(nullable=True)
 
     companies: list["CompanyModel"] = Relationship(
-        back_populates="strategies",
-        link_model=CompanyStrategy
+        back_populates="strategies", link_model=CompanyStrategy
     )
 
     user_id: int | None = Field(foreign_key="user.id", index=True)

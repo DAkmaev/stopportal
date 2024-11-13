@@ -12,9 +12,9 @@ router = APIRouter()
 
 @router.get("/")
 async def read_heroes(
-        session: AsyncSession = Depends(get_session),
-        offset: int = 0,
-        limit: Annotated[int, Query(le=100)] = 100,
+    session: AsyncSession = Depends(get_session),
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
 ) -> list[HeroModel]:
     result = await session.execute(select(HeroModel).offset(offset).limit(limit))
     heroes = result.scalars().all()
@@ -23,9 +23,8 @@ async def read_heroes(
 
 @router.post("/")
 async def create_hero(
-        hero: HeroModel,
-        session: AsyncSession = Depends(get_session),
-
+    hero: HeroModel,
+    session: AsyncSession = Depends(get_session),
 ) -> HeroModel:
     session.add(hero)
     # await session.commit()

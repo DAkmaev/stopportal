@@ -11,7 +11,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from server.src.main import app
 from server.src.db.db import get_session, settings
 from server.src.db.utils import create_database, drop_database
-from server.tests.utils.common import get_superuser_token_headers, get_user_token_headers, get_inactive_user_token_headers
+from server.tests.utils.common import (
+    get_superuser_token_headers,
+    get_user_token_headers,
+    get_inactive_user_token_headers,
+)
 
 
 @pytest.fixture(scope="session")
@@ -27,7 +31,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
     await create_database()
 
-    #connect_str = "sqlite+aiosqlite:///test.db"
+    # connect_str = "sqlite+aiosqlite:///test.db"
     engine = create_async_engine(str(settings.db_test_url))
 
     async with engine.begin() as conn:
@@ -68,7 +72,7 @@ def anyio_backend() -> str:
 
 @pytest.fixture
 def fastapi_app(
-        dbsession: AsyncSession,
+    dbsession: AsyncSession,
 ) -> FastAPI:
     application = app
     application.dependency_overrides[get_session] = lambda: dbsession
@@ -77,30 +81,32 @@ def fastapi_app(
 
 @pytest.fixture
 async def client(
-        fastapi_app: FastAPI,
+    fastapi_app: FastAPI,
 ) -> AsyncClient:
     async with AsyncClient(
-            transport=ASGITransport(app=fastapi_app), base_url="http://test"
+        transport=ASGITransport(app=fastapi_app), base_url="http://test"
     ) as ac:
         yield ac
 
 
 @pytest.fixture
 def celery_app():
-    celery_app = Celery('tasks', broker='memory://', backend='memory://')
+    celery_app = Celery("tasks", broker="memory://", backend="memory://")
     celery_app.conf.task_always_eager = True
     return celery_app
 
 
 @pytest.fixture
 def celery_local_app():
-    celery_app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/1')
+    celery_app = Celery(
+        "tasks", broker="redis://localhost:6379/0", backend="redis://localhost:6379/1"
+    )
     celery_app.conf.update(
         task_always_eager=False,  # Отключаем eager-режим
         task_eager_propagates=True,
         task_store_eager_result=False,
         task_ignore_result=False,
-        task_store_errors_even_if_ignored=True
+        task_store_errors_even_if_ignored=True,
     )
     return celery_app
 

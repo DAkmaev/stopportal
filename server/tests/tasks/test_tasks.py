@@ -2,8 +2,18 @@ from unittest.mock import patch
 
 from server.src.schemas.company import CompanyDTO
 from server.src.schemas.enums import PeriodEnum, DecisionEnum
-from server.src.schemas.ta import TAStartGenerateMessage, TAFinalMessage, TAGenerateMessage, DecisionDTO
-from server.src.worker.tasks import start_generate_task, ta_generate_task, ta_final_task, send_telegram_task
+from server.src.schemas.ta import (
+    TAStartGenerateMessage,
+    TAFinalMessage,
+    TAGenerateMessage,
+    DecisionDTO,
+)
+from server.src.worker.tasks import (
+    start_generate_task,
+    ta_generate_task,
+    ta_final_task,
+    send_telegram_task,
+)
 
 
 def test_start_generate_task(celery_local_app):
@@ -15,12 +25,12 @@ def test_start_generate_task(celery_local_app):
     payload_str = str(payload_obj.model_dump_json())
     result = start_generate_task.apply(args=(payload_str,))
 
-    assert result.status in ('PENDING', 'SUCCESS')
+    assert result.status in ("PENDING", "SUCCESS")
 
 
 def test_ta_generate_task(celery_local_app):
-    tiker = 'TST'
-    name = 'Test'
+    tiker = "TST"
+    name = "Test"
     period = PeriodEnum.DAY
     payload_obj = TAGenerateMessage(
         period=period,
@@ -28,7 +38,12 @@ def test_ta_generate_task(celery_local_app):
     )
     user_id = 1
     payload_str = str(payload_obj.model_dump_json())
-    result = ta_generate_task.apply(args=(payload_str, user_id,))
+    result = ta_generate_task.apply(
+        args=(
+            payload_str,
+            user_id,
+        )
+    )
 
     assert result.successful()
     decision = DecisionDTO.model_validate_json(result.result[0])
@@ -47,25 +62,32 @@ def test_final_task(celery_app):
     )
     payload_str = str(payload_obj.model_dump_json())
 
-    decisions: list[DecisionDTO] = [DecisionDTO(
-        tiker='TST',
-        decision=DecisionEnum.SELL,
-        period=PeriodEnum.DAY,
-        last_price=100.0,
-        k=50.0,
-        d=50.0,
-    )]
+    decisions: list[DecisionDTO] = [
+        DecisionDTO(
+            tiker="TST",
+            decision=DecisionEnum.SELL,
+            period=PeriodEnum.DAY,
+            last_price=100.0,
+            k=50.0,
+            d=50.0,
+        )
+    ]
     results_str = [[dec.model_dump_json() for dec in decisions]]
 
-    result = ta_final_task.apply(args=(results_str, payload_str,))
+    result = ta_final_task.apply(
+        args=(
+            results_str,
+            payload_str,
+        )
+    )
 
     assert result.successful()
 
 
 @patch("server.src.worker.tasks.send_sync_tg_message")
 def test_send_telegram_task(
-        mock_send_sync_tg_message,
-        celery_app,
+    mock_send_sync_tg_message,
+    celery_app,
 ):
     mock_send_sync_tg_message.return_value = ""
     payload_str = "Test message"

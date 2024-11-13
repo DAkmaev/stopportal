@@ -56,3 +56,5 @@ pandas-ta==0.3.14b0
 pandas==2.2.3
 apimoex==1.4.0
 yahoo-fin==0.8.9.1
+
+black-24.10.0
