@@ -26,7 +26,7 @@ async def get_user(
 
 
 @router.get("/", response_model=List[UserModelDTO])
-async def get_user(
+async def get_users(
     limit: int = 10,
     offset: int = 0,
     user_dao: UserDAO = Depends(),
@@ -39,7 +39,6 @@ async def create_user(
     new_user_object: UserModelInputDTO,
     user_dao: UserDAO = Depends(),
 ) -> None:
-    logger.info(f"----------")
     await user_dao.create_user_model(
         name=new_user_object.name,
         email=new_user_object.email,

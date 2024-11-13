@@ -1,5 +1,3 @@
-from typing import Any
-
 import pytest
 from server.src.db.dao.companies import CompanyDAO
 from server.src.db.dao.strategies import StrategiesDAO
@@ -16,7 +14,6 @@ async def test_add_company_model(
     TIKER = "TIKER1"
     NAME = "Company1"
     COMPANY_TYPE = "MOEX"
-    NEW_NAME = "Company2"
     company_dao = CompanyDAO(dbsession)
 
     # Create test user

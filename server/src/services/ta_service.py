@@ -5,6 +5,8 @@ from typing import List
 from server.src.schemas.company import CompanyDTO
 from server.src.schemas.ta import DecisionDTO
 from server.src.utils.ta.ta_calculator import TACalculator
+from server.src.schemas.enums import DecisionEnum
+from server.src.utils.telegram.telegramm_client import send_sync_tg_message
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +51,7 @@ class TAService:
                 continue
 
             for period_name, decisions in periods.items():
+                # TODO Надо эту логику перенести выше
                 # decisions_filtered = [
                 #     dec
                 #     for dec in decisions

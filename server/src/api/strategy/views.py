@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[StrategiesDTO])
-async def get_strategy(
+async def get_strategies(
     current_user: CurrentUser,
     dao: StrategiesDAO = Depends(),
 ) -> List[StrategyModel]:

@@ -66,7 +66,7 @@ async def test_get_strategy_models(
         )
 
     # Отправляем GET-запрос для получения списка стратегий
-    url = fastapi_app.url_path_for("get_strategy")
+    url = fastapi_app.url_path_for("get_strategies")
     response = await client.get(url, headers=headers)
     strategies = response.json()
 

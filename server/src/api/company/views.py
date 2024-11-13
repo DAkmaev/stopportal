@@ -27,7 +27,7 @@ async def get_company(
 
 
 @router.get("/", response_model=List[CompanyModelDTO])
-async def get_company(
+async def get_companies(
     current_user: CurrentUser,
     limit: int = 100,
     offset: int = 0,

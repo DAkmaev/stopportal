@@ -15,7 +15,6 @@ from server.src.db.models.briefcase import (
 )
 from server.src.db.models.company import CompanyModel, StopModel, StrategyModel
 from server.src.db.models.user import UserModel
-from server.src.settings import settings
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession

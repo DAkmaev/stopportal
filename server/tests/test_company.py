@@ -74,7 +74,7 @@ async def test_getting(
 
     company = await create_test_company(dbsession, True, True, user_id=user.id)
 
-    url = fastapi_app.url_path_for("get_company")
+    url = fastapi_app.url_path_for("get_companies")
     response = await client.get(url, headers=headers)
     companies = response.json()
 

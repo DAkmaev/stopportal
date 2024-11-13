@@ -2,7 +2,6 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-import uvicorn
 from server.src.settings import settings
 from server.src.api.router import api_router
 from server.src.db.db import init_db

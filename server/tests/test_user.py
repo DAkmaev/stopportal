@@ -2,10 +2,8 @@ from typing import Any
 
 import pytest
 from server.src.db.dao.user import UserDAO
-from server.src.db.models.user import UserModel
 from server.tests.utils.common import (
     create_test_user,
-    get_headers,
     random_email,
     random_lower_string,
 )
@@ -31,7 +29,7 @@ async def test_get_user_models(
         password = random_lower_string()
         await dao.create_user_model(names[i], emails[i], password)
 
-    url = fastapi_app.url_path_for("get_user")
+    url = fastapi_app.url_path_for("get_users")
     response = await client.get(url)
     users = response.json()
 

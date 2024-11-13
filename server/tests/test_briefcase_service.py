@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 

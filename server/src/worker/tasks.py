@@ -9,7 +9,6 @@ from server.src.schemas.ta import (
     TAGenerateMessage,
     TAFinalMessage,
     DecisionDTO,
-    TAMessageResponse,
 )
 from server.src.schemas.ta import TAStartGenerateMessage
 from server.src.worker.worker import celery_app
@@ -73,7 +72,7 @@ def ta_final_task(  # noqa:  WPS210ß
     params_json: str,
 ):
     params: TAFinalMessage = TypeAdapter(TAFinalMessage).validate_json(params_json)
-    logger.info(f"Старт final task...")
+    logger.info("Старт final task...")
     ta_decisions = [
         TypeAdapter(DecisionDTO).validate_json(dec_json)
         for sublist in results
