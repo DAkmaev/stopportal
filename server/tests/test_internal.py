@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from server.tests.utils.common import create_test_company
+from server.tests.utils.common import create_test_company, create_test_briefcase
 from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +22,7 @@ async def test_internal_start_generate_ta_decisions(
     await create_test_company(
         dbsession, need_add_stop=True, need_add_strategy=True, user_id=user.id
     )
+    await create_test_briefcase(dbsession, user_id=user.id)
 
     url = fastapi_app.url_path_for("internal_start_generate_ta_decisions", user_id=user.id)
     response = await client.get(url)

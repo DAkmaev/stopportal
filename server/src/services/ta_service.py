@@ -12,6 +12,8 @@ from server.src.schemas.enums import DecisionEnum, CompanyTypeEnum, PeriodEnum
 from server.src.utils.telegram.telegramm_client import send_sync_tg_message
 from server.src.db.dao.companies import CompanyDAO
 from server.src.db.db import get_session
+from server.src.db.dao.briefcases import BriefcaseDAO
+from server.src.db.dao.user import UserDAO
 
 logger = logging.getLogger(__name__)
 
@@ -36,19 +38,27 @@ class TAService:
         update_db: bool,
         send_test_message: bool,
     ):
+        user_dao = UserDAO(session=self.session)
         company_dao = CompanyDAO(session=self.session)
+        briefcase_dao = BriefcaseDAO(session=self.session)
+
         # TODO отправлять пачками
         LIMIT = 1000
         companies = await company_dao.get_all_companies(
             limit=LIMIT,
             user_id=user_id,
         )
+        user = await user_dao.get_user(user_id)
+        briefcase = await briefcase_dao.get_briefcase_model_by_user(user)
+        shares = await briefcase_dao.get_all_briefcase_shares(briefcase.id)
+        shared_dict = {sh.company_id: True for sh in shares}
+
         companies_dto = [
             CompanyDTO(
                 name=company.name,
                 tiker=company.tiker,
                 type=CompanyTypeEnum(company.type),
-                has_shares=False,  # TODO заменить на высчитывание
+                has_shares=shared_dict.get(company.id, False),
                 stops=[
                     CompanyStopDTO(
                         period=stop.period,
@@ -56,6 +66,7 @@ class TAService:
                     )
                     for stop in company.stops
                 ],
+
             )
             for company in companies
         ]
@@ -71,15 +82,20 @@ class TAService:
         logging.debug(f"********* TAStartGenerateMessage: {message}")
         return message
 
-
-
     def generate_ta_decision(
         self,
         company: CompanyDTO,
         period: str,
     ) -> dict[str, DecisionDTO]:
         ta_calculator = TACalculator()
-        return ta_calculator.get_company_ta_decisions(company, period)
+        decisions = ta_calculator.get_company_ta_decisions(company, period)
+
+        for key in decisions:
+            if not company.has_shares and decisions[key].decision == DecisionEnum.SELL:
+                logger.debug(f"Заменяем решение SELL на RELAX, так как нет акций в портфеле")
+                decisions[key].decision = DecisionEnum.RELAX
+
+        return decisions
 
     def send_tg_messages(self, td_decisions: list[DecisionDTO]):
         if td_decisions:
