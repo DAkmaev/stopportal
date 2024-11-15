@@ -1,8 +1,6 @@
 import logging
 
 from server.src.schemas.ta import (
-    TAStartGenerateMessage,
-    PeriodEnum,
     TAMessageResponse,
     TAMessageStatus,
 )
@@ -10,9 +8,8 @@ from fastapi import APIRouter, Depends
 
 from server.src.auth import CurrentUser
 from server.src.worker.tasks import start_generate_task
+from server.src.services.ta_service import TAService
 from server.src.db.dao.companies import CompanyDAO
-from server.src.schemas.company import CompanyDTO,  CompanyStopDTO
-from server.src.schemas.enums import CompanyTypeEnum
 
 router = APIRouter()
 
@@ -24,50 +21,19 @@ async def run_generate_ts_decisions(
     send_messages: bool = False,
     update_db: bool = False,
     send_test_message: bool = False,
-    company_dao: CompanyDAO = Depends(),
+    ta_service: TAService = Depends(),
 ) -> TAMessageResponse:
-    # TODO отправлять пачками
-    LIMIT = 1000
-    companies = await company_dao.get_all_companies(
-        limit=LIMIT,
-        user_id=current_user.id,
-    )
-    companies_dto = [
-        CompanyDTO(
-            name=company.name,
-            tiker=company.tiker,
-            type=CompanyTypeEnum(company.type),
-            has_shares=False, # TODO заменить на высчитывание
-            stops=[
-                 CompanyStopDTO(
-                    period=stop.period,
-                    value=stop.value,
-                )
-                for stop in company.stops
-            ],
-        )
-        for company in companies
-    ]
 
-    message = TAStartGenerateMessage(
+    message = await ta_service.fill_send_start_generate_message(
         user_id=current_user.id,
-        period=PeriodEnum(period),
-        companies=companies_dto,
+        period=period,
+        send_messages=send_messages,
         update_db=update_db,
-        send_message=send_messages,
         send_test_message=send_test_message,
     )
 
-    payload_str = str(message.model_dump_json())
-    logging.debug(f"********* payload_str: {payload_str}")
-    result = start_generate_task.delay(payload_str)
-
-    logging.debug(f"********* payload: {result}")
-
-    res_message = TAMessageResponse(id=result.id, status=result.status)
-    logging.info(f"********* Run generate result: {res_message}")
-
-    return res_message
+    result = start_generate_task.delay(str(message.model_dump_json()))
+    return TAMessageResponse(id=result.id, status=result.status)
 
 
 @router.get("/{task_id}")

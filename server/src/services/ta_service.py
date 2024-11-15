@@ -2,11 +2,16 @@ import logging
 from collections import defaultdict
 from typing import List
 
-from server.src.schemas.company import CompanyDTO
-from server.src.schemas.ta import DecisionDTO
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from server.src.schemas.company import CompanyDTO, CompanyStopDTO
+from server.src.schemas.ta import DecisionDTO, TAStartGenerateMessage
 from server.src.utils.ta.ta_calculator import TACalculator
-from server.src.schemas.enums import DecisionEnum
+from server.src.schemas.enums import DecisionEnum, CompanyTypeEnum, PeriodEnum
 from server.src.utils.telegram.telegramm_client import send_sync_tg_message
+from server.src.db.dao.companies import CompanyDAO
+from server.src.db.db import get_session
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +25,54 @@ DECISION_NAMES = {
 
 
 class TAService:
+    def __init__(self, session: AsyncSession = Depends(get_session)):
+        self.session = session
+
+    async def fill_send_start_generate_message(
+        self,
+        user_id: int,
+        period: str,
+        send_messages: bool,
+        update_db: bool,
+        send_test_message: bool,
+    ):
+        company_dao = CompanyDAO(session=self.session)
+        # TODO отправлять пачками
+        LIMIT = 1000
+        companies = await company_dao.get_all_companies(
+            limit=LIMIT,
+            user_id=user_id,
+        )
+        companies_dto = [
+            CompanyDTO(
+                name=company.name,
+                tiker=company.tiker,
+                type=CompanyTypeEnum(company.type),
+                has_shares=False,  # TODO заменить на высчитывание
+                stops=[
+                    CompanyStopDTO(
+                        period=stop.period,
+                        value=stop.value,
+                    )
+                    for stop in company.stops
+                ],
+            )
+            for company in companies
+        ]
+
+        message = TAStartGenerateMessage(
+            user_id=user_id,
+            period=PeriodEnum(period),
+            companies=companies_dto,
+            update_db=update_db,
+            send_message=send_messages,
+            send_test_message=send_test_message,
+        )
+        logging.debug(f"********* TAStartGenerateMessage: {message}")
+        return message
+
+
+
     def generate_ta_decision(
         self,
         company: CompanyDTO,
