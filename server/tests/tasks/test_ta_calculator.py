@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 from pandas import DataFrame
 
-from server.src.schemas.company import CompanyStop
+from server.src.schemas.company import  CompanyStopDTO
 from server.src.utils.ta.ta_calculator import TACalculator
 from server.src.schemas.ta import DecisionEnum, CompanyDTO, DecisionDTO
 
@@ -83,7 +83,7 @@ def test_calculate_decision(sample_dataframe):
     last_price = 130.0
 
     company = CompanyDTO(
-        name="Test", tiker="TST", stops=[CompanyStop(period=period, value=120.0)]
+        name="Test", tiker="TST", stops=[ CompanyStopDTO(period=period, value=120.0)]
     )
 
     decision = calculator._calculate_decision(
@@ -133,7 +133,7 @@ def test_get_stoch_decisions_with_stop(
     value = 120.0
 
     company = CompanyDTO(
-        name="Test", tiker="TST", stops=[CompanyStop(period=period, value=value)]
+        name="Test", tiker="TST", stops=[ CompanyStopDTO(period=period, value=value)]
     )
 
     decisions = calculator.get_company_ta_decisions(company, period)

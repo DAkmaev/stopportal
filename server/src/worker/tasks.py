@@ -30,6 +30,7 @@ def start_generate_task(
                 company=company,
                 period=message.period,
             ).model_dump_json(),
+            message.user_id,
         )
         for company in message.companies
     )
@@ -71,7 +72,9 @@ def ta_final_task(  # noqa:  WPS210ß
     results: list,
     params_json: str,
 ):
+    logging.debug(f"********* Final task params: {params_json}")
     params: TAFinalMessage = TypeAdapter(TAFinalMessage).validate_json(params_json)
+
     logger.info("Старт final task...")
     ta_decisions = [
         TypeAdapter(DecisionDTO).validate_json(dec_json)
@@ -81,10 +84,12 @@ def ta_final_task(  # noqa:  WPS210ß
 
     ta_service = TAService()
     if params.send_message:
+        logging.debug(f"********* Final task decisions: {ta_decisions}")
         messages = ta_service.generate_bulk_tg_messages(
             ta_decisions,
             params.send_test_message,
         )
+        logging.debug(f"********* Final task messages: {messages}")
         for message in messages:
             send_telegram_task.delay(message)
 

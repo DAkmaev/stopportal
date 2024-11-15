@@ -1,13 +1,9 @@
-from enum import Enum
 from typing import List, Optional
 
 from server.src.api.stop.scheme import StopDTO
 from pydantic import BaseModel
 
-
-class CompanyTypeEnum(str, Enum):  # noqa: WPS600
-    MOEX = "MOEX"
-    YAHOO = "YAHOO"
+from server.src.schemas.enums import CompanyTypeEnum
 
 
 class StrategiesInputDTO(BaseModel):

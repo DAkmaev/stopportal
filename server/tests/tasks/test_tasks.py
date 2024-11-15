@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from server.src.schemas.company import CompanyDTO
+from server.src.schemas.company import CompanyDTO, CompanyStopDTO
 from server.src.schemas.enums import PeriodEnum, DecisionEnum
 from server.src.schemas.ta import (
     TAStartGenerateMessage,
@@ -20,10 +20,26 @@ from server.src.worker.tasks import (
 
 @pytest.mark.integrations
 def test_start_generate_task(celery_local_app):
+    companies = [
+        CompanyDTO(
+            name='Test1',
+            tiker='TST1',
+        ),
+        CompanyDTO(
+            name='Test1',
+            tiker='TST1',
+            stops=[
+                CompanyStopDTO(
+                    period=PeriodEnum.DAY,
+                    value=100.0,
+                )
+            ]
+        ),
+    ]
     payload_obj = TAStartGenerateMessage(
         user_id=1,
         period=PeriodEnum.DAY,
-        companies=[],
+        companies=companies,
     )
     payload_str = str(payload_obj.model_dump_json())
     result = start_generate_task.apply(args=(payload_str,))
