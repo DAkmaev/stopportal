@@ -1,7 +1,7 @@
 import enum
 from pathlib import Path
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class LogLevel(str, enum.Enum):  # noqa: WPS600
@@ -58,6 +58,8 @@ class Settings(BaseSettings):
         url_account = f"{self.db_user}:{self.db_password}"
         url_db = f"{self.db_server}:{self.db_port}/{self.db_name}"
         return f"{url_scheme}://{url_account}@{url_db}"
+
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 settings = Settings()
