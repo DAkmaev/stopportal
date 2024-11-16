@@ -1,22 +1,22 @@
-# server
+# Backend
 
 ## Local debug
 Create Virtual env and install requirements.
 ```bash
-cd server
+cd backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Rum server dev
+Rum backend dev
 ```bash
-fastapi dev src/main.py
+fastapi dev app/main.py
 ```
 
-Run server prod
+Run backend prod
 ```bash
-fastapi prod src/main.py
+fastapi prod app/main.py
 ```
 
 
@@ -53,7 +53,7 @@ alembic revision --autogenerate
 alembic revision
 ```
 
-## worker
+## Worker
 
 ### Local start
 ```bash
