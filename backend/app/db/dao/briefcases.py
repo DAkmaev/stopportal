@@ -1,24 +1,24 @@
 from datetime import datetime
 from typing import List
 
-from app.db.dao.common import update_model_fields
-from app.db.dependencies import get_db_session
-from app.db.models.briefcase import (
+from backend.app.db.dao.common import update_model_fields
+from backend.app.db.db import get_session
+from backend.app.db.models.briefcase import (
     BriefcaseModel,
     BriefcaseRegistryModel,
     CurrencyEnum,
     RegistryOperationEnum,
     BriefcaseShareModel,
 )
-from app.db.models.company import CompanyModel, StrategyModel
-from app.db.models.user import UserModel
+from backend.app.db.models.company import CompanyModel, StrategyModel
+from backend.app.db.models.user import UserModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class BriefcaseDAO:
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
     async def create_briefcase_model(

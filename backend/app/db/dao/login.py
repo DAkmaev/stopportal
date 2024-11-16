@@ -1,16 +1,18 @@
 from datetime import timedelta
 
-from app.core import security
-from app.db.dao.user import UserDAO
-from app.db.dependencies import get_db_session
-from app.settings import settings
-from app.web.api.login.schema import Token
+
+from backend.app.db.dao.user import UserDAO
+from backend.app.db.db import get_session
+from backend.app.settings import settings
+from backend.app.schemas.login import Token
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app import security
+
 
 class LoginDAO:
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
     async def authenticate(self, username: str, password: str) -> Token:

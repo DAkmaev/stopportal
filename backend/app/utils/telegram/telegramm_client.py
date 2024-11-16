@@ -1,8 +1,8 @@
 import httpx
-from app.settings import settings
+from backend.app.settings import settings
 
 
-async def send_tg_message(message: str):
+def send_sync_tg_message(message: str):
     if message:
         tg_msg = {
             "chat_id": settings.chat_id,
@@ -10,5 +10,6 @@ async def send_tg_message(message: str):
             "parse_mode": "Markdown",
         }
         api_url = f"https://api.telegram.org/bot{settings.bot_token}/sendMessage"
-        async with httpx.AsyncClient(timeout=180) as client:
-            await client.post(api_url, json=tg_msg)
+        with httpx.Client(timeout=180) as client:
+            response = client.post(api_url, json=tg_msg)
+            response.raise_for_status()

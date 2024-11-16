@@ -1,17 +1,17 @@
 from typing import List, Optional
 
-from app.db.dao.stops import StopsDAO
-from app.db.dao.strategies import StrategiesDAO
-from app.db.dependencies import get_db_session
-from app.db.models.company import CompanyModel
-from app.db.models.user import UserModel
+from backend.app.db.dao.stops import StopsDAO
+from backend.app.db.dao.strategies import StrategiesDAO
+from backend.app.db.db import get_session
+from backend.app.db.models.company import CompanyModel
+from backend.app.db.models.user import UserModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class CompanyDAO:
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
         self.stop_dao = StopsDAO(session)
         self.strategy_dao = StrategiesDAO(session)
@@ -110,7 +110,10 @@ class CompanyDAO:
         offset: int = 0,
     ) -> List[CompanyModel]:
         raw_companies = await self.session.execute(
-            select(CompanyModel).limit(limit).offset(offset),
+            select(CompanyModel)
+            .where(CompanyModel.user_id == user_id)
+            .limit(limit)
+            .offset(offset),
         )
 
         return list(raw_companies.scalars().fetchall())

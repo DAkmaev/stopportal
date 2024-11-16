@@ -1,8 +1,7 @@
 import enum
 from pathlib import Path
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from yarl import URL
+from pydantic_settings import BaseSettings
 
 
 class LogLevel(str, enum.Enum):  # noqa: WPS600
@@ -17,74 +16,48 @@ class LogLevel(str, enum.Enum):  # noqa: WPS600
 
 
 class Settings(BaseSettings):
-    """
-    Application settings.
-
-    These parameters can be configured
-    with environment variables.
-    """
-
-    host: str = "127.0.0.1"
-    port: int = 8000
-    # quantity of workers for uvicorn
-    workers_count: int = 1
-    # Enable uvicorn reloading
-    reload: bool = False
-
-    # Current environment
     environment: str = "dev"
 
     log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
-    db_file: Path = "db.sqlite3"
-    db_echo: bool = False
-    postgres_server: str = "localhost"
-    postgres_user: str = "stopportal_user"
-    postgres_password: str = "stopportal_password"
-    postgres_db: str = "stopportal"
-    postgres_port: int = 5432
+    db_file: Path = "database.db"
+    db_test_file: Path = "database_test.db"
+    db_server: str = "localhost"
+    db_user: str = "stopportal_user"
+    db_password: str = "stopportal_password"
+    db_name: str = "stopportal"
+    db_port: int = 5433
 
     access_token_expire_minutes: int = 60 * 24 * 8
     api_v1_str: str = "/api"
     algorithm: str = "HS256"
     secret_key: str = "sdsdsdw34fdfwr2efdfwe2"  # secrets.token_urlsafe(32)
 
-    first_superuser: str = "admin"
-    first_superuser_password: str = "changethis"
+    # Celery
+    celery_broker_url: str = "redis://localhost:6379/0"
+    celery_backend_url: str = "redis://localhost:6379/1"
 
-    bot_token: str = ""
+    # Telegram
     chat_id: str = ""
-
-    redis_url: str = ""
+    bot_token: str = ""
 
     @property
-    def db_url(self) -> URL:
+    def db_url(self) -> str:
         return self.generate_url()
 
     @property
-    def db_sync_url(self) -> URL:
-        return self.generate_url(False)
+    def db_test_url(self) -> str:
+        return f"sqlite+aiosqlite:///{self.db_test_file}"
 
-    def generate_url(self, is_async: bool = True):
+    def generate_url(self):
         if self.environment not in {"prod", "test"}:
-            scheme = "sqlite+aiosqlite" if is_async else "sqlite"
-            path = f"///../{self.db_file}" if is_async else f"///backend/{self.db_file}"
-            return URL.build(
-                scheme=scheme,
-                path=path,
-            )
+            return f"sqlite+aiosqlite:///{self.db_file}"
 
-        url_scheme = "postgresql+psycopg" if is_async else "postgresql"
-        url_account = f"{self.postgres_user}:{self.postgres_password}"
-        url_db = f"{self.postgres_server}:{self.postgres_port}/{self.postgres_db}"
-        return URL.build(scheme=url_scheme, path=f"//{url_account}@{url_db}")
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_prefix="BACKEND_",
-        env_file_encoding="utf-8",
-    )
+        url_scheme = "postgresql+psycopg"
+        url_account = f"{self.db_user}:{self.db_password}"
+        url_db = f"{self.db_server}:{self.db_port}/{self.db_name}"
+        return f"{url_scheme}://{url_account}@{url_db}"
 
 
 settings = Settings()

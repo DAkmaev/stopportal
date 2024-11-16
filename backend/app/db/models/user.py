@@ -1,19 +1,12 @@
-from typing import TYPE_CHECKING
-
-from app.db.base import Base
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql.sqltypes import Boolean, String
-
-if TYPE_CHECKING:
-    from .item import Item  # noqa: F401,WPS300
+from sqlmodel import SQLModel, Field
 
 
-class UserModel(Base):
+class UserModel(SQLModel, table=True):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, index=True)
-    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False)
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(index=True)
+    email: str = Field(unique=True, index=True, nullable=False)
+    hashed_password: str = Field(nullable=False)
+    is_active: bool = Field(default=True)
+    is_superuser: bool = Field(default=False)

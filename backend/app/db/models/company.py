@@ -1,70 +1,59 @@
-from typing import TYPE_CHECKING, List, Optional
+from sqlmodel import Field, SQLModel, Relationship
 
-from app.db.base import Base
-from app.db.models.user import UserModel
-from sqlalchemy import Column, ForeignKey, Table
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql.sqltypes import Float, String
-
-if TYPE_CHECKING:
-    from .item import Item  # noqa: F401,WPS300
+from backend.app.db.models.user import UserModel
 
 
-association_table = Table(
-    "companies_strategies",
-    Base.metadata,
-    Column("company_id", ForeignKey("companies.id"), primary_key=True),
-    Column("strategy_id", ForeignKey("strategies.id"), primary_key=True),
-)
+class CompanyStrategy(SQLModel, table=True):
+    __tablename__ = "companies_strategies"
+
+    company_id: int | None = Field(
+        default=None, foreign_key="companies.id", primary_key=True
+    )
+    strategy_id: int | None = Field(
+        default=None, foreign_key="strategies.id", primary_key=True
+    )
 
 
-class CompanyModel(Base):
+class CompanyModel(SQLModel, table=True):
     __tablename__ = "companies"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, index=True, unique=True, nullable=True)
-    tiker: Mapped[str] = mapped_column(String, index=True, unique=True)
-    type: Mapped[str] = mapped_column(String, default="MOEX", nullable=True)
-    stops: Mapped[List["StopModel"]] = relationship(
-        lazy="selectin",
-        cascade="all,delete",
+    id: int = Field(primary_key=True, default=None)
+    name: str = Field(index=True, unique=True, nullable=True)
+    tiker: str = Field(index=True, unique=True)
+    type: str = Field(default="MOEX", nullable=True)
+    stops: list["StopModel"] = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}, cascade_delete=True
     )
-    strategies: Mapped[List["StrategyModel"]] = relationship(
-        secondary=association_table,
+
+    strategies: list["StrategyModel"] = Relationship(
         back_populates="companies",
-        lazy="selectin",
+        link_model=CompanyStrategy,
+        sa_relationship_kwargs={"lazy": "selectin"},
     )
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"),
-        index=True,
-        nullable=True,
-    )
-    user: Mapped[Optional["UserModel"]] = relationship()
+    user_id: int = Field(foreign_key="user.id", index=True)
+    user: UserModel = Relationship()
 
 
-class StopModel(Base):
+class StopModel(SQLModel, table=True):
     __tablename__ = "companies_stop"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    period: Mapped[str] = mapped_column(String)
-    value: Mapped[float] = mapped_column(Float, nullable=False)
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
+
+    id: int = Field(primary_key=True, default=None)
+    period: str = Field()
+    value: float = Field(nullable=False)
+    company_id: int = Field(foreign_key="companies.id")
 
 
-class StrategyModel(Base):
+class StrategyModel(SQLModel, table=True):
     __tablename__ = "strategies"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, index=True, unique=True, nullable=False)
-    description: Mapped[str] = mapped_column(String, nullable=True)
-    companies: Mapped[List["CompanyModel"]] = relationship(
-        secondary=association_table,
-        back_populates="strategies",
+    id: int = Field(primary_key=True, default=None)
+    name: str = Field(index=True, unique=True, nullable=False)
+    description: str = Field(nullable=True)
+
+    companies: list["CompanyModel"] = Relationship(
+        back_populates="strategies", link_model=CompanyStrategy
     )
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"),
-        index=True,
-        nullable=True,
-    )
-    user: Mapped[Optional["UserModel"]] = relationship()
+    user_id: int | None = Field(foreign_key="user.id", index=True)
+    user: UserModel | None = Relationship()

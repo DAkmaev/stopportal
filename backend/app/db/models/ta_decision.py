@@ -1,23 +1,24 @@
-from app.db.base import Base
-from app.db.models.company import CompanyModel
-from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql.sqltypes import TIMESTAMP, Float, String
+from datetime import datetime
+
+from sqlmodel import SQLModel, Field, Relationship
+
+from backend.app.db.models.company import CompanyModel
 
 
-class TADecisionModel(Base):
+class TADecisionModel(SQLModel, table=True):
     __tablename__ = "stoch_decisions"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    period: Mapped[str] = mapped_column(String, nullable=False, index=True)
-    decision: Mapped[str] = mapped_column(String, nullable=False)
-    k: Mapped[float] = mapped_column(Float, nullable=True)  # noqa: WPS111
-    d: Mapped[float] = mapped_column(Float, nullable=True)  # noqa: WPS111
-    last_price: Mapped[float] = mapped_column(Float, nullable=True)
-    last_updated: Mapped[TIMESTAMP] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now(),
-        onupdate=func.current_timestamp(),
+    id: int = Field(primary_key=True, default=None)
+    period: str = Field(nullable=False, index=True)
+    decision: str = Field(nullable=False)
+    k: float = Field(nullable=True)  # noqa: WPS111
+    d: float = Field(nullable=True)  # noqa: WPS111
+    last_price: float = Field(nullable=True)
+
+    last_updated: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column_kwargs={"onupdate": datetime.utcnow},
     )
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"), index=True)
-    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
+
+    company_id: int = Field(foreign_key="companies.id")
+    company: CompanyModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})

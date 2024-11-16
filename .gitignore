@@ -1,2 +1,3 @@
 /.idea/
-/backend/poetry.lock
+/backend/.venv/
+/worker/.venv/

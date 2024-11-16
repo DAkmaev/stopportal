@@ -1,12 +1,10 @@
 import enum
-from typing import Optional
+from datetime import datetime
+from decimal import Decimal
 
-from app.db.base import Base
-from app.db.models.company import CompanyModel, StrategyModel
-from app.db.models.user import UserModel
-from sqlalchemy import Enum, ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql.sqltypes import DECIMAL, TIMESTAMP, Integer
+from sqlmodel import Field, Relationship, SQLModel, Enum, Column
+from backend.app.db.models.company import CompanyModel, StrategyModel
+from backend.app.db.models.user import UserModel
 
 
 class CurrencyEnum(enum.Enum):
@@ -21,61 +19,64 @@ class RegistryOperationEnum(enum.Enum):
     DIVIDENDS = "DIVIDENDS"
 
 
-class BriefcaseModel(Base):
+class BriefcaseModel(SQLModel, table=True):
     """Model for Briefcase."""
 
     __tablename__ = "briefcases"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    fill_up: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"),
-        index=True,
-        nullable=True,
-    )
-    user: Mapped[Optional["UserModel"]] = relationship()
+    id: int = Field(primary_key=True, default=None)
+    fill_up: Decimal | None = Field(nullable=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    user: UserModel = Relationship()
 
 
-class BriefcaseRegistryModel(Base):
+class BriefcaseRegistryModel(SQLModel, table=True):
     """Model for BriefcaseRegistryItem."""
 
     __tablename__ = "briefcase_registry"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    created_date: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP)
-    currency: Mapped[str] = mapped_column(Enum(CurrencyEnum), default=CurrencyEnum.RUB)
-    operation: Mapped[str] = mapped_column(Enum(RegistryOperationEnum))
-    count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    amount: Mapped[DECIMAL] = mapped_column(DECIMAL, nullable=True)  # Сумма сделки
-    price: Mapped[Optional[DECIMAL]] = mapped_column(DECIMAL, nullable=True)
+    id: int = Field(primary_key=True, default=None)
+    created_date: datetime = Field()
+    currency: CurrencyEnum = Field(
+        sa_column=Column(Enum(CurrencyEnum), default=CurrencyEnum.RUB)
+    )
+    operation: RegistryOperationEnum = Field(
+        sa_column=Column(Enum(RegistryOperationEnum))
+    )
+    count: int | None = Field(nullable=True)
+    amount: Decimal = Field(nullable=True)  # Сумма сделки
+    price: Decimal | None = Field(nullable=True)
 
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
-    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
+    company_id: int = Field(foreign_key="companies.id")
+    company: CompanyModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
-    strategy_id: Mapped[int] = mapped_column(ForeignKey("strategies.id"), nullable=True)
-    strategy: Mapped[Optional["StrategyModel"]] = relationship(lazy="selectin")
+    strategy_id: int = Field(foreign_key="strategies.id", nullable=True)
+    strategy: StrategyModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
-    briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
-    briefcase: Mapped["BriefcaseModel"] = relationship(lazy="selectin")
+    briefcase_id: int = Field(foreign_key="briefcases.id")
+    briefcase: BriefcaseModel = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
-class BriefcaseShareModel(Base):
+class BriefcaseShareModel(SQLModel, table=True):
     """Model for BriefcaseShare."""
 
     __tablename__ = "briefcase_shares"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: int = Field(primary_key=True, default=None)
 
-    created: Mapped[TIMESTAMP] = mapped_column(TIMESTAMP)
-    last_updated: Mapped[TIMESTAMP] = mapped_column(
-        TIMESTAMP,
-        server_default=func.now(),
-        onupdate=func.current_timestamp(),
+    created: datetime = Field()
+    last_updated: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column_kwargs={"onupdate": datetime.utcnow},
     )
 
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
-    company: Mapped["CompanyModel"] = relationship(lazy="selectin")
+    company_id: int = Field(foreign_key="companies.id")
+    company: CompanyModel = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
-    briefcase_id: Mapped[int] = mapped_column(ForeignKey("briefcases.id"))
-    briefcase: Mapped["BriefcaseModel"] = relationship(lazy="selectin")
+    briefcase_id: int = Field(foreign_key="briefcases.id")
+    briefcase: BriefcaseModel = Relationship(
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
-    count: Mapped[int] = mapped_column(nullable=True)
+    count: int = Field(nullable=True)

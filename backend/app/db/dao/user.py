@@ -1,15 +1,15 @@
 from typing import List, Optional
 
-from app.core.security import get_password_hash, verify_password
-from app.db.dependencies import get_db_session
-from app.db.models.user import UserModel
+from backend.app.security import get_password_hash, verify_password
+from backend.app.db.db import get_session
+from backend.app.db.models.user import UserModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class UserDAO:
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
     async def create_user_model(  # noqa: WPS211

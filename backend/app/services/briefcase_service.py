@@ -3,15 +3,15 @@ from functools import reduce
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.dao.briefcases import BriefcaseDAO
-from app.db.dependencies import get_db_session
-from app.db.models.briefcase import RegistryOperationEnum
+from backend.app.db.dao.briefcases import BriefcaseDAO
+from backend.app.db.db import get_session
+from backend.app.db.models.briefcase import RegistryOperationEnum
 
 logger = logging.getLogger(__name__)
 
 
 class BriefcaseService:
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
     async def recalculate_share(

@@ -6,28 +6,24 @@ on:
       - main
 
 jobs:
-#  pytest:
-#    runs-on: ubuntu-latest
-#    steps:
-#    - uses: actions/checkout@v4
-#
-#    - name: Setup python
-#      uses: actions/setup-python@v5
-#      with:
-#        python-version: 3.11
-#
-#    - name: Install poetry
-#      uses: Gr1N/setup-poetry@v8
-#
-#    - name: Install dependencies
-#      working-directory: backend
-#      run: poetry install
-#
-#    - name: Run pytest check
-#      working-directory: backend
-#      run: poetry run pytest -vv .
-#      env:
-#        BACKEND_HOST: "0.0.0.0"
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      working-directory: backend
+      run: pip install -r requirements.txt
+
+    - name: Run pytest check
+      working-directory: backend
+      run: pytest -vv -m "not integrations"
+
   black:
     runs-on: ubuntu-latest
     steps:
@@ -38,16 +34,13 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install poetry
-        uses: Gr1N/setup-poetry@v8
-
       - name: Install dependencies
         working-directory: backend
-        run: poetry install
+        run: pip install -r requirements.txt
 
       - name: Run black check
         working-directory: backend
-        run: poetry run black --check .
+        run: black --check .
   flake8:
     runs-on: ubuntu-latest
     steps:
@@ -58,16 +51,13 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install poetry
-        uses: Gr1N/setup-poetry@v8
-
       - name: Install dependencies
         working-directory: backend
-        run: poetry install
+        run: pip install -r requirements.txt
 
       - name: Run flake8 check
         working-directory: backend
-        run: poetry run flake8 --count .
+        run: flake8 --count .
 #  mypy:
 #    runs-on: ubuntu-latest
 #    steps:
@@ -117,6 +107,7 @@ jobs:
       - black
       - flake8
       - frontend_lint
+      - pytest
     steps:
       - name: Send message
         uses: appleboy/telegram-action@master

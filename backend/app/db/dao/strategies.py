@@ -1,14 +1,14 @@
 from typing import List
 
-from app.db.dependencies import get_db_session
-from app.db.models.company import StrategyModel
+from backend.app.db.db import get_session
+from backend.app.db.models.company import StrategyModel
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class StrategiesDAO:
-    def __init__(self, session: AsyncSession = Depends(get_db_session)):
+    def __init__(self, session: AsyncSession = Depends(get_session)):
         self.session = session
 
     async def create_strategy_model(
