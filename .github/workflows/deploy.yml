@@ -88,3 +88,4 @@ jobs:
             sudo docker compose -f docker-compose-test.yml -p test pull
             sudo docker compose -f docker-compose-test.yml -p test down
             sudo docker compose -f docker-compose-test.yml -p test up -d
+
