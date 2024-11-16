@@ -35,6 +35,7 @@ async def test_run_generate_ts_decisions(
 
 
 @pytest.mark.anyio
+@pytest.mark.integrations
 async def test_run_generate_ts_decisions_no_briefcase(
     celery_local_app,
     fastapi_app: FastAPI,

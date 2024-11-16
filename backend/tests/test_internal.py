@@ -9,6 +9,7 @@ from starlette import status
 
 
 @pytest.mark.anyio
+@pytest.mark.integrations
 async def test_internal_start_generate_ta_decisions(
     celery_local_app,
     fastapi_app: FastAPI,
