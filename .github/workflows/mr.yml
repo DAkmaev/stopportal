@@ -17,11 +17,11 @@ jobs:
         python-version: 3.11
 
     - name: Install dependencies
-      working-directory: server
+      working-directory: backend
       run: pip install -r requirements.txt
 
     - name: Run pytest check
-      working-directory: server
+      working-directory: backend
       run: pytest -vv -m "not integrations"
 
   black:
@@ -35,11 +35,11 @@ jobs:
           python-version: 3.11
 
       - name: Install dependencies
-        working-directory: server
+        working-directory: backend
         run: pip install -r requirements.txt
 
       - name: Run black check
-        working-directory: server
+        working-directory: backend
         run: black --check .
   flake8:
     runs-on: ubuntu-latest
@@ -52,11 +52,11 @@ jobs:
           python-version: 3.11
 
       - name: Install dependencies
-        working-directory: server
+        working-directory: backend
         run: pip install -r requirements.txt
 
       - name: Run flake8 check
-        working-directory: server
+        working-directory: backend
         run: flake8 --count .
 #  mypy:
 #    runs-on: ubuntu-latest
