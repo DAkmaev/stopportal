@@ -10,4 +10,4 @@ ENV PYTHONPATH=/app/backend/
 
 RUN pip install -r requirements.txt
 
-CMD ["fastapi", "prod", "app/main.py"]
+CMD ["fastapi", "run", "app/main.py"]
