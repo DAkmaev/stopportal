@@ -13,4 +13,4 @@ class CompanyDTO(BaseModel):
     tiker: str
     type: str = CompanyTypeEnum.MOEX
     has_shares: bool = False
-    stops: list[ CompanyStopDTO] | None = None
+    stops: list[CompanyStopDTO] | None = None

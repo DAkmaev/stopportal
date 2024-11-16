@@ -31,7 +31,7 @@ async def test_run_generate_ts_decisions(
         headers=headers,
     )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()['id']
+    assert response.json()["id"]
 
 
 @pytest.mark.anyio
@@ -71,10 +71,10 @@ async def test_get_task_status(
 
     assert response.status_code == status.HTTP_200_OK
 
-    task_id = response.json()['id']
+    task_id = response.json()["id"]
     url_check = fastapi_app.url_path_for("get_task_status", task_id=task_id)
     response_check = await client.get(url_check)
 
     assert response_check.status_code == status.HTTP_200_OK
-    task_status = response_check.json()['status']
-    assert task_status == 'PENDING'
+    task_status = response_check.json()["status"]
+    assert task_status == "PENDING"

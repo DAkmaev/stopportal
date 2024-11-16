@@ -110,7 +110,10 @@ class CompanyDAO:
         offset: int = 0,
     ) -> List[CompanyModel]:
         raw_companies = await self.session.execute(
-            select(CompanyModel).where(CompanyModel.user_id == user_id).limit(limit).offset(offset),
+            select(CompanyModel)
+            .where(CompanyModel.user_id == user_id)
+            .limit(limit)
+            .offset(offset),
         )
 
         return list(raw_companies.scalars().fetchall())

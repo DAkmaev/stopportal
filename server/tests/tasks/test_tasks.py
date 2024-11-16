@@ -22,18 +22,18 @@ from server.src.worker.tasks import (
 def test_start_generate_task(celery_local_app):
     companies = [
         CompanyDTO(
-            name='Test1',
-            tiker='TST1',
+            name="Test1",
+            tiker="TST1",
         ),
         CompanyDTO(
-            name='Test1',
-            tiker='TST1',
+            name="Test1",
+            tiker="TST1",
             stops=[
                 CompanyStopDTO(
                     period=PeriodEnum.DAY,
                     value=100.0,
                 )
-            ]
+            ],
         ),
     ]
     payload_obj = TAStartGenerateMessage(

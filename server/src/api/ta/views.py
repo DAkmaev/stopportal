@@ -9,7 +9,6 @@ from fastapi import APIRouter, Depends
 from server.src.auth import CurrentUser
 from server.src.worker.tasks import start_generate_task
 from server.src.services.ta_service import TAService
-from server.src.db.dao.companies import CompanyDAO
 
 router = APIRouter()
 

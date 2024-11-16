@@ -66,7 +66,6 @@ class TAService:
                     )
                     for stop in company.stops
                 ],
-
             )
             for company in companies
         ]
@@ -92,7 +91,9 @@ class TAService:
 
         for key in decisions:
             if not company.has_shares and decisions[key].decision == DecisionEnum.SELL:
-                logger.debug(f"Заменяем решение SELL на RELAX, так как нет акций в портфеле")
+                logger.debug(
+                    "Заменяем решение SELL на RELAX, так как нет акций в портфеле"
+                )
                 decisions[key].decision = DecisionEnum.RELAX
 
         return decisions

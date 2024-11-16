@@ -7,7 +7,11 @@ from server.src.services.ta_service import TAService
 from server.src.schemas.company import CompanyDTO
 from server.src.schemas.enums import DecisionEnum, PeriodEnum
 from server.src.schemas.ta import DecisionDTO
-from server.tests.utils.common import create_test_company, create_test_briefcase, create_test_briefcase_share
+from server.tests.utils.common import (
+    create_test_company,
+    create_test_briefcase,
+    create_test_briefcase_share,
+)
 
 
 @pytest.mark.anyio
@@ -21,10 +25,14 @@ async def test_generate_bulk_tg_messages(
     briefcase = await create_test_briefcase(dbsession, user_id=user.id)
 
     company1_dto = CompanyDTO(
-        id=company1.id, name=company1.name, tiker=company1.tiker,
+        id=company1.id,
+        name=company1.name,
+        tiker=company1.tiker,
     )
     company2_dto = CompanyDTO(
-        id=company2.id, name=company2.name, tiker=company2.tiker,
+        id=company2.id,
+        name=company2.name,
+        tiker=company2.tiker,
     )
 
     # Создаем идентичные решения для каждой компании
@@ -52,7 +60,8 @@ async def test_generate_bulk_tg_messages(
 
     ta_sync_service = TAService()
     messages = ta_sync_service.generate_bulk_tg_messages(
-        ta_decisions=decisions, send_test_message=True,
+        ta_decisions=decisions,
+        send_test_message=True,
     )
 
     assert len(messages) == 3
@@ -71,7 +80,7 @@ async def test_generate_bulk_tg_messages(
 
 @pytest.mark.anyio
 async def test_generate_bulk_tg_messages_dont_send_test() -> None:
-    tiker = 'TST'
+    tiker = "TST"
     decisions = [
         DecisionDTO(
             decision=DecisionEnum.BUY,
@@ -106,7 +115,7 @@ async def test_fill_send_start_generate_message(
     await create_test_company(dbsession, user_id=user.id)
 
     # для company1 добавляет акцию (share)
-    await create_test_briefcase_share(dbsession,user_id=user.id, company=company1)
+    await create_test_briefcase_share(dbsession, user_id=user.id, company=company1)
 
     ta_sync_service = TAService(dbsession)
     message = await ta_sync_service.fill_send_start_generate_message(
