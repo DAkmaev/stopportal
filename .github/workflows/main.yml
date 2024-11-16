@@ -51,7 +51,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend/
-          file: ./backend/Dockerfile-celeryworker
+          file: ./backend/Dockerfile-worker
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/stopportal-celeryworker:latest
 

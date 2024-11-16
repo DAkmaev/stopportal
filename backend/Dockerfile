@@ -4,7 +4,7 @@ WORKDIR /app/backend/
 
 COPY ./requirements.txt /app/server
 COPY ./alembic.ini /app/backend
-COPY ./src /app/backend/app
+COPY ./app /app/backend/app
 
 ENV PYTHONPATH=/app/backend/
 
