@@ -39,7 +39,7 @@ services:
     env_file:
       - .env
     restart: on-failure
-    command: poetry run alembic upgrade head
+    command: alembic upgrade head
     links:
       - db
     networks:
