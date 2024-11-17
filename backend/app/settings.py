@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     db_user: str = "stopportal_user"
     db_password: str = "stopportal_password"
     db_name: str = "stopportal"
-    db_port: int = 5433
+    db_port: int = 5432
 
     access_token_expire_minutes: int = 60 * 24 * 8
     api_v1_str: str = "/api"

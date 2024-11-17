@@ -7,6 +7,8 @@ services:
     links:
       - db
       - queue
+    ports:
+      - "8088:80"
     networks:
       - app-network
 
@@ -39,6 +41,7 @@ services:
     env_file:
       - .env
     restart: on-failure
+    working_dir: /app/backend/
     command: alembic upgrade head
     links:
       - db
@@ -60,7 +63,7 @@ services:
     links:
       - backend
     ports:
-      - "${PORT}:80"
+      - "8080:80"
     volumes:
       - static:/usr/share/nginx/html/
     networks:
