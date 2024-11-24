@@ -25,6 +25,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     logging=logging,
     lifespan=lifespan,
+    openapi_url="/api/openapi.json",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc"
 )
 
 
