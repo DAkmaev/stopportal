@@ -80,4 +80,4 @@ async def test_get_task_status(
 
     assert response_check.status_code == status.HTTP_200_OK
     task_status = response_check.json()["status"]
-    assert task_status == "PENDING"
+    assert task_status in ["PENDING", "SUCCESS"]

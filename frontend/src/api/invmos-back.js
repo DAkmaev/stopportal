@@ -107,9 +107,9 @@ export async function getStrategies() {
 }
 
 export const endpoints = Object.freeze({
-  BRIEFCASE: 'briefcase',
-  BRIEFCASE_ITEMS: 'briefcase/items',
-  BRIEFCASE_REGISTRY: 'briefcase/registry',
+  BRIEFCASE: 'briefcases',
+  BRIEFCASE_ITEMS: 'briefcases/items',
+  BRIEFCASE_REGISTRY: 'briefcases/registry',
   COMPANIES: 'companies/',
   COMPANIES_CATEGORIES: 'companies/categories',
   COMPANIES_STRATEGIES: 'companies/strategies',
@@ -134,11 +134,11 @@ export const endpoints = Object.freeze({
   REPORTS_VALUES: 'reports/values',
   REPORTS_VALUE: 'reports/value',
   REPORTS_UNITS: 'reports/units',
-  TA: 'ta/',
+  TA: 'tas/',
   STOPS: 'stops/',
   STRATEGIES: 'strategies/',
   STRATEGIES_MIH: 'strategies/mih',
   STRATEGIES_MIH_DETAILS: 'strategies/mih/details',
   LOGIN: 'login',
-  ME: 'user/me'
+  ME: 'users/me'
 })
