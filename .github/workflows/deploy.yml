@@ -107,7 +107,8 @@ jobs:
     runs-on: ubuntu-latest
     needs:
 #      - build_celeryworker_docker
-#      - build_backend_docker
+      - build_backend_docker
+      - build_frontend_docker
       - build_nginx_docker
     steps:
       - name: Checkout repo
