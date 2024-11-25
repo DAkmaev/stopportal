@@ -1,6 +1,8 @@
 from typing import Any
 
 import pytest
+
+from backend.app.db.dao.ta_decisions import TADecisionDAO
 from backend.tests.utils.common import create_test_company, create_test_briefcase
 from fastapi import FastAPI
 from httpx import AsyncClient
@@ -81,3 +83,35 @@ async def test_get_task_status(
     assert response_check.status_code == status.HTTP_200_OK
     task_status = response_check.json()["status"]
     assert task_status in ["PENDING", "SUCCESS"]
+
+
+@pytest.mark.anyio
+async def test_get_ts_decisions(
+    fastapi_app: FastAPI,
+    client: AsyncClient,
+    dbsession: AsyncSession,
+    user_token_headers: dict[str, Any],
+) -> None:
+    user, headers = user_token_headers.values()
+    # Create a test companies
+    company = await create_test_company(dbsession, user_id=user.id)
+
+    # Create a DecisionModel
+    decision_dao = TADecisionDAO(dbsession)
+    ta_decision = await decision_dao.update_or_create_ta_decision_model(
+        None, company, "D", "BUY", 0.1, 0.2, 1.0
+    )
+
+    url = fastapi_app.url_path_for("get_ts_decisions")
+    response = await client.get(
+        url,
+        headers=headers,
+    )
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()[0]
+    assert body["tiker"] == company.tiker
+    assert body["decision"] == "BUY"
+    assert body["k"] == 0.1
+    assert body["d"] == 0.2
+    assert body["period"] == "D"
+    assert body["last_price"] is None
