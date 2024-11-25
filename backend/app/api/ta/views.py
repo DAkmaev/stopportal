@@ -1,5 +1,8 @@
 import logging
+from typing import List
 
+from backend.app.db.dao.ta_decisions import TADecisionDAO
+from backend.app.schemas.ta import DecisionDTO
 from backend.app.schemas.ta import (
     TAMessageResponse,
     TAMessageStatus,
@@ -44,3 +47,23 @@ def get_task_status(task_id: str) -> TAMessageStatus:
     logging.info(f"********* Get task message: {str(response)}")
 
     return response
+
+
+class TADecisionDTO:
+    pass
+
+
+@router.get("/")
+async def get_ts_decisions(stoch_dao: TADecisionDAO = Depends()) -> List[DecisionDTO]:
+    decisions = await stoch_dao.get_ta_decision_models()
+    return [
+        DecisionDTO(
+            tiker=dec.company.tiker,
+            decision=dec.decision,
+            last_pric=dec.last_price,
+            k=dec.k,
+            d=dec.d,
+            period=dec.period,
+        )
+        for dec in decisions
+    ]

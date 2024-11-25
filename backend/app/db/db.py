@@ -21,6 +21,7 @@ async def init_db(app: FastAPI):
     )
     app.state.db_engine = engine
     app.state.db_session_factory = session_factory
+    logging.debug("Finish script - init_db")
 
 
 async def get_session(request: Request = None) -> AsyncGenerator[AsyncSession, None]:

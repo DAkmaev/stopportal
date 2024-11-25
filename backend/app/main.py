@@ -25,17 +25,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     logging=logging,
     lifespan=lifespan,
+    openapi_url="/api/openapi.json",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
 )
 
-
-# @app.on_event("startup")
-# async def on_startup():
-#     logger.info("Startup block")
-#     await init_db(app)
 
 # Main router for the API.
 app.include_router(router=api_router, prefix="/api")
 
 
 # if __name__ == "__main__":
-#     uvicorn.run(app, host='0.0.0.0', port=8000)
+#     uvicorn.run(app, host='0.0.0.0', port=80)
