@@ -11,16 +11,22 @@ from backend.app.settings import Settings
 settings = Settings()
 connect_url = str(settings.db_url)
 
+engine = create_async_engine(
+    str(settings.db_url),
+    echo=False,
+)
+
+
+SessionLocal = async_sessionmaker(
+    bind=engine,
+    expire_on_commit=False,
+)
+
 
 async def init_db(app: FastAPI):
     logging.debug("Startup scripts - init_db")
-    engine = create_async_engine(str(settings.db_url), echo=False)
-    session_factory = async_sessionmaker(
-        engine,
-        expire_on_commit=False,
-    )
     app.state.db_engine = engine
-    app.state.db_session_factory = session_factory
+    app.state.db_session_factory = SessionLocal
     logging.debug("Finish script - init_db")
 
 

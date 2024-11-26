@@ -54,7 +54,6 @@ class TADecisionDAO:
 
     async def update_or_create_ta_decision_model(  # noqa:WPS211
         self,
-        decision_id,
         company: CompanyModel,
         period: str,
         decision: str,
@@ -62,7 +61,10 @@ class TADecisionDAO:
         d: float = None,  # noqa:WPS111
         last_price: float = None,
     ) -> TADecisionModel:
-        if not decision_id:
+        exist_decision = await self.get_ta_decision_model_by_company_period(
+            company_id=company.id, period=period
+        )
+        if not exist_decision:
             ta_decision = TADecisionModel(
                 period=period,
                 decision=decision,
@@ -75,10 +77,9 @@ class TADecisionDAO:
 
             return ta_decision
 
-        ta_decision = await self.get_ta_decision_model(decision_id)
-        ta_decision.decision = decision
-        ta_decision.k = k
-        ta_decision.d = d
-        ta_decision.last_price = last_price
+        exist_decision.decision = decision
+        exist_decision.k = k
+        exist_decision.d = d
+        exist_decision.last_price = last_price
 
-        return ta_decision
+        return exist_decision

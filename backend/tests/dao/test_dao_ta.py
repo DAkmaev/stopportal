@@ -20,10 +20,10 @@ async def test_get_ta_decision(
 
     # Create a StochDecisionModel
     ta_decision1 = await decision_dao.update_or_create_ta_decision_model(
-        None, company1, "D", "BUY", 0.5, 0.3, 100.0
+        company1, "D", "BUY", 0.5, 0.3, 100.0
     )
     ta_decision2 = await decision_dao.update_or_create_ta_decision_model(
-        None, company2, "W", "SELL", 1.0, 1.2, 200.0
+        company2, "W", "SELL", 1.0, 1.2, 200.0
     )
 
     ############## By company_id
@@ -80,19 +80,18 @@ async def test_update_stoch_decisions(
     decision_dao = TADecisionDAO(dbsession)
     period = "W"
 
-    user = await create_test_user(dbsession)
     # Create a test company
     company = await create_test_company(dbsession)
 
     # Create a StochDecisionModel
-    ta_decision = await decision_dao.update_or_create_ta_decision_model(
-        None, company, period, "BUY", 0.5, 0.3, 100.0
+    await decision_dao.update_or_create_ta_decision_model(
+        company, period, "BUY", 0.5, 0.3, 100.0
     )
 
     # Modify the StochDecisionModel
     updated_decision = "SELL"
     ta_decision = await decision_dao.update_or_create_ta_decision_model(
-        ta_decision.id, company, period, updated_decision, 0.4, 0.6, 110.0
+        company, period, updated_decision, 0.4, 0.6, 110.0
     )
 
     assert ta_decision.decision == updated_decision
