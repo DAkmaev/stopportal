@@ -98,8 +98,8 @@ async def test_get_ts_decisions(
 
     # Create a DecisionModel
     decision_dao = TADecisionDAO(dbsession)
-    ta_decision = await decision_dao.update_or_create_ta_decision_model(
-        None, company, "D", "BUY", 0.1, 0.2, 1.0
+    await decision_dao.update_or_create_ta_decision_model(
+        company, "D", "BUY", 0.1, 0.2, 1.0
     )
 
     url = fastapi_app.url_path_for("get_ts_decisions")
