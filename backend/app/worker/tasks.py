@@ -1,14 +1,9 @@
-import asyncio
 import logging
-import nest_asyncio
 
 from celery import group
 from pydantic import TypeAdapter
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.dao.companies import CompanyDAO
-from backend.app.db.dao.ta_decisions import TADecisionDAO
-from backend.app.db.db import SessionLocal
+from backend.app.utils.ta.ta_client import send_update_db_request
 from backend.app.services.ta_service import TAService
 from backend.app.utils.telegram.telegramm_client import send_sync_tg_message
 from backend.app.schemas.ta import (
@@ -20,10 +15,9 @@ from backend.app.schemas.ta import TAStartGenerateMessage
 from backend.app.worker.worker import celery_app
 
 logger = logging.getLogger(__name__)
-nest_asyncio.apply()
 
 
-@celery_app.task(name="start_generate_task")  # , queue='run_calculation')
+@celery_app.task(name="start_generate_task")
 def start_generate_task(
     message_json: str,
 ):
@@ -53,7 +47,7 @@ def start_generate_task(
     task_chain.delay()
 
 
-@celery_app.task(name="ta_generate_task")  # (queue='ta_calculation')
+@celery_app.task(name="ta_generate_task")
 def ta_generate_task(
     message_json: str,
     user_id: int,
@@ -101,10 +95,8 @@ def ta_final_task(  # noqa:  WPS210ß
 
     if params.update_db:
         logging.info("********* Final task start saving to DB...")
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(
-            update_db_decisions(decisions=ta_decisions, user_id=params.user_id)
-        )
+        decisions_json = [dec.model_dump() for dec in ta_decisions]
+        send_update_db_request(decisions_json, user_id=params.user_id)
 
     logger.info("********* Finish final task")
 
@@ -117,34 +109,6 @@ def send_telegram_task(
     send_sync_tg_message(message)
 
 
-async def update_db_decisions(
-    decisions: list[DecisionDTO],
-    user_id: int,
-    dbsession: AsyncSession = None,
-):
-    should_close_session = dbsession is None
-    if should_close_session:
-        dbsession = SessionLocal()
-
-    decisions_dao = TADecisionDAO(session=dbsession)
-    company_dao = CompanyDAO(session=dbsession)
-    tasks = []
-    for decision in decisions:
-        company = await company_dao.get_company_model_by_tiker(
-            tiker=decision.tiker, user_id=user_id
-        )
-        task = decisions_dao.update_or_create_ta_decision_model(
-            company=company,
-            period=decision.period,
-            decision=decision.decision,
-            k=decision.k,
-            d=decision.d,
-            last_price=decision.last_price,
-        )
-        tasks.append(task)
-
-    await asyncio.gather(*tasks)
-
-    if should_close_session:
-        await dbsession.commit()
-        await dbsession.close()
+@celery_app.task(ignore_result=True)
+def say_hello(who: str):
+    print(f"Hello {who}")

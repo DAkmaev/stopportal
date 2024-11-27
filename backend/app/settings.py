@@ -19,10 +19,11 @@ class Settings(BaseSettings):
     environment: str = "dev"
 
     log_level: LogLevel = LogLevel.INFO
+    project_root: Path = Path(__file__).parent.parent.absolute()
 
     # Variables for the database
-    db_file: Path = "database.db"
-    db_test_file: Path = "database_test.db"
+    db_file: Path = project_root / "database.db"
+    db_test_file: Path = project_root / "database_test.db"
     db_server: str = "localhost"
     db_user: str = "stopportal_user"
     db_password: str = "stopportal_password"
@@ -41,6 +42,9 @@ class Settings(BaseSettings):
     # Telegram
     chat_id: str = ""
     bot_token: str = ""
+
+    # internal
+    internal_api_url: str = "http://localhost:8000/api/internal/"
 
     @property
     def db_url(self) -> str:
