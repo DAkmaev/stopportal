@@ -57,10 +57,19 @@ def ta_generate_task(
     )
 
     ta_service = TAService()
-    decisions = ta_service.generate_ta_decision(
-        company=message.company,
-        period=message.period,
-    )
+    try:
+        decisions = ta_service.generate_ta_decision(
+            company=message.company,
+            period=message.period,
+        )
+    except Exception as exception:
+        error_message = (
+            f"Failed to generate decisions for company: {message.company.tiker}, "
+            f"user_id: {user_id}, period: {message.period}. "
+            f"Error: '{exception}'"
+        )
+        logger.error(error_message)
+        decisions = {}
 
     logger.info(
         f"Завершена генерация TA для {message.company.name} для пользователя {user_id}",

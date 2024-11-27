@@ -48,9 +48,7 @@ async def test_internal_update_db_decisions(
     company = await create_test_company(dbsession, user_id=user.id)
     await create_test_briefcase(dbsession, user_id=user.id)
 
-    url = fastapi_app.url_path_for(
-        "internal_update_db_decisions", user_id=user.id
-    )
+    url = fastapi_app.url_path_for("internal_update_db_decisions", user_id=user.id)
     response = await client.post(
         url,
         json=[
@@ -60,7 +58,7 @@ async def test_internal_update_db_decisions(
                 "last_price": 100.0,
                 "k": 10.0,
                 "d": 20.0,
-                "decision": "SELL"
+                "decision": "SELL",
             }
         ],
     )
