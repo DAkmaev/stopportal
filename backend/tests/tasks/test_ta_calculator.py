@@ -39,6 +39,19 @@ def sample_lkoh_dataframe():
 
 
 @pytest.fixture
+def sample_empty_dataframe():
+    file_path = Path(__file__).parent.parent / "data/mocked_empty_history.csv"
+    df = pd.read_csv(file_path)
+    df["DATE"] = pd.to_datetime(df["DATE"])  # Convert DATE column to datetime
+    df.set_index("DATE", inplace=True)  # Set DATE as the index
+    df = df.rename(
+        columns={"OPEN": "OPEN", "CLOSE": "CLOSE", "HIGH": "HIGH", "LOW": "LOW"}
+    )
+
+    return df
+
+
+@pytest.fixture
 def sample_stoch_dataframe():
     file_path = Path(__file__).parent.parent / "data/mocked_stoch_data.csv"
     df = pd.read_csv(file_path)
@@ -159,11 +172,31 @@ def test_get_stoch(
         assert stoch_M.size != 0
 
         # Проверяем последнюю строку
-        assert stoch_D.iloc[-1]["k"] == 55.0951118966398
-        assert stoch_D.iloc[-1]["d"] == 52.04061579315601
+        assert stoch_D.iloc[-1]["k"] == 55.09511189663982
+        assert stoch_D.iloc[-1]["d"] == 52.04061579315603
 
         assert stoch_W.iloc[-1]["k"] == 34.344579818736555
-        assert stoch_W.iloc[-1]["d"] == 35.581577728133325
+        assert stoch_W.iloc[-1]["d"] == 35.581577728133333
 
         assert stoch_M.iloc[-1]["k"] == 83.15564413051169
         assert stoch_M.iloc[-1]["d"] == 87.04591638759291
+
+
+@patch("backend.app.utils.moex.moex_reader.MoexReader.get_company_history")
+def test_get_stoch_broken(
+    mock_get_company_history,
+    sample_empty_dataframe,
+) -> None:
+    mock_get_company_history.return_value = sample_empty_dataframe
+    calculator = TACalculator()
+    period = "D"
+
+    company = CompanyDTO(name="ACKO", tiker="ACKO")
+
+    # Simulate the case where there's no data available
+    decisions = calculator.get_company_ta_decisions(company, period)
+
+    assert isinstance(decisions, dict)
+    assert isinstance(decisions[period], DecisionDTO)
+    assert decisions[period].decision == DecisionEnum.RELAX
+    assert decisions[period].tiker == company.tiker

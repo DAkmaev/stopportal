@@ -17,7 +17,7 @@ from backend.app.worker.tasks import (
     ta_generate_task,
     ta_final_task,
     send_telegram_task,
-    update_db_decisions,
+    # update_db_decisions,
 )
 from backend.tests.utils.common import create_test_user, create_test_company
 
@@ -108,18 +108,17 @@ def test_final_task(celery_app):
     assert result.successful()
 
 
-@patch("backend.app.worker.tasks.update_db_decisions")
+@patch("backend.app.worker.tasks.send_update_db_request")
 @pytest.mark.integrations
 @pytest.mark.anyio
 async def test_final_task_update_db(
-    mock_update_db_decisions,
+    mock_send_update_db_request,
     celery_app,
     dbsession: AsyncSession,
 ):
-    mock_update_db_decisions.return_value = "TEST_UPDATE"
+    mock_send_update_db_request.return_value = ""
     user = await create_test_user(dbsession)
     company = await create_test_company(dbsession, user_id=user.id)
-    ts_dao = TADecisionDAO(dbsession)
 
     payload_obj = TAFinalMessage(
         user_id=user.id,
@@ -149,35 +148,6 @@ async def test_final_task_update_db(
     )
 
     assert result.successful()
-
-
-@pytest.mark.anyio
-async def test_update_db_decisions(
-    dbsession: AsyncSession,
-):
-    user = await create_test_user(dbsession)
-    company = await create_test_company(dbsession, user_id=user.id)
-    ts_dao = TADecisionDAO(dbsession)
-
-    decisions: list[DecisionDTO] = [
-        DecisionDTO(
-            tiker=company.tiker,
-            decision=DecisionEnum.SELL,
-            period=PeriodEnum.DAY,
-            last_price=100.0,
-            k=50.0,
-            d=50.0,
-        )
-    ]
-
-    result = await update_db_decisions(
-        decisions=decisions, user_id=user.id, dbsession=dbsession
-    )
-
-    assert result is None
-    ta_decisions = await ts_dao.get_ta_decision_models()
-    assert len(ta_decisions) == 1
-    assert ta_decisions[0].decision == DecisionEnum.SELL
 
 
 @patch("backend.app.worker.tasks.send_sync_tg_message")

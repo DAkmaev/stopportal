@@ -23,7 +23,9 @@ pandas-ta==0.3.14b0
 pandas==2.2.3
 apimoex==1.4.0
 yahoo-fin==0.8.9.1
+asgiref==3.8.1
 
+
+# linters
 black==24.10.0
 flake8==7.1.1
-nest_asyncio==1.6.0

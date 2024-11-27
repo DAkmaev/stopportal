@@ -4,6 +4,7 @@ import math
 from dataclasses import dataclass
 
 import pandas as pd
+import numpy as np
 import pandas_ta as ta  # noqa: F401
 
 from pandas import DataFrame
@@ -88,6 +89,7 @@ class TACalculator:
         period: str,
     ) -> dict[str, DecisionDTO]:
         df = self.get_history_data(company)
+        df = df.fillna(value=np.nan)
         results = {}
 
         for cur_period in ("M", "W", "D"):
@@ -107,7 +109,6 @@ class TACalculator:
     # Вынесено в отдельный метод для тестирования
     def _generate_ta_df(self, df: DataFrame):
         try:
-            df.fillna(0, inplace=True)
             df.ta.adx(append=True)
             df.ta.stoch(append=True)
             df.ta.macd(append=True)
