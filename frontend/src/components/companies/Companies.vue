@@ -230,7 +230,7 @@ export default {
     },
     handleStoch() {
       this.checkingStoch = true
-      postData(endpoints.TA, {}, { period: 'ALL' }, this.token).then((results) => {
+      postData(endpoints.TA, {}, { period: 'All' }, this.token).then((results) => {
         this.checkingStoch = false
         this.fetchList()
         console.log(results)

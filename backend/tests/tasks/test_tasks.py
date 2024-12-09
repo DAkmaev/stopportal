@@ -17,6 +17,7 @@ from backend.app.worker.tasks import (
     ta_generate_task,
     ta_final_task,
     send_telegram_task,
+    update_db_task,
     # update_db_decisions,
 )
 from backend.tests.utils.common import create_test_user, create_test_company
@@ -30,8 +31,8 @@ def test_start_generate_task(celery_local_app):
             tiker="TST1",
         ),
         CompanyDTO(
-            name="Test1",
-            tiker="TST1",
+            name="Test2",
+            tiker="TST2",
             stops=[
                 CompanyStopDTO(
                     period=PeriodEnum.DAY,
@@ -158,4 +159,20 @@ def test_send_telegram_task(
     mock_send_sync_tg_message.return_value = ""
     payload_str = "Test message"
     result = send_telegram_task.apply(args=(payload_str,))
+    assert result.successful()
+
+
+@patch("backend.app.worker.tasks.send_update_db_request")
+def test_update_db_task(
+    mock_send_update_db_request,
+    celery_app,
+):
+    mock_send_update_db_request.return_value = ""
+    payload_str = '[{"tiker": "TST", "decision": "SELL", "last_price": 100.0, "k": 50.0, "d": 50.0, "period": "D"}]'
+    result = update_db_task.apply(
+        args=(
+            payload_str,
+            1,
+        )
+    )
     assert result.successful()

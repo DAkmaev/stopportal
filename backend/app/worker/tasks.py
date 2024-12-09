@@ -1,3 +1,4 @@
+import json
 import logging
 
 from celery import group
@@ -105,7 +106,7 @@ def ta_final_task(  # noqa:  WPS210ß
     if params.update_db:
         logging.info("********* Final task start saving to DB...")
         decisions_json = [dec.model_dump() for dec in ta_decisions]
-        send_update_db_request(decisions_json, user_id=params.user_id)
+        update_db_task.delay(json.dumps(decisions_json), params.user_id)
 
     logger.info("********* Finish final task")
 
@@ -116,6 +117,16 @@ def send_telegram_task(
 ):
     logger.info(f"Send message: '{message}'")
     send_sync_tg_message(message)
+
+
+@celery_app.task(name="update_db_task")
+def update_db_task(
+    decisions_str: str,
+    user_id: int,
+):
+    logger.debug(f"Send update DB message: '{decisions_str}'")
+    decisions_json = json.loads(decisions_str)
+    send_update_db_request(decisions_json, user_id=user_id)
 
 
 @celery_app.task(ignore_result=True)
