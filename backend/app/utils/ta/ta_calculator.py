@@ -111,7 +111,8 @@ class TACalculator:
         try:
             df.ta.adx(append=True)
             df.ta.stoch(append=True)
-            df.ta.macd(append=True)
+            # df.fillna(0, inplace=True)
+            # df.ta.macd(append=True)
 
             return df[
                 [
@@ -120,9 +121,9 @@ class TACalculator:
                     "ADX_14",
                     "DMP_14",
                     "DMN_14",
-                    "MACD_12_26_9",
-                    "MACDh_12_26_9",
-                    "MACDs_12_26_9",
+                    # "MACD_12_26_9",
+                    # "MACDh_12_26_9",
+                    # "MACDs_12_26_9",
                 ]
             ].rename(
                 columns={
@@ -131,9 +132,9 @@ class TACalculator:
                     "ADX_14": "adx",
                     "DMP_14": "dmp",
                     "DMN_14": "dmn",
-                    "MACD_12_26_9": "macd",
-                    "MACDh_12_26_9": "macd_h",
-                    "MACDs_12_26_9": "macd_s",
+                    # "MACD_12_26_9": "macd",
+                    # "MACDh_12_26_9": "macd_h",
+                    # "MACDs_12_26_9": "macd_s",
                 },
             )
         except Exception as ex:

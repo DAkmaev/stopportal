@@ -200,3 +200,20 @@ def test_get_stoch_broken(
     assert isinstance(decisions[period], DecisionDTO)
     assert decisions[period].decision == DecisionEnum.RELAX
     assert decisions[period].tiker == company.tiker
+
+
+## Тест с реальными запросами
+# def test_get_period_decision_month(sample_lkoh_dataframe):
+#     calculator = TACalculator()
+#     period = "M"
+#     company = CompanyDTO(
+#         name="Лукойл",
+#         tiker="LKOH",
+#     )
+#
+#     decisions = calculator.get_company_ta_decisions(company, period)
+#
+#     assert isinstance(decisions, dict)
+#     assert isinstance(decisions[period], DecisionDTO)
+#     assert decisions[period].decision.name == DecisionEnum.SELL
+#     assert decisions[period].tiker == company.tiker
